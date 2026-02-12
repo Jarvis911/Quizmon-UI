@@ -70,7 +70,7 @@ export default function Navbar() {
           type="text"
           placeholder="Nhập mã phòng để tham gia..."
           value={code}
-          onChange={(e: FormEvent) => setCode(e.target as HTMLAttributes)}
+          onChange={(e: FormEvent) => setCode((e.target as HTMLInputElement).value)}
           className="w-full border-2 border-orange-400 focus:border-red-500 focus:ring-0"
         />
         <Button className="bg-orange-600 cursor-pointer" variant="default" size="lg" onClick={handleJoinCode}>Tham gia</Button>
@@ -91,6 +91,7 @@ export default function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer">
+                {/* Haven't implement avatar yet */}
                 <AvatarImage className={undefined} src={user?.avatar || "https://github.com/shadcn.png"} alt="@user" />
                 <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
               </Avatar>
