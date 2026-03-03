@@ -11,18 +11,39 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { useState, FormEvent, HTMLAttributes } from "react";
 import { useAuth } from "../../context/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { useEffect } from "react";
 
 interface LoginFormProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-export function LoginForm({className, ...props}: LoginFormProps) {
-  const { login } = useAuth();
+export function LoginForm({ className, ...props }: LoginFormProps) {
+  const { login, setAuthData } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const userJson = searchParams.get("user");
+    const errorParam = searchParams.get("error");
+
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+    } else if (token && userJson) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(userJson));
+        setAuthData(token, userData);
+        navigate("/");
+      } catch (e) {
+        console.error("Failed to parse user data", e);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,12 +51,16 @@ export function LoginForm({className, ...props}: LoginFormProps) {
     if (!ok) {
       setError("Đăng nhập thất bại, vui lòng thử lại!");
     }
-    navigate("/home");
+    navigate("/");
   };
 
   const onSignUp = () => {
     navigate(`/sign-up`);
   }
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/auth/google";
+  };
 
   return (
     <div className={cn("absolute top-30 left-[50%] -translate-x-1/2 flex flex-col gap-6", className)} {...props}>
@@ -58,7 +83,7 @@ export function LoginForm({className, ...props}: LoginFormProps) {
                   </svg>
                   Đăng nhập với Apple
                 </Button>
-                <Button variant="outline" size="default" className="w-full">
+                <Button variant="outline" size="default" className="w-full" onClick={handleGoogleLogin} type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
                       d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"

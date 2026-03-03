@@ -38,6 +38,32 @@ interface Endpoints {
 
     // User
     user_stats: string;
+
+    // AI Generation
+    ai_create_job: string;
+    ai_jobs: string;
+    ai_job: (id: number) => string;
+    ai_job_status: (id: number) => string;
+    ai_job_delete: (id: number) => string;
+    ai_job_question: (jobId: number, questionId: number) => string;
+    ai_job_question_content: (jobId: number, questionId: number) => string;
+    ai_job_question_regenerate: (jobId: number, questionId: number) => string;
+    ai_job_question_delete: (jobId: number, questionId: number) => string;
+    ai_job_approve_all: (id: number) => string;
+
+    // Classrooms
+    classrooms: string;
+    classroom: (id: number) => string;
+    classroom_join: string;
+
+    // Homework
+    homework: string;
+    homework_start: (id: number) => string;
+    homework_answer: (id: number) => string;
+    homework_finish: (id: number) => string;
+
+    // Reports
+    report_excel: (matchId: number) => string;
 }
 
 const endpoints: Endpoints = {
@@ -79,6 +105,32 @@ const endpoints: Endpoints = {
 
     // User
     user_stats: `${BASE_URL}/user/statistics`,
+
+    // AI Generation
+    ai_create_job: `${BASE_URL}/ai/jobs`,
+    ai_jobs: `${BASE_URL}/ai/jobs`,
+    ai_job: (id: number) => `${BASE_URL}/ai/jobs/${id}`,
+    ai_job_status: (id: number) => `${BASE_URL}/ai/jobs/${id}/status`,
+    ai_job_delete: (id: number) => `${BASE_URL}/ai/jobs/${id}`,
+    ai_job_question: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}`,
+    ai_job_question_content: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}/content`,
+    ai_job_question_regenerate: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}/regenerate`,
+    ai_job_question_delete: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}`,
+    ai_job_approve_all: (id: number) => `${BASE_URL}/ai/jobs/${id}/approve-all`,
+
+    // Classrooms
+    classrooms: `${BASE_URL}/classrooms`,
+    classroom: (id: number) => `${BASE_URL}/classrooms/${id}`,
+    classroom_join: `${BASE_URL}/classrooms/join`,
+
+    // Homework
+    homework: `${BASE_URL}/homework`,
+    homework_start: (id: number) => `${BASE_URL}/homework/${id}/start`,
+    homework_answer: (id: number) => `${BASE_URL}/homework/${id}/answer`,
+    homework_finish: (id: number) => `${BASE_URL}/homework/${id}/finish`,
+
+    // Reports
+    report_excel: (matchId: number) => `${BASE_URL}/reports/excel/${matchId}`,
 };
 
 export default endpoints;

@@ -2,21 +2,30 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { SortableItem } from "@/components/SortableItem"; 
+import { SortableItem } from "@/components/SortableItem";
 import QuestionMedia from "./QuestionMedia";
-import useQuestionSocket from "@/hooks/useQuestionSocket.jsx"
+import useQuestionSocket from "@/hooks/useQuestionSocket";
+import axios from "axios";
+import endpoints from "../../api/api";
 
+const ITEM_COLORS = [
+  "bg-gradient-to-r from-red-500/60 to-red-600/60",
+  "bg-gradient-to-r from-blue-500/60 to-blue-600/60",
+  "bg-gradient-to-r from-emerald-500/60 to-emerald-600/60",
+  "bg-gradient-to-r from-amber-500/60 to-amber-600/60",
+  "bg-gradient-to-r from-purple-500/60 to-purple-600/60",
+  "bg-gradient-to-r from-pink-500/60 to-pink-600/60",
+];
 
-const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer }) => {
-  const [submitted, setSubmitted] = useState(null);
+const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
+  const [submitted, setSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(socket, userId, question.id);
-  const colors = ["bg-red-500/60", "bg-blue-500/60", "bg-green-500/60", "bg-yellow-500/60"];
 
   const [items, setItems] = useState(
     question.options.map((opt, idx) => ({
-      id: idx,
+      id: opt.id,
       text: opt.text,
-      color: colors[idx % colors.length], 
+      color: ITEM_COLORS[idx % ITEM_COLORS.length],
     }))
   );
 
@@ -28,10 +37,8 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer }) => {
   );
 
   useEffect(() => {
-    // Reset states when a new question is received
-    setItems(question.options.map((opt, idx) => ({ id: idx, text: opt.text, color: colors[idx % colors.length] })));
-    setSubmitted(null);
-
+    setItems(question.options.map((opt, idx) => ({ id: opt.id, text: opt.text, color: ITEM_COLORS[idx % ITEM_COLORS.length] })));
+    setSubmitted(false);
   }, [question.id]);
 
   const handleDragEnd = (event) => {
@@ -45,25 +52,48 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer }) => {
     }
   };
 
-  const handleSubmit = () => {
-    if (timer <= 0) return;
-    const answer = items.map(item => item.id); // Array of orders
-    socket.emit("submitAnswer", {
-      matchId,
-      userId,
-      questionId: question.id,
-      answer,
-    });
+  const handleSubmit = async () => {
+    if (submitted) return;
+    const answerIds = items.map(item => item.id);
     setSubmitted(true);
+
+    if (mode === "HOMEWORK") {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(endpoints.homework_answer(Number(matchId)), {
+          questionId: question.id,
+          answerIds: answerIds
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (onHomeworkSubmit) onHomeworkSubmit();
+      } catch (err) {
+        console.error("Failed to submit homework answer", err);
+      }
+    } else {
+      socket.emit("submitAnswer", {
+        matchId,
+        userId,
+        questionId: question.id,
+        answer: answerIds,
+      });
+    }
   };
 
-  const wrapperClass = `flex flex-row gap-8 p-6 relative transition ${isWrong ? "bg-red-500/30 shake rounded-2xl" : ""}`;
+  // Auto-submit when timer runs out
+  useEffect(() => {
+    if (timer === 0 && !submitted && mode !== "HOMEWORK") {
+      handleSubmit();
+    }
+  }, [timer, submitted, mode, items]);
+  const wrapperClass = `flex flex-row gap-6 p-4 relative transition-all duration-300 ${isWrong ? "animate-shake" : ""}`;
+
   return (
     <div className={wrapperClass}>
-      <QuestionMedia media={question.media?.[0]}/>
-      <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg text-black flex-1 flex flex-col justify-between">
+      <QuestionMedia media={question.media?.[0]} />
+      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-white flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-2xl font-bold mb-4">
+          <h2 className="min-w-[250px] text-xl font-bold mb-6">
             {question.text}
           </h2>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -76,8 +106,12 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer }) => {
             </SortableContext>
           </DndContext>
         </div>
-        <Button onClick={handleSubmit} disabled={submitted || isCorrect !== null || timer <= 0}>
-          Submit
+        <Button
+          onClick={handleSubmit}
+          disabled={submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
+          className="mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl py-3"
+        >
+          ✅ Xác nhận
         </Button>
       </div>
     </div>

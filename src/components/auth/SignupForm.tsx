@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 // schema validate 
 const signUpSchema = z.object({
   username: z.string().min(6, "Tên đăng nhập phải có ít nhất 6 ký tự"),
+  email: z.string().email("Email không hợp lệ"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -32,6 +33,7 @@ interface SignupFormProps extends HTMLAttributes<HTMLDivElement> {
 
 interface User {
   username: string;
+  email: string;
   password: string;
 }
 
@@ -47,7 +49,7 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
   });
 
   const onSubmit = async (data: User) => {
-    const ok = await signup(data.username, data.password);
+    const ok = await signup(data.username, data.email, data.password);
     if (!ok) {
       alert("Đăng ký thất bại, vui lòng thử lại!");
     }
@@ -74,8 +76,14 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
             <div className="grid gap-6">
               <div className="grid gap-3">
                 <Label className={undefined} htmlFor="username">Tên đăng nhập</Label>
-                <Input className={undefined} id="username" type="text" placeholder="triho753@gmail.com" {...register("username")} />
+                <Input className={undefined} id="username" type="text" placeholder="triho99" {...register("username")} />
                 {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+              </div>
+
+              <div className="grid gap-3">
+                <Label className={undefined} htmlFor="email">Email</Label>
+                <Input className={undefined} id="email" type="email" placeholder="triho753@gmail.com" {...register("email")} />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               </div>
 
               <div className="grid gap-3">

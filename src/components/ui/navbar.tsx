@@ -1,9 +1,10 @@
-import { useEffect, useState, FormEvent, HTMLAttributes } from "react"
+import { useEffect, useState, FormEvent } from "react"
 import { Input } from "./input"
 import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
-import { Plus, LogOut, TrendingUp } from "lucide-react"
+import { useTheme } from "../../context/ThemeContext";
+import { LogOut, TrendingUp, Sparkles } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ import {
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { token, user, logout } = useAuth();
+  const { selectedTheme } = useTheme();
   const [code, setCode] = useState("");
   const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ export default function Navbar() {
   };
 
   const handleReturnHome = () => {
-     navigate(`/home`);
+    navigate(`/`);
   }
 
   const handleLogin = () => {
@@ -49,8 +51,8 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    logout(); 
-    navigate(`/home`); 
+    logout();
+    navigate(`/`);
   };
 
   const handleNavigateUserStatistics = () => {
@@ -62,7 +64,7 @@ export default function Navbar() {
         bg-white/70 backdrop-blur-md ${scrolled ? "shadow-md" : ""}`}
     >
       {/* Left - Logo */}
-      <div className="text-2xl font-bold text-orange-600 cursor-pointer" onClick={handleReturnHome}>Quizmon</div>
+      <div className={`text-2xl font-bold cursor-pointer ${selectedTheme.navbarStyles.logo}`} onClick={handleReturnHome}>Quizmon</div>
 
       {/* Middle - Search */}
       <div className="flex-1 flex flex-row gap-4 mx-6 max-w-xl">
@@ -70,10 +72,10 @@ export default function Navbar() {
           type="text"
           placeholder="Nhập mã phòng để tham gia..."
           value={code}
-          onChange={(e: FormEvent) => setCode(e.target as HTMLAttributes)}
-          className="w-full border-2 border-orange-400 focus:border-red-500 focus:ring-0"
+          onChange={(e: FormEvent) => setCode((e.target as HTMLInputElement).value)}
+          className={`w-full border-2 focus:ring-0 ${selectedTheme.navbarStyles.borderFocus}`}
         />
-        <Button className="bg-orange-600 cursor-pointer" variant="default" size="lg" onClick={handleJoinCode}>Tham gia</Button>
+        <Button className={`cursor-pointer ${selectedTheme.navbarStyles.buttonPrimary}`} variant="default" size="lg" onClick={handleJoinCode}>Tham gia</Button>
       </div>
 
       {/* Right - Avatar + New Quiz */}
@@ -81,7 +83,15 @@ export default function Navbar() {
         <Button
           variant="ghost"
           size="default"
-          className="rounded-full p-4 bg-orange-500 hover:bg-orange-600 cursor-pointer text-white"
+          className="rounded-full p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 cursor-pointer text-white"
+          onClick={() => navigate('/ai/generate')}
+        >
+          <Sparkles className="w-4 h-4 mr-1" /> AI Quiz
+        </Button>
+        <Button
+          variant="ghost"
+          size="default"
+          className={`rounded-full p-4 cursor-pointer transition-colors ${selectedTheme.navbarStyles.buttonSecondary}`}
           onClick={handleCreateQuiz}
         >
           Tạo quiz!
@@ -108,7 +118,7 @@ export default function Navbar() {
           </DropdownMenu>
         ) : (
           <Button
-            className="bg-orange-500 hover:bg-orange-400 text-white"
+            className={`cursor-pointer transition-colors ${selectedTheme.navbarStyles.buttonSecondary}`}
             variant="default"
             size="default"
             onClick={handleLogin}

@@ -214,3 +214,44 @@ export interface QuestionPlayProps<T extends BaseQuestion = BaseQuestion> {
     userId: number;
     onAnswer: (answer: unknown) => void;
 }
+
+// ========================
+// AI Generation Types
+// ========================
+
+export type AIGenerationStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'APPROVED' | 'FAILED';
+export type AIQuestionStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'REGENERATING';
+
+export interface AIGeneratedQuestion {
+    id: number;
+    jobId: number;
+    questionText: string;
+    questionType: string;
+    optionsData: {
+        options?: Array<{ text: string; isCorrect?: boolean; order?: number }>;
+        correctAnswer?: string;
+    };
+    status: AIQuestionStatus;
+    userFeedback?: string | null;
+    regenerationCount: number;
+    finalQuestionId?: number | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AIGenerationJob {
+    id: number;
+    instruction?: string | null;
+    pdfUrl?: string | null;
+    targetQuizId?: number | null;
+    targetQuiz?: { id: number; title: string } | null;
+    status: AIGenerationStatus;
+    questionCount: number;
+    errorMessage?: string | null;
+    userId: number;
+    generatedQuestions?: AIGeneratedQuestion[];
+    _count?: { generatedQuestions: number };
+    createdAt: string;
+    updatedAt: string;
+}
+

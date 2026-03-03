@@ -1,17 +1,19 @@
-import { createContext, useContext, useState , ReactNode} from "react";
+import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 interface User {
   id: number;
   username: string;
   email: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
   token: string | null;
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string) => Promise<boolean>;
+  signup: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  setAuthData: (token: string, user: User) => void;
 }
 
 interface AuthProviderProps {
@@ -31,18 +33,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const res = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           username: email,
           password: password
-         }),
+        }),
       });
 
       if (!res.ok) throw new Error("Wrong email or password");
 
       const data = await res.json();
-      setToken(data.token);
+      const bearerToken = data.token.startsWith('Bearer ') ? data.token : `Bearer ${data.token}`;
+      setToken(bearerToken);
       setUser(data.user);
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", bearerToken);
       localStorage.setItem("user", JSON.stringify(data.user));
       return true;
     } catch (err: any) {
@@ -51,13 +54,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-    const signup = async (email: string, password: string): Promise<boolean> => {
+  const signup = async (username: string, email: string, password: string): Promise<boolean> => {
     try {
       const res = await fetch("http://localhost:5000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: email, 
+          username: username,
+          email: email,
           password: password,
         }),
       });
@@ -67,9 +71,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const data = await res.json();
 
       if (data.token && data.user) {
-        setToken(data.token);
+        const bearerToken = data.token.startsWith('Bearer ') ? data.token : `Bearer ${data.token}`;
+        setToken(bearerToken);
         setUser(data.user);
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", bearerToken);
         localStorage.setItem("user", JSON.stringify(data.user));
       }
       return true;
@@ -79,20 +84,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
+    setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-  };
+  }, []);
+
+  const setAuthData = useCallback((token: string, user: User) => {
+    const bearerToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    setToken(bearerToken);
+    setUser(user);
+    localStorage.setItem("token", bearerToken);
+    localStorage.setItem("user", JSON.stringify(user));
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ token, user, login, signup, logout }}>
+    <AuthContext.Provider value={{ token, user, login, signup, logout, setAuthData }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType =>  {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;

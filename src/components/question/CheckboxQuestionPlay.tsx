@@ -3,62 +3,101 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import QuestionMedia from "./QuestionMedia";
-import useQuestionSocket from "@/hooks/useQuestionSocket.jsx"
+import useQuestionSocket from "@/hooks/useQuestionSocket";
+import axios from "axios";
+import endpoints from "../../api/api";
 
-const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer }) => {
-  const [selected, setSelected] = useState([]); // Array of selected indices
+const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(socket, userId, question.id);
 
   useEffect(() => {
-    setSelected([]);
+    setSelectedIds([]);
+    setIsSubmitted(false);
   }, [question.id]);
 
   const handleSelect = (idx) => {
-    if (selected.includes(idx)) {
-      setSelected(selected.filter(i => i !== idx));
+    if (isSubmitted || timer <= 0) return;
+    if (selectedIds.includes(idx)) {
+      setSelectedIds(selectedIds.filter(i => i !== idx));
     } else {
-      setSelected([...selected, idx]);
+      setSelectedIds([...selectedIds, idx]);
     }
   };
 
-  const handleSubmit = () => {
-    if (selected.length === 0 || timer <= 0) return;
-    const answer = question.options.map((_, idx) => selected.includes(idx)); // Boolean array
-    socket.emit("submitAnswer", {
-      matchId,
-      userId,
-      questionId: question.id,
-      answer,
-    });
-    setSelected([]); // Lock after submit
+  const handleSubmit = async () => {
+    if (selectedIds.length === 0 || isSubmitted) return;
+
+    setIsSubmitted(true);
+
+    if (mode === "HOMEWORK") {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(endpoints.homework_answer(Number(matchId)), {
+          questionId: question.id,
+          answerIds: selectedIds
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (onHomeworkSubmit) onHomeworkSubmit();
+      } catch (err) {
+        console.error("Failed to submit homework answer", err);
+      }
+    } else {
+      socket.emit("submitAnswer", {
+        matchId,
+        questionId: question.id,
+        answerIds: selectedIds,
+        userId,
+      });
+    }
   };
 
-  // For shake animation
-  const wrapperClass = `flex flex-row gap-8 p-6 relative transition ${isWrong ? "bg-red-500/30 shake rounded-2xl" : ""}`;
+  // Auto-submit when timer runs out
+  useEffect(() => {
+    if (timer === 0 && !isSubmitted && mode !== "HOMEWORK") {
+      handleSubmit();
+    }
+  }, [timer, isSubmitted, mode, selectedIds]);
+
+  const wrapperClass = `flex flex-row gap-6 p-4 relative transition-all duration-300 ${isWrong ? "animate-shake" : ""}`;
+
   return (
     <div className={wrapperClass}>
-      <QuestionMedia media={question.media?.[0]}/>
-      <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg text-black flex-1 flex flex-col justify-between">
+      <QuestionMedia media={question.media?.[0]} />
+      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-white flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-xl font-bold mb-4">
+          <h2 className="min-w-[250px] text-xl font-bold mb-6">
             {question.text}
           </h2>
-          <div className="space-y-4 flex flex-col gap-4 mb-4">
+          <div className="space-y-3 mb-6">
             {question.options.map((opt, idx) => (
-              <div key={idx} className="flex items-center space-x-2">
+              <label
+                key={opt.id}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer ${selectedIds.includes(idx)
+                  ? "bg-purple-500/20 border-purple-400/40"
+                  : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                  } ${isSubmitted || timer <= 0 ? "opacity-50 pointer-events-none" : ""}`}
+              >
                 <Checkbox
                   id={`option-${idx}`}
-                  checked={selected.includes(idx)}
+                  checked={selectedIds.includes(idx)}
                   onCheckedChange={() => handleSelect(idx)}
-                  disabled={isCorrect !== null || timer <= 0}
+                  disabled={isSubmitted || timer <= 0}
+                  className="border-white/30 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                 />
-                <Label htmlFor={`option-${idx}`}>{opt.text}</Label>
-              </div>
+                <span className="text-white/90">{opt.text}</span>
+              </label>
             ))}
           </div>
         </div>
-        <Button onClick={handleSubmit} disabled={selected.length === 0 || isCorrect !== null || timer <= 0}>
-          Submit
+        <Button
+          onClick={handleSubmit}
+          disabled={selectedIds.length === 0 || isSubmitted || timer <= 0}
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl py-3"
+        >
+          ✅ Xác nhận
         </Button>
       </div>
     </div>

@@ -32,7 +32,7 @@ const QuizEditor = () => {
           options: q.options || [],
           location: q.location || [],
           range: q.range || [],
-          typeAnswer: q.typeAnswer || []          
+          typeAnswer: q.typeAnswer || []
         }));
         setQuestions(normalized);
         setActiveIndex(normalized.length ? 0 : null);
@@ -60,18 +60,18 @@ const QuizEditor = () => {
     if (loading) return <p className="text-gray-500">Đang tải quiz...</p>;
 
     if (creatingType) {
-      if (creatingType === "BUTTONS") 
-          return <ButtonQuestionForm quizId={id} onSaved={handleSaveNew} />
+      if (creatingType === "BUTTONS")
+        return <ButtonQuestionForm quizId={id} onSaved={handleSaveNew} />
       if (creatingType === "CHECKBOXES")
-          return <CheckboxQuestionForm quizId={id} onSaved={handleSaveNew} />
-      if (creatingType === "RANGE") 
-          return <RangeQuestionForm quizId={id} onSaved={handleSaveNew} />
+        return <CheckboxQuestionForm quizId={id} onSaved={handleSaveNew} />
+      if (creatingType === "RANGE")
+        return <RangeQuestionForm quizId={id} onSaved={handleSaveNew} />
       if (creatingType === "REORDER")
-          return <ReorderQuestionForm quizId={id} onSaved={handleSaveNew} />
+        return <ReorderQuestionForm quizId={id} onSaved={handleSaveNew} />
       if (creatingType === "TYPEANSWER")
-          return <TypeAnswerQuestionForm quizId={id} onSaved={handleSaveNew} />
+        return <TypeAnswerQuestionForm quizId={id} onSaved={handleSaveNew} />
       if (creatingType === "LOCATION")
-          return <LocationQuestionForm quizId={id} onSaved={handleSaveNew} />
+        return <LocationQuestionForm quizId={id} onSaved={handleSaveNew} />
     }
 
     const q = questions[activeIndex];
@@ -146,9 +146,8 @@ const QuizEditor = () => {
         {questions.map((q, i) => (
           <div
             key={q.id}
-            className={`min-w-20 h-20 relative rounded-xl border-2 cursor-pointer flex items-center justify-center overflow-hidden ${
-              i === activeIndex ? "border-blue-500" : "border-gray-300"
-            }`}
+            className={`min-w-20 h-20 relative rounded-xl border-2 cursor-pointer flex items-center justify-center overflow-hidden ${i === activeIndex ? "border-blue-500" : "border-gray-300"
+              }`}
             onClick={() => {
               setActiveIndex(i);
               setCreatingType(null);
