@@ -4,8 +4,10 @@ import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
-import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft } from "lucide-react"
-import { useNavigate, useLocation } from "react-router-dom";
+import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash } from "lucide-react"
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import axios from "axios";
+import endpoints from "../../api/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,8 +26,58 @@ export default function Navbar() {
   const { token, user, logout } = useAuth();
   const { selectedTheme, themeId, handleThemeChange } = useTheme();
   const [code, setCode] = useState("");
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const fetchNotifications = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get(endpoints.notifications, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(res.data);
+      setUnreadCount(res.data.filter((n: any) => !n.isRead).length);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Poll every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [token]);
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await axios.put(endpoints.notification_read_all, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error("Failed to mark all as read", error);
+    }
+  };
+
+  const handleNotificationClick = async (notif: any) => {
+    if (!notif.isRead) {
+      try {
+        await axios.put(endpoints.notification_read(notif.id), {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        fetchNotifications();
+      } catch (error) {
+        console.error("Failed to mark as read", error);
+      }
+    }
+    if (notif.link) {
+      navigate(notif.link);
+    }
+  };
 
   // Determine variant based on route
   const isCompactVariant = useMemo(() => {
@@ -130,48 +182,99 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
 
         {token ? (
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="cursor-pointer ring-2 ring-white/50 hover:ring-white transition-all shadow-md">
-                <AvatarImage className={undefined} src={user?.avatar || "https://github.com/shadcn.png"} alt="@user" />
-                <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-24">
-              <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-medium text-slate-700 dark:text-slate-300" inset={undefined}>
-                <TrendingUp className="w-4 h-4 mr-2 text-indigo-500" />
-                Lịch sử đấu
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700" inset={undefined}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Đăng xuất
-              </DropdownMenuItem>
-
-
-              <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                  <Palette className="w-4 h-4 mr-2" />
-                  Đổi Giao Diện
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    {BACKGROUND_THEMES.map((theme) => (
-                      <DropdownMenuItem
-                        key={theme.id}
-                        onClick={() => handleThemeChange(theme.id)}
-                        className={`cursor-pointer mb-1 flex items-center gap-2 ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : ''}`}
-                        inset={undefined}
+          <div className="flex items-center gap-3">
+            {/* Notification Bell */}
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <div className="relative cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors">
+                  <Bell className="w-5 h-5 text-primary-foreground" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-background">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 p-0 shadow-xl overflow-hidden rounded-xl border-white/20 bg-background/95 backdrop-blur-xl">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/10 bg-muted/30">
+                  <span className="font-semibold text-sm">Thông báo</span>
+                  {unreadCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead} className="h-auto p-0 text-xs text-primary hover:text-primary/80 hover:bg-transparent px-1">
+                      <Check className="w-3 h-3 mr-1" /> Đánh dấu đã đọc
+                    </Button>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-foreground/50">
+                      Chưa có thông báo nào.
+                    </div>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        onClick={() => handleNotificationClick(notif)}
+                        className={`flex flex-col items-start gap-1 p-3 cursor-pointer transition-colors border-b border-foreground/5 last:border-0 hover:bg-muted/50 ${!notif.isRead ? 'bg-primary/5' : ''}`}
                       >
-                        <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
-                        {theme.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                        <div className="flex gap-2 w-full justify-between items-start">
+                          <span className={`text-sm leading-tight ${!notif.isRead ? 'font-semibold text-foreground' : 'text-foreground/80'}`}>
+                            {notif.message}
+                          </span>
+                          {!notif.isRead && <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />}
+                        </div>
+                        <span className="text-[10px] text-foreground/50 mt-1">
+                          {new Date(notif.createdAt).toLocaleString('vi-VN')}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="cursor-pointer ring-2 ring-white/50 hover:ring-white transition-all shadow-md">
+                  <AvatarImage className={undefined} src={user?.avatar || "https://github.com/shadcn.png"} alt="@user" />
+                  <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-24">
+                <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-medium text-slate-700 dark:text-slate-300" inset={undefined}>
+                  <TrendingUp className="w-4 h-4 mr-2 text-indigo-500" />
+                  Lịch sử đấu
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700" inset={undefined}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Đăng xuất
+                </DropdownMenuItem>
+
+
+                <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="cursor-pointer font-medium text-slate-700 dark:text-slate-300">
+                    <Palette className="w-4 h-4 mr-2" />
+                    Đổi Giao Diện
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      {BACKGROUND_THEMES.map((theme) => (
+                        <DropdownMenuItem
+                          key={theme.id}
+                          onClick={() => handleThemeChange(theme.id)}
+                          className={`cursor-pointer mb-1 flex items-center gap-2 ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : ''}`}
+                          inset={undefined}
+                        >
+                          <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
+                          {theme.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ) : (
           <Button
             className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground font-bold

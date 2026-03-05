@@ -64,6 +64,11 @@ interface Endpoints {
 
     // Reports
     report_excel: (matchId: number) => string;
+
+    // Notifications
+    notifications: string;
+    notification_read_all: string;
+    notification_read: (id: number) => string;
 }
 
 const endpoints: Endpoints = {
@@ -131,6 +136,11 @@ const endpoints: Endpoints = {
 
     // Reports
     report_excel: (matchId: number) => `${BASE_URL}/reports/excel/${matchId}`,
+
+    // Notifications
+    notifications: `${BASE_URL}/notifications`,
+    notification_read_all: `${BASE_URL}/notifications/read-all`,
+    notification_read: (id: number) => `${BASE_URL}/notifications/${id}/read`,
 };
 
 export default endpoints;
