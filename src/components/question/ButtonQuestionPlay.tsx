@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import useQuestionSocket from "@/hooks/useQuestionSocket"
 import QuestionMedia from "./QuestionMedia";
+import axios from "axios";
+import endpoints from "../../api/api";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 const OPTION_COLORS = [
   "from-red-500/80 to-red-600/80",
@@ -48,7 +51,7 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
           questionId: question.id,
           answerIds: [selectedAnswerId]
         }, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

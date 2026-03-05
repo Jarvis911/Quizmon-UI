@@ -31,8 +31,12 @@ function AppContent() {
     // Hide navbar on match routes (lobby & play)
     const isMatchRoute = /^\/match\/\d+\/(lobby|play)/.test(location.pathname);
 
+    // Compact navbar padding on quiz routes
+    const isQuizRoute = location.pathname.startsWith('/quiz');
+    const paddingTopClass = isMatchRoute ? "" : isQuizRoute ? "pt-[48px]" : "pt-[64px]";
+
     return (
-        <div className={`w-full h-full min-h-screen ${isMatchRoute ? "" : "py-[60px]"}`}>
+        <div className={`w-full h-full min-h-screen ${paddingTopClass}`}>
             {/* Default background — hidden on match pages which have their own */}
             {!isMatchRoute && (
                 <div

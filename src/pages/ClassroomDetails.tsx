@@ -64,7 +64,7 @@ export default function ClassroomDetails() {
             const token = localStorage.getItem("token");
             if (!token) return;
             const res = await axios.get(endpoints.classroom(Number(id)), {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: token }
             });
             setClassroom(res.data);
         } catch (error: any) {

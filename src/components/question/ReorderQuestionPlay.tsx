@@ -64,7 +64,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
           questionId: question.id,
           answerIds: answerIds
         }, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

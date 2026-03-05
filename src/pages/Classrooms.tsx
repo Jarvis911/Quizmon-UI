@@ -42,7 +42,7 @@ export default function Classrooms() {
             const token = localStorage.getItem("token");
             if (!token) return;
             const res = await axios.get(endpoints.classrooms, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: token }
             });
             setClassrooms(res.data);
         } catch (error) {
@@ -57,7 +57,7 @@ export default function Classrooms() {
         try {
             const token = localStorage.getItem("token");
             await axios.post(endpoints.classroom_join, { code: joinCode }, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: token }
             });
             setIsJoinModalOpen(false);
             setJoinCode("");
@@ -72,7 +72,7 @@ export default function Classrooms() {
         try {
             const token = localStorage.getItem("token");
             await axios.post(endpoints.classrooms, createForm, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: token }
             });
             setIsCreateModalOpen(false);
             setCreateForm({ name: "", description: "" });
@@ -123,7 +123,7 @@ export default function Classrooms() {
                     </p>
                     <div className="flex justify-center gap-4">
                         <Button variant="outline" onClick={() => setIsJoinModalOpen(true)}>Nhập mã tham gia</Button>
-                        <Button onClick={() => setIsCreateModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white">Tạo lớp học</Button>
+                        <Button onClick={() => setIsCreateModalOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">Tạo lớp học</Button>
                     </div>
                 </div>
             ) : (
@@ -176,7 +176,7 @@ export default function Classrooms() {
                         </div>
                         <DialogFooter className="sm:justify-end gap-2">
                             <Button type="button" variant="outline" onClick={() => setIsJoinModalOpen(false)}>Hủy</Button>
-                            <Button type="submit" disabled={joinCode.length < 3} className="bg-indigo-600 text-white hover:bg-indigo-700">Tham gia</Button>
+                            <Button type="submit" disabled={joinCode.length < 3} className="bg-primary text-primary-foreground hover:bg-primary/90">Tham gia</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -210,7 +210,7 @@ export default function Classrooms() {
                         </div>
                         <DialogFooter className="sm:justify-end gap-2">
                             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Hủy</Button>
-                            <Button type="submit" disabled={!createForm.name} className="bg-purple-600 text-white border-transparent hover:bg-purple-700">Tạo lớp</Button>
+                            <Button type="submit" disabled={!createForm.name} className="bg-primary text-primary-foreground border-transparent hover:bg-primary/90">Tạo lớp</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

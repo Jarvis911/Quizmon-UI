@@ -38,7 +38,7 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
           questionId: question.id,
           answerIds: selectedIds
         }, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

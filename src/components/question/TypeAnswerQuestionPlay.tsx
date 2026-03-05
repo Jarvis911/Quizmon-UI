@@ -29,7 +29,7 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
           answerIds: [],
           textAnswer: finalAnswer
         }, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

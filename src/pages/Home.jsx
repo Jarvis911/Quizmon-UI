@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Palette, Plus, Play, Edit3, BookOpen } from "lucide-react";
+import { Palette, Plus, Play, Edit3, BookOpen, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,13 +20,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-//Swiper
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
+// Embla Carousel
+import useEmblaCarousel from "embla-carousel-react";
 
-import { useTheme, BACKGROUND_THEMES } from "@/context/ThemeContext";
+
 
 const Home = () => {
   const { user, token } = useAuth();
@@ -40,8 +37,6 @@ const Home = () => {
   const [classrooms, setClassrooms] = useState([]);
   const [homeworkForm, setHomeworkForm] = useState({ classroomId: "", deadline: "", strictMode: false });
 
-  // Theme state
-  const { themeId, handleThemeChange } = useTheme();
 
   // Fetch my quizzes and categories first
   useEffect(() => {
@@ -49,7 +44,7 @@ const Home = () => {
       if (!token) return;
       try {
         const res = await axios.get(endpoints.classrooms, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         setClassrooms(res.data.filter(c => c.teacher?.id === user?.id)); // Only classes they teach
       } catch (err) { console.error(err); }
@@ -122,7 +117,7 @@ const Home = () => {
         deadline: homeworkForm.deadline || null,
         strictMode: homeworkForm.strictMode
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: token }
       });
       setIsHomeworkModalOpen(false);
       setHomeworkForm({ classroomId: "", deadline: "", strictMode: false });
@@ -187,10 +182,11 @@ const Home = () => {
       {/* Dynamic Custom Background removed here because it's now handled globally via ThemeContext */}
 
       <div className="p-6 md:p-10 space-y-12 max-w-7xl mx-auto">
-        {/* Modern Hero Section */}
+        {/* Quick Actions Hub / Welcome Section */}
         {user && (
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/60 backdrop-blur-xl p-8 md:p-10 rounded-[2rem] shadow-xl shadow-black/5 border border-white/50 group hover:bg-white/70 transition-colors duration-500">
-            <div>
+          <div className="relative mb-12 flex flex-col lg:flex-row gap-6 lg:items-center justify-between w-full">
+            {/* Welcome Message */}
+            <div className="lg:max-w-[40%]">
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-3 flex items-center gap-3">
                 Chào mừng, {user.username}! <span className="animate-wave inline-block origin-bottom-right">👋</span>
               </h1>
@@ -199,34 +195,43 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="mt-6 md:mt-0 flex flex-wrap items-center gap-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="rounded-2xl border-white/40 bg-white/50 hover:bg-white/80 shadow-sm backdrop-blur-md transition-all">
-                    <Palette className="w-4 h-4 mr-2 text-indigo-500" />
-                    Giao diện
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/40 p-2 shadow-2xl">
-                  <DropdownMenuLabel className="font-bold text-slate-700">Màu nền giao diện</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-100" />
-                  {BACKGROUND_THEMES.map((theme) => (
-                    <DropdownMenuItem
-                      key={theme.id}
-                      onClick={() => handleThemeChange(theme.id)}
-                      className={`cursor-pointer rounded-xl mb-1 flex items-center gap-2 ${themeId === theme.id ? 'bg-indigo-50/80 font-semibold text-indigo-700' : 'text-slate-600 focus:bg-slate-50 focus:text-slate-900'}`}
-                    >
-                      <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
-                      {theme.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* Quick Actions Grid */}
+            <div className="w-full lg:w-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {/* Action 1: Create Manually */}
+              <div
+                onClick={() => navigate('/quiz')}
+                className="group flex flex-col items-start p-5 bg-white/60 hover:bg-white/90 backdrop-blur-lg border border-white/60 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-800 mb-1">Tạo Quiz mới</h3>
+                <p className="text-sm text-slate-500 font-medium">Biên soạn thủ công</p>
+              </div>
 
-              <Button onClick={() => navigate('/quiz')} className="rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all bg-indigo-600 hover:bg-indigo-700 text-white items-center h-10 px-5">
-                <Plus className="w-5 h-5 mr-1" />
-                Tạo Quiz mới
-              </Button>
+              {/* Action 2: Create with AI */}
+              <div
+                onClick={() => navigate('/ai/generate')}
+                className="group flex flex-col items-start p-5 bg-gradient-to-br from-indigo-50/80 to-purple-50/80 hover:from-indigo-100 hover:to-purple-100 backdrop-blur-lg border border-indigo-100/60 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-800 mb-1">Tạo bằng AI</h3>
+                <p className="text-sm text-slate-500 font-medium">Tiết kiệm 90% thời gian</p>
+              </div>
+
+              {/* Action 3: Classrooms */}
+              <div
+                onClick={() => navigate('/classrooms')}
+                className="group flex flex-col items-start p-5 bg-white/60 hover:bg-white/90 backdrop-blur-lg border border-white/60 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer sm:col-span-2 md:col-span-1"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-800 mb-1">Lớp học</h3>
+                <p className="text-sm text-slate-500 font-medium">Quản lý bài tập & học sinh</p>
+              </div>
             </div>
           </div>
         )}
@@ -318,27 +323,49 @@ const Home = () => {
   );
 };
 
-const QuizCarousel = ({ quizzes, renderQuizCard }) => (
-  <Swiper
-    modules={[Navigation]}
-    spaceBetween={24}
-    navigation
-    breakpoints={{
-      320: { slidesPerView: 1.5, spaceBetween: 16 },
-      640: { slidesPerView: 2.5, spaceBetween: 20 },
-      768: { slidesPerView: 3.5, spaceBetween: 24 },
-      1024: { slidesPerView: 4.5 },
-      1280: { slidesPerView: 5.5 },
-    }}
-    className="pb-12 px-2 -mx-2"
-  >
-    {quizzes.map((quiz) => (
-      <SwiperSlide key={quiz.id} className="py-4">
-        {renderQuizCard(quiz)}
-      </SwiperSlide>
-    ))}
-  </Swiper>
-);
+const QuizCarousel = ({ quizzes, renderQuizCard }) => {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    containScroll: 'trimSnaps',
+    dragFree: true
+  });
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  return (
+    <div className="relative group/carousel">
+      <div className="overflow-hidden pb-12 px-2 -mx-2" ref={emblaRef}>
+        <div className="flex gap-4 sm:gap-5 md:gap-6">
+          {quizzes.map((quiz) => (
+            <div key={quiz.id} className="flex-[0_0_80%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_18%] min-w-0 py-4">
+              {renderQuizCard(quiz)}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={scrollPrev}
+        className="absolute left-[-1rem] top-1/3 w-10 h-10 bg-white shadow-xl rounded-full flex items-center justify-center text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all opacity-0 group-hover/carousel:opacity-100 z-20 border border-slate-200"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      <button
+        onClick={scrollNext}
+        className="absolute right-[-1rem] top-1/3 w-10 h-10 bg-white shadow-xl rounded-full flex items-center justify-center text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all opacity-0 group-hover/carousel:opacity-100 z-20 border border-slate-200"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+    </div>
+  );
+};
 
 const CategoryQuizzes = ({ categoryId, renderQuizCard }) => {
   const [quizzes, setQuizzes] = useState([]);

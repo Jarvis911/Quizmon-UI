@@ -56,14 +56,14 @@ const YoutubePicker = ({ form }) => { // RHF from the parent component
           </FormItem>
         )}
       />
-      
+
       {form.watch("videoUrl") && isValidUrl && (
         <ReactPlayer
           ref={playerRef} // Grant this ReactPlayer is playerRef to use later
           url={form.watch("videoUrl")}
           controls={false}
-          width="500px"
-          height="350px"
+          width="320px"
+          height="240px"
           onReady={() => {
             console.log("[YoutubePicker] onReady gọi");
           }}

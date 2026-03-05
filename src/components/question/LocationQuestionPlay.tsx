@@ -104,7 +104,7 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
           answerIds: [],
           textAnswer: `${location.lat},${location.lon}`
         }, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

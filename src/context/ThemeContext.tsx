@@ -99,6 +99,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     const selectedTheme = BACKGROUND_THEMES.find(t => t.id === themeId) || BACKGROUND_THEMES[0];
 
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', themeId);
+    }, [themeId]);
+
     const handleThemeChange = (id: string) => {
         setThemeId(id);
         localStorage.setItem("home_bg_theme", id);

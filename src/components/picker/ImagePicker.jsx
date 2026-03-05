@@ -16,7 +16,7 @@ const ImagePicker = ({ imageSrc, setImageSrc, crop, setCrop, zoom, setZoom, setC
   };
 
   return (
-    <div className="relative w-[500px] h-[300px] border rounded-lg overflow-hidden">
+    <div className="relative w-[320px] h-[240px] border rounded-lg overflow-hidden shrink-0">
       {!imageSrc ? ( // If there is not an image, show the placeholder image
         <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
           <Upload className="w-10 h-10 text-gray-400" />

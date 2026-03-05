@@ -78,7 +78,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --swiper-navigation-color: oklch(0.646 0.222 41.116);
+
 }
 
 .dark {
@@ -113,6 +113,59 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Custom Anime Themes dynamically applied */
+[data-theme='sunset'] {
+  --primary: var(--color-pink-600);
+  --primary-foreground: var(--color-white);
+  --foreground: var(--color-white);
+}
+
+[data-theme='ocean'] {
+  --primary: var(--color-blue-600);
+  --primary-foreground: var(--color-white);
+  --foreground: var(--color-white);
+}
+
+[data-theme='forest'] {
+  --primary: var(--color-green-600);
+  --primary-foreground: var(--color-white);
+  --foreground: var(--color-white);
+}
+
+[data-theme='midnight'] {
+  --primary: var(--color-purple-600);
+  --primary-foreground: var(--color-white);
+  --foreground: var(--color-white);
+  --background: var(--color-slate-900);
+}
+
+[data-theme='lavender'] {
+  --primary: var(--color-indigo-600);
+  --primary-foreground: var(--color-white);
+  --foreground: var(--color-indigo-950);
+}
+
+/* Ensure global text has a slight shadow for readability on vibrant animated backgrounds */
+[data-theme='sunset'] body,
+[data-theme='ocean'] body,
+[data-theme='forest'] body,
+[data-theme='midnight'] body {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='lavender'] body {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Disable text-shadow inside structural surface elements so content text looks normal */
+.bg-card,
+.bg-white,
+.dark\:bg-black,
+[data-slot="card"],
+.bg-background {
+  text-shadow: none !important;
 }
 
 @layer base {
@@ -270,4 +323,22 @@
   75% {
     transform: translate(-30px, -30px);
   }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-33.33%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
 }

@@ -79,9 +79,9 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
           text: o.text,
           isCorrect: o.isCorrect,
         })) || [
-          { text: "", isCorrect: true },
-          { text: "", isCorrect: false },
-        ],
+            { text: "", isCorrect: true },
+            { text: "", isCorrect: false },
+          ],
         mediaType: question.media?.length
           ? question.media[0].type === "VIDEO"
             ? "YOUTUBE"
@@ -182,9 +182,9 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
             "Content-Type": "multipart/form-data",
           },
         });
-        alert("Tạo câu hỏi thành công!");        
-      // form.reset();
-      // removeImage();
+        alert("Tạo câu hỏi thành công!");
+        // form.reset();
+        // removeImage();
         if (onSaved) onSaved(res.data);
       }
 
@@ -197,24 +197,24 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
   };
 
   return (
-    <div className="p-6 border rounded-xl shadow bg-white/40 backdrop-blur-lg">
+    <div className="p-4 border rounded-xl shadow bg-white/40 backdrop-blur-lg">
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl z-50">
           <Loader2 className="animate-spin h-8 w-8 text-white" />
         </div>
       )}
 
-      <h2 className="font-bold text-lg mb-4">
+      <h2 className="font-bold text-lg mb-2">
         {question ? "Chỉnh sửa câu hỏi trắc nghiệm" : "Tạo câu hỏi trắc nghiệm"}
       </h2>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 flex flex-row gap-8"
+          className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6"
         >
           {/* If media */}
           <div className="flex flex-col gap-3">
-            <div className="flex justify-center gap-8">
+            <div className="flex justify-center gap-4">
               <Button
                 type="button"
                 variant="outline"
@@ -249,7 +249,7 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
             )}
           </div>
 
-          <div className="flex flex-col gap-4 w-[250px]">
+          <div className="flex flex-col gap-4 min-w-[280px] flex-1">
             <FormField
               control={form.control}
               name="text"
@@ -257,7 +257,7 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
                 <FormItem>
                   <FormLabel>Câu hỏi</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Nhập câu hỏi..." {...field} />
+                    <Textarea placeholder="Nhập câu hỏi..." rows={2} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

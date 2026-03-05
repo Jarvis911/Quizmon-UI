@@ -19,7 +19,7 @@ export default function HomeworkStart() {
             try {
                 if (!token) return;
                 const res = await axios.get(endpoints.match(Number(id)), {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: token }
                 });
 
                 if (res.data.mode !== 'HOMEWORK') {
@@ -42,7 +42,7 @@ export default function HomeworkStart() {
     const handleStartHomework = async () => {
         try {
             await axios.post(endpoints.homework_start(Number(id)), {}, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: token }
             });
             // Navigate directly to MatchPlay
             navigate(`/match/${id}/play`);

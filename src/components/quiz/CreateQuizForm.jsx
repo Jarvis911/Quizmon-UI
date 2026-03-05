@@ -163,7 +163,7 @@ const CreateQuizForm = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="inline-flex flex-col p-6 mt-5 border rounded-xl shadow-md bg-white/30 backdrop-blur-lg ">
+      <div className="inline-flex flex-col p-4 mt-4 border rounded-xl shadow-md bg-white/30 backdrop-blur-lg ">
         {loading && (
           <div className="absolute rounded-xl inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="p-6 bg-white rounded-xl shadow-lg flex flex-col items-center gap-3">
@@ -173,10 +173,10 @@ const CreateQuizForm = () => {
           </div>
         )}
 
-        <h2 className="text-xl font-bold mb-4">Tạo Quiz mới</h2>
+        <h2 className="text-lg font-bold mb-2">Tạo Quiz mới</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
               {/* Image Upload + Cropper */}
               <div>
                 <FormField
@@ -187,7 +187,7 @@ const CreateQuizForm = () => {
                       <FormLabel>Thumbnail</FormLabel>
                       <FormControl>
                         <div
-                          className="relative w-[500px] h-[500px] border rounded-lg flex items-center justify-center overflow-hidden bg-gray-100"
+                          className="relative w-[320px] h-[320px] lg:w-[400px] lg:h-[400px] border rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 shrink-0"
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={(e) => handleDrop(e, field)}
                         >
@@ -254,7 +254,7 @@ const CreateQuizForm = () => {
               </div>
 
               {/* Other field */}
-              <div className="flex flex-col max-w-[200px] gap-8">
+              <div className="flex flex-col min-w-[280px] flex-1 gap-4">
                 <FormField
                   control={form.control}
                   name="title"
@@ -276,7 +276,7 @@ const CreateQuizForm = () => {
                     <FormItem>
                       <FormLabel>Mô tả</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Nhập mô tả quiz" {...field} />
+                        <Textarea placeholder="Nhập mô tả quiz" rows={3} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

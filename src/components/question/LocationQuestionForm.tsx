@@ -113,18 +113,18 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
   }, [form, question]);
 
   return (
-    <div className="p-6 border rounded-xl shadow bg-white/40 backdrop-blur-lg">
+    <div className="p-4 border rounded-xl shadow bg-white/40 backdrop-blur-lg">
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl z-50">
           <Loader2 className="animate-spin h-8 w-8 text-white" />
         </div>
       )}
 
-      <h2 className="font-bold text-lg mb-4">{question ? "Chỉnh sửa câu hỏi về địa điểm" : "Tạo câu hỏi về địa điểm"}</h2>
+      <h2 className="font-bold text-lg mb-2">{question ? "Chỉnh sửa câu hỏi về địa điểm" : "Tạo câu hỏi về địa điểm"}</h2>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 flex flex-row gap-8"
+          className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6"
         >
           {/* Map chọn vị trí */}
           <div className="flex flex-col gap-3">
@@ -134,7 +134,7 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
               // Location was updated after useEffect -> center will not update until map remount -> Key have to change
               center={location ? [location.lat, location.lng] : [10.7904, 106.69285]}
               zoom={10}
-              style={{ height: "450px", borderRadius: "12px" }}
+              style={{ height: "300px", borderRadius: "12px" }}
             >
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors &copy; CARTO"
@@ -151,7 +151,7 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
           </div>
 
           {/* Text câu hỏi */}
-          <div className="flex flex-col gap-4 w-[250px]">
+          <div className="flex flex-col gap-4 min-w-[280px] flex-1">
             <FormField
               control={form.control}
               name="text"
@@ -159,7 +159,7 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
                 <FormItem>
                   <FormLabel>Câu hỏi</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <Textarea rows={2}
                       placeholder="Nhập câu hỏi về địa điểm..."
                       {...field}
                     />

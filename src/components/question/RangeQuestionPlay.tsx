@@ -29,7 +29,7 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
           answerIds: [],
           numberAnswer: answer
         }, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

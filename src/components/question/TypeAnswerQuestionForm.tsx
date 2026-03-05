@@ -93,28 +93,28 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
   };
 
   useEffect(() => {
-      if (question) {
-        form.reset({
-          text: question.text || "",
-          correctAnswer: question.typeAnswer.correctAnswer || "",
+    if (question) {
+      form.reset({
+        text: question.text || "",
+        correctAnswer: question.typeAnswer.correctAnswer || "",
 
-          mediaType: question.media?.length
-            ? question.media[0].type === "VIDEO"
-              ? "YOUTUBE"
-              : "IMAGE"
-            : undefined,
-          videoUrl:
-            question.media?.[0]?.type === "VIDEO" ? question.media[0].url : "",
-          startTime: question.media?.[0]?.startTime || 0,
-          duration: question.media?.[0]?.duration || 30,
-        });
-  
-        // Set preview if it is IMAGE
-        if (question.media?.[0]?.type === "IMAGE") {
-          setImageSrc(question.media[0].url);
-        }
+        mediaType: question.media?.length
+          ? question.media[0].type === "VIDEO"
+            ? "YOUTUBE"
+            : "IMAGE"
+          : undefined,
+        videoUrl:
+          question.media?.[0]?.type === "VIDEO" ? question.media[0].url : "",
+        startTime: question.media?.[0]?.startTime || 0,
+        duration: question.media?.[0]?.duration || 30,
+      });
+
+      // Set preview if it is IMAGE
+      if (question.media?.[0]?.type === "IMAGE") {
+        setImageSrc(question.media[0].url);
       }
-    }, [question, form]);
+    }
+  }, [question, form]);
 
   const onSubmit = async (values) => {
     try {
@@ -171,22 +171,22 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
   };
 
   return (
-    <div className="p-6 border rounded-xl shadow bg-white/40 backdrop-blur-lg relative">
+    <div className="p-4 border rounded-xl shadow bg-white/40 backdrop-blur-lg relative">
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl z-50">
           <Loader2 className="animate-spin h-8 w-8 text-white" />
         </div>
       )}
 
-      <h2 className="font-bold text-lg mb-4">{question ? "Cập nhật câu hỏi nhập đáp án" : "Tạo câu hỏi nhập đáp án"}</h2>
+      <h2 className="font-bold text-lg mb-2">{question ? "Cập nhật câu hỏi nhập đáp án" : "Tạo câu hỏi nhập đáp án"}</h2>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 flex flex-row gap-8"
+          className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6"
         >
           {/* Media */}
           <div className="flex flex-col gap-3">
-            <div className="flex justify-center gap-8">
+            <div className="flex justify-center gap-4">
               <Button
                 type="button"
                 variant="outline"
@@ -221,7 +221,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
           </div>
 
           {/* Nội dung */}
-          <div className="flex flex-col gap-4 w-[250px]">
+          <div className="flex flex-col gap-4 min-w-[280px] flex-1">
             <FormField
               control={form.control}
               name="text"
@@ -229,7 +229,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
                 <FormItem>
                   <FormLabel>Câu hỏi</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Nhập câu hỏi..." {...field} />
+                    <Textarea placeholder="Nhập câu hỏi..." rows={2} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
