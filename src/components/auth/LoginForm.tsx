@@ -1,18 +1,8 @@
-import { cn } from "../../lib/utils"
-import { Button } from "../ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
 import { useState, FormEvent, HTMLAttributes } from "react";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useEffect } from "react";
+import { Sparkles, Smile } from "lucide-react";
 
 interface LoginFormProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -42,16 +32,17 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         console.error("Failed to parse user data", e);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return;
     const ok = await login(email, password);
     if (!ok) {
       setError("Đăng nhập thất bại, vui lòng thử lại!");
+    } else {
+      navigate("/");
     }
-    navigate("/");
   };
 
   const onSignUp = () => {
@@ -63,74 +54,119 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   };
 
   return (
-    <div className={cn("absolute top-30 left-[50%] -translate-x-1/2 flex flex-col gap-6", className)} {...props}>
-      <Card className="bg-white/80 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Chào mừng trở lại</CardTitle>
-          <CardDescription className={undefined}>
-            Đăng nhập bằng tài khoản Apple hoặc Google
-          </CardDescription>
-        </CardHeader>
-        <CardContent className={undefined}>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4">
-              <div className="flex flex-col gap-4">
-                <Button variant="outline" size="default" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                      fill="currentColor" />
-                  </svg>
-                  Đăng nhập với Apple
-                </Button>
-                <Button variant="outline" size="default" className="w-full" onClick={handleGoogleLogin} type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor" />
-                  </svg>
-                  Đăng nhập với Google
-                </Button>
-              </div>
-              <div
-                className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="text-muted-foreground relative z-10 px-2">
-                  Hoặc tiếp tục với
-                </span>
-              </div>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label className={undefined} htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e: FormEvent) => setEmail((e.target as HTMLInputElement).value)} required className="border-slate-300" />
-                </div>
-                <div className="grid gap-3">
-                  <div className="flex items-center">
-                    <Label className={undefined} htmlFor="password">Mật khẩu</Label>
-                    <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
-                      Quên mật khẩu?
-                    </a>
-                  </div>
-                  <Input id="password" type="password" value={password} onChange={(e: FormEvent) => setPassword((e.target as HTMLInputElement).value)} required className="border-slate-300" />
-                  {error && <p className="text-red-500 text-sm">{error}</p>}
-                </div>
-                <Button type="submit" variant="default" size="default" className="w-full">
-                  Đăng nhập
-                </Button>
-              </div>
-              <div className="text-center text-sm">
-                Chưa có tài khoản?{" "}
-                <a href="#" onClick={onSignUp} className="underline underline-offset-4">
-                  Đăng ký
-                </a>
-              </div>
-            </div>
+    <div className="w-full h-screen bg-white flex flex-row font-sans overflow-hidden">
+
+      {/* Left Panel: Form */}
+      <div className="w-full md:w-[60%] lg:w-[50%] h-full flex flex-col relative overflow-y-auto bg-white pt-6">
+
+        {/* Header (Logo & Signup Button) */}
+        <div className="w-full flex justify-between items-center px-6 md:px-10 mb-8 md:mb-16">
+          <div
+            onClick={() => navigate("/")}
+            className="text-white text-3xl font-black tracking-tighter cursor-pointer bg-[#A8E6CF] py-2 px-4 rounded-xl shadow-[0_4px_0_0_rgba(133,195,172,1)] hover:bg-[#85C3AC] transition-colors"
+          >
+            Quizmon
+          </div>
+
+          <button
+            type="button"
+            onClick={onSignUp}
+            className="text-slate-500 font-bold border-2 border-slate-200 py-2 px-6 rounded-lg hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 transition-colors shadow-sm"
+          >
+            Sign up
+          </button>
+        </div>
+
+        {/* Central Form Wrapper */}
+        <div className="flex-1 w-full max-w-sm mx-auto flex flex-col items-center justify-center px-4 pb-20">
+          <h1 className="text-[2rem] font-black text-slate-700 mb-8 border-b-2 border-transparent">
+            Log in
+          </h1>
+
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+
+            <input
+              id="email"
+              type="text"
+              placeholder="Username or email"
+              value={email}
+              onChange={(e: FormEvent) => setEmail((e.target as HTMLInputElement).value)}
+              required
+              className="w-full py-3.5 px-4 rounded-xl border-2 border-slate-300 text-slate-700 text-lg font-medium focus:outline-none focus:border-[#A8E6CF] focus:shadow-sm placeholder:text-slate-400 transition-colors"
+              autoComplete="email"
+            />
+
+            <input
+              id="password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e: FormEvent) => setPassword((e.target as HTMLInputElement).value)}
+              required
+              className="w-full py-3.5 px-4 rounded-xl border-2 border-slate-300 text-slate-700 text-lg font-medium focus:outline-none focus:border-[#A8E6CF] focus:shadow-sm placeholder:text-slate-400 transition-colors"
+              autoComplete="current-password"
+            />
+
+            {error && <p className="text-red-500 text-sm font-bold text-center">{error}</p>}
+
+            <button
+              type="submit"
+              className="w-full mt-2 py-4 rounded-xl bg-slate-300 text-white text-xl font-black shadow-[0_5px_0_0_rgba(203,213,225,1)] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_0_0_rgba(203,213,225,1)] active:translate-y-1 active:shadow-none enabled:bg-slate-300 disabled:opacity-50"
+              style={email && password ? { backgroundColor: '#cbd5e1', boxShadow: '0 5px 0 0 #94a3b8' } : {}}
+            >
+              Let's go!
+            </button>
           </form>
-        </CardContent>
-      </Card>
-      <div
-        className="text-black *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        Bằng cách tiếp tục, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a>{" "}
-        và <a href="#">Chính sách bảo mật</a>.
+
+          <div className="flex w-full items-center gap-4 my-6 opacity-40">
+            <div className="flex-1 h-px bg-slate-500 rounded-full"></div>
+            <span className="text-slate-500 font-bold text-xs">or</span>
+            <div className="flex-1 h-px bg-slate-500 rounded-full"></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full py-3 rounded-xl bg-white border-2 border-slate-200 text-slate-600 text-lg font-bold shadow-[0_3px_0_0_rgba(226,232,240,1)] flex items-center justify-center gap-3 transition-all hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-1 active:shadow-none"
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6" />
+            Google
+          </button>
+
+          <a href="#" className="mt-8 text-[#4A7A68] font-bold hover:underline text-sm tracking-wide">
+            Forgot your password?
+          </a>
+
+        </div>
+      </div>
+
+      {/* Right Panel: Blooket Style Cyan BG (Hidden on mobile) */}
+      <div className="hidden md:flex flex-1 h-full bg-[#A8E6CF] relative items-center justify-center border-l-8 border-slate-100/50 shadow-[inset_10px_0_20px_-10px_rgba(0,0,0,0.1)] overflow-hidden">
+        {/* Subtle pattern overlays - mimicking Blooket ghost squares */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 20%, transparent 20%)', backgroundSize: '40px 40px' }}></div>
+        <div className="absolute w-[200%] h-[200%] rotate-12 flex flex-wrap gap-8 p-12 -z-0 opacity-10">
+          {Array.from({ length: 40 }).map((_, i) => (
+            <div key={i} className="w-32 h-32 rounded-[2rem] bg-white opacity-40 shrink-0 shadow-lg"></div>
+          ))}
+        </div>
+
+        {/* Decorative Center "Mascot" Block */}
+        <div className="w-48 h-48 bg-pink-400 rounded-3xl rotate-[25deg] shadow-[15px_15px_0_rgba(0,0,0,0.1)] flex items-center justify-center relative translate-y-[-40px] z-10 animate-bounce" style={{ animationDuration: '3s' }}>
+          <Smile className="w-24 h-24 text-white drop-shadow-md -rotate-[25deg]" />
+          {/* Mascot "ears" */}
+          <div className="absolute -top-3 left-4 w-6 h-10 bg-pink-500 rounded-full rotate-45"></div>
+          <div className="absolute -top-3 right-4 w-6 h-10 bg-pink-500 rounded-full -rotate-45"></div>
+          {/* Mascot blush */}
+          <div className="absolute bottom-6 left-6 w-5 h-5 bg-pink-300 rounded-full"></div>
+          <div className="absolute bottom-6 right-6 w-5 h-5 bg-pink-300 rounded-full"></div>
+        </div>
+
+        {/* Tagline */}
+        <div className="absolute bottom-16 text-center z-10 w-full px-12">
+          <h2 className="text-white text-[1.4rem] md:text-[1.8rem] font-bold tracking-tight drop-shadow-md whitespace-pre-line leading-snug font-sans">
+            Leveling up engagement,{"\n"}one question at a time.
+          </h2>
+        </div>
       </div>
     </div>
   );

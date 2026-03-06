@@ -25,7 +25,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { token, user, logout } = useAuth();
   const { selectedTheme, themeId, handleThemeChange } = useTheme();
-  const [code, setCode] = useState("");
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
@@ -92,10 +91,8 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleJoinCode = async () => {
-    if (code) {
-      navigate(`/match/${code}/lobby`);
-    }
+  const handleJoinCode = () => {
+    navigate('/join');
   };
 
   const handleCreateQuiz = () => {
@@ -135,7 +132,7 @@ export default function Navbar() {
           </Button>
         )}
         <div
-          className={`font-black tracking-tighter cursor-pointer drop-shadow-md text-primary transition-all duration-300 ${isCompactVariant ? 'text-xl' : 'text-2xl'}`}
+          className={`font-black tracking-tighter cursor-pointer text-primary transition-all duration-300 ${isCompactVariant ? 'text-xl' : 'text-2xl'}`}
           onClick={handleReturnHome}
         >
           Quizmon
@@ -158,22 +155,12 @@ export default function Navbar() {
           )}
 
           {/* Join Form */}
-          <div className="flex-1 flex flex-row gap-2 max-w-md ml-auto">
-            <Input
-              type="text"
-              placeholder="Nhập mã phòng..."
-              value={code}
-              onChange={(e: FormEvent) => setCode((e.target as HTMLInputElement).value)}
-              className={`w-full border-2 border-foreground/40 bg-background/20 text-foreground placeholder:text-foreground/80 focus:ring-0 focus:border-primary rounded-lg shadow-[inset_1px_1px_3px_rgba(0,0,0,0.2)]`}
-            />
+          <div className="flex-1 flex flex-row gap-2 max-w-md ml-auto justify-end">
             <Button
-              className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground font-bold
-            shadow-[inset_1px_1px_0px_0px_rgba(255,255,255,0.4),inset_-1px_-1px_0px_0px_rgba(0,0,0,0.3)]
-            hover:shadow-[inset_0_0_20px_0px_rgba(255,255,255,0.5),0_4px_10px_rgba(0,0,0,0.3)]
-            hover:-translate-y-1 hover:brightness-110 transition-all duration-300 ease-out border border-primary/50 text-sm md:text-base rounded-lg px-3 md:px-6"
-              variant="default"
+              className="text-sm md:text-base font-black px-6"
+              variant="outline"
               size="default"
-              onClick={handleJoinCode}>Tham gia</Button>
+              onClick={handleJoinCode}>Tham gia đấu</Button>
           </div>
         </div>
       )}
@@ -277,10 +264,7 @@ export default function Navbar() {
           </div>
         ) : (
           <Button
-            className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground font-bold
-            shadow-[inset_1px_1px_0px_0px_rgba(255,255,255,0.4),inset_-1px_-1px_0px_0px_rgba(0,0,0,0.3)]
-            hover:shadow-[inset_0_0_20px_0px_rgba(255,255,255,0.5),0_4px_10px_rgba(0,0,0,0.3)]
-            hover:-translate-y-1 hover:brightness-110 transition-all duration-300 ease-out border border-primary/50 rounded-lg px-6 h-10"
+            className="font-bold px-6 h-12"
             variant="default"
             size="default"
             onClick={handleLogin}
