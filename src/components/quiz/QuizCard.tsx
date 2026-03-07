@@ -59,30 +59,27 @@ const QuizCard: React.FC<QuizCardProps> = ({
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 p-4">
                     <Button 
-                        size="sm" 
                         onClick={() => onPlay(quiz.id)}
-                        className="w-full rounded-full bg-primary hover:bg-primary/90 font-black text-xs"
+                        className="w-full h-8 px-4 rounded-full bg-primary hover:bg-primary/90 font-black text-[10px] uppercase tracking-wider"
                     >
-                        <Play className="w-3 h-3 mr-2 fill-current" /> CHƠI NGAY
+                        <Play className="w-2.5 h-2.5 mr-2 fill-current" /> CHƠI NGAY
                     </Button>
                     
                     {isOwner && (
                         <>
                             <Button 
-                                size="sm" 
                                 variant="secondary"
                                 onClick={() => onEdit?.(quiz.id)}
-                                className="w-full rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-xs"
+                                className="w-full h-8 px-4 rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[10px] uppercase tracking-wider"
                             >
-                                <Edit3 className="w-3 h-3 mr-2" /> CHỈNH SỬA
+                                <Edit3 className="w-2.5 h-2.5 mr-2" /> CHỈNH SỬA
                             </Button>
                             <Button 
-                                size="sm" 
                                 variant="secondary"
                                 onClick={() => onAssign?.(quiz.id)}
-                                className="w-full rounded-full bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-xs"
+                                className="w-full h-8 px-4 rounded-full bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[10px] uppercase tracking-wider"
                             >
-                                <BookOpen className="w-3 h-3 mr-2" /> GIAO BÀI
+                                <BookOpen className="w-2.5 h-2.5 mr-2" /> GIAO BÀI
                             </Button>
                         </>
                     )}

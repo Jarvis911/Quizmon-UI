@@ -69,6 +69,17 @@ interface Endpoints {
     notifications: string;
     notification_read_all: string;
     notification_read: (id: number) => string;
+    
+    // Organizations
+    organizations: string;
+    organization: (id: number) => string;
+    organization_members: (id: number) => string;
+
+    // Subscriptions
+    plans: string;
+    subscription_current: string;
+    subscriptions: string;
+    subscription_usage: string;
 }
 
 const endpoints: Endpoints = {
@@ -141,6 +152,17 @@ const endpoints: Endpoints = {
     notifications: `${BASE_URL}/notifications`,
     notification_read_all: `${BASE_URL}/notifications/read-all`,
     notification_read: (id: number) => `${BASE_URL}/notifications/${id}/read`,
+
+    // Organizations
+    organizations: `${BASE_URL}/organizations`,
+    organization: (id: number) => `${BASE_URL}/organizations/${id}`,
+    organization_members: (id: number) => `${BASE_URL}/organizations/${id}/members`,
+
+    // Subscriptions
+    plans: `${BASE_URL}/subscriptions/plans`,
+    subscription_current: `${BASE_URL}/subscriptions/current`,
+    subscriptions: `${BASE_URL}/subscriptions`,
+    subscription_usage: `${BASE_URL}/subscriptions/usage`,
 };
 
 export default endpoints;

@@ -13,8 +13,14 @@ import Classrooms from "./pages/Classrooms";
 import ClassroomDetails from "./pages/ClassroomDetails";
 import HomeworkStart from "./pages/HomeworkStart";
 import JoinMatch from "./pages/JoinMatch";
+import OrganizationSettings from "./pages/OrganizationSettings";
+import BillingPage from "./pages/BillingPage";
+import BillingSuccess from "./pages/BillingSuccess";
+import BillingCancel from "./pages/BillingCancel";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { OrganizationProvider } from "./context/OrganizationContext";
+import { FeatureProvider } from "./context/FeatureContext";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
 
@@ -46,28 +52,36 @@ function AppContent() {
                 />
             )}
             <AuthProvider>
-                {!isNoNavbarRoute && <Navbar />}
-                <Routes>
-                    <Route path="/join" element={<JoinMatch />} />
-                    <Route path="/login" element={<LoginForm />} />
-                    <Route path="/sign-up" element={<SignUpForm />} />
-                    <Route path="/" element={<Home />} />
+                <OrganizationProvider>
+                    <FeatureProvider>
+                        {!isNoNavbarRoute && <Navbar />}
+                        <Routes>
+                            <Route path="/join" element={<JoinMatch />} />
+                            <Route path="/login" element={<LoginForm />} />
+                            <Route path="/sign-up" element={<SignUpForm />} />
+                            <Route path="/" element={<Home />} />
 
-                    {/* Protected Routes */}
-                    <Route path="/quiz/:id/editor" element={<ProtectedRoute><QuizEditor /></ProtectedRoute>} />
-                    <Route path="/match/:id/lobby" element={<ProtectedRoute><MatchLobby /></ProtectedRoute>} />
-                    <Route path="/match/:id/play" element={<ProtectedRoute><MatchPlay /></ProtectedRoute>} />
-                    <Route path="/quiz" element={<ProtectedRoute><CreateQuizForm /></ProtectedRoute>} />
-                    <Route path="/statistics" element={<ProtectedRoute><UserStats /></ProtectedRoute>} />
-                    <Route path="/ai/generate" element={<ProtectedRoute><AIQuizGenerator /></ProtectedRoute>} />
-                    <Route path="/ai/review/:jobId" element={<ProtectedRoute><AIQuizReview /></ProtectedRoute>} />
-                    <Route path="/classrooms" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
-                    <Route path="/classrooms/:id" element={<ProtectedRoute><ClassroomDetails /></ProtectedRoute>} />
-                    <Route path="/homework/:id/start" element={<ProtectedRoute><HomeworkStart /></ProtectedRoute>} />
+                            {/* Protected Routes */}
+                            <Route path="/quiz/:id/editor" element={<ProtectedRoute><QuizEditor /></ProtectedRoute>} />
+                            <Route path="/match/:id/lobby" element={<ProtectedRoute><MatchLobby /></ProtectedRoute>} />
+                            <Route path="/match/:id/play" element={<ProtectedRoute><MatchPlay /></ProtectedRoute>} />
+                            <Route path="/quiz" element={<ProtectedRoute><CreateQuizForm /></ProtectedRoute>} />
+                            <Route path="/statistics" element={<ProtectedRoute><UserStats /></ProtectedRoute>} />
+                            <Route path="/ai/generate" element={<ProtectedRoute><AIQuizGenerator /></ProtectedRoute>} />
+                            <Route path="/ai/review/:jobId" element={<ProtectedRoute><AIQuizReview /></ProtectedRoute>} />
+                            <Route path="/classrooms" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
+                            <Route path="/classrooms/:id" element={<ProtectedRoute><ClassroomDetails /></ProtectedRoute>} />
+                            <Route path="/homework/:id/start" element={<ProtectedRoute><HomeworkStart /></ProtectedRoute>} />
+                            <Route path="/settings/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
+                            <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
+                    <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
+                    <Route path="/billing/cancel" element={<ProtectedRoute><BillingCancel /></ProtectedRoute>} />
 
-                    {/* Redirect old home to root */}
-                    <Route path="/home" element={<Navigate to="/" replace />} />
-                </Routes>
+                            {/* Redirect old home to root */}
+                            <Route path="/home" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </FeatureProvider>
+                </OrganizationProvider>
             </AuthProvider>
         </div>
     );

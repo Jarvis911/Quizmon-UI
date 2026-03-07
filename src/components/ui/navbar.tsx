@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
-import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash } from "lucide-react"
+import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2 } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import endpoints from "../../api/api";
@@ -21,9 +21,13 @@ import {
   DropdownMenuSubContent
 } from "./dropdown-menu";
 
+import OrgSwitcher from "../OrgSwitcher";
+import { useOrganization } from "../../context/OrganizationContext";
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { token, user, logout } = useAuth();
+  const { currentOrg } = useOrganization();
   const { selectedTheme, themeId, handleThemeChange } = useTheme();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -137,6 +141,7 @@ export default function Navbar() {
         >
           Quizmon
         </div>
+        {token && <OrgSwitcher />}
       </div>
 
       {/* Middle - Search & Navigation (Hidden in compact variant) */}
@@ -231,6 +236,22 @@ export default function Navbar() {
                   <TrendingUp className="w-4 h-4 mr-2 text-primary" />
                   Lịch sử đấu
                 </DropdownMenuItem>
+                
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuLabel className="text-[10px] uppercase font-black text-muted-foreground px-2 py-1">Workspace</DropdownMenuLabel>
+                
+                <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
+                  <Building2 className="w-4 h-4 mr-2 text-primary" />
+                  Quản lý tổ chức
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate('/billing')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
+                  <Sparkles className="w-4 h-4 mr-2 text-primary" />
+                  Gói dịch vụ & Thanh toán
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-white/10" />
+                
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive font-bold focus:bg-destructive/10 focus:text-destructive" inset={undefined}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Đăng xuất
