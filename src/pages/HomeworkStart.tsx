@@ -1,170 +1,153 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import endpoints from "../api/api";
-import { Clock, PlayCircle, AlertCircle, BookOpen } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import endpoints from "@/api/api";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { BookOpen, Clock, AlertCircle, Sparkles, ChevronRight, ArrowLeft } from "lucide-react";
+import { Quiz } from "@/types";
 
-export default function HomeworkStart() {
-    const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
+const HomeworkStart = () => {
+    const { id } = useParams();
     const { token } = useAuth();
-
     const [homework, setHomework] = useState<any>(null);
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchHomeworkInfo = async () => {
+        const fetchData = async () => {
             try {
-                if (!token) return;
-                const res = await axios.get(endpoints.match(Number(id)), {
+                const res = await axios.get(endpoints.homework_detail(Number(id)), {
                     headers: { Authorization: token }
                 });
-
-                if (res.data.mode !== 'HOMEWORK') {
-                    setError("This match is not available for homework mode.");
-                    return;
-                }
-
                 setHomework(res.data);
+                setQuiz(res.data.quiz);
             } catch (err: any) {
-                setError(err.response?.data?.message || "Could not load homework assignment");
-                console.error(err);
+                setError(err.response?.data?.message || "Không thể tải thông tin bài tập.");
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchHomeworkInfo();
+        fetchData();
     }, [id, token]);
 
-    const handleStartHomework = async () => {
-        try {
-            await axios.post(endpoints.homework_start(Number(id)), {}, {
-                headers: { Authorization: token }
-            });
-            // Navigate directly to MatchPlay
-            navigate(`/match/${id}/play`);
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to start homework");
-        }
+    const handleStart = () => {
+        navigate(`/match/${homework.matchId}/play`);
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full" />
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+                <div className="w-20 h-20 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6" />
+                <p className="text-muted-foreground font-black uppercase tracking-widest animate-pulse">Đang tải bài tập...</p>
             </div>
         );
     }
 
-    if (error || !homework) {
+    if (error || !quiz) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-                <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-red-100">
-                    <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <AlertCircle size={32} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Unavailable</h2>
-                    <p className="text-gray-600 mb-8">{error || "Assignment not found."}</p>
-                    <button
-                        onClick={() => navigate('/classrooms')}
-                        className="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors w-full"
-                    >
-                        Return to Classrooms
-                    </button>
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+                <div className="bg-red-500/10 p-8 rounded-4xl border border-red-500/20 text-center max-w-md shadow-2xl">
+                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+                    <h2 className="text-2xl font-black text-foreground mb-3 tracking-tight">Đã xảy ra lỗi</h2>
+                    <p className="text-muted-foreground font-bold mb-8">{error}</p>
+                    <Button variant="default" className="w-full h-12 rounded-2xl font-black bg-primary text-primary-foreground shadow-lg" onClick={() => navigate(-1)}>
+                        QUAY LẠI
+                    </Button>
                 </div>
             </div>
         );
     }
 
-    const quiz = homework.quiz;
-    const deadline = homework.deadline ? new Date(homework.deadline) : null;
-    const isPastDeadline = deadline && deadline < new Date();
+    const isPastDeadline = homework.deadline && new Date(homework.deadline) < new Date();
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
             <div className="max-w-xl w-full">
-                <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
+                <div className="bg-card/80 backdrop-blur-3xl rounded-4xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden border border-white/10 group">
 
                     {/* Header Image Area */}
-                    <div className="relative h-48 bg-gradient-to-br from-indigo-500 to-purple-600 p-8 flex flex-col justify-end">
+                    <div className="relative h-64 bg-linear-to-br from-primary to-indigo-600 p-10 flex flex-col justify-end overflow-hidden">
+                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
                         {quiz.image && (
-                            <img src={quiz.image} alt="Quiz Cover" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50" />
+                            <img src={quiz.image} alt="Quiz Cover" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 group-hover:scale-110 transition-transform duration-1000" />
                         )}
-                        <div className="relative z-10 text-white">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-sm font-semibold mb-3">
-                                <BookOpen size={16} /> Homework Assignment
-                            </span>
-                            <h1 className="text-3xl font-extrabold drop-shadow-md">{quiz.title}</h1>
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 text-primary-foreground/60 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
+                                <Sparkles size={12} className="animate-spin-slow" />
+                                Giao bởi Google Classroom
+                            </div>
+                            <h1 className="text-4xl font-black text-white tracking-tighter leading-none mb-2 drop-shadow-xl">{quiz.title}</h1>
                         </div>
                     </div>
 
-                    <div className="p-8">
-                        <p className="text-gray-600 text-lg mb-8">{quiz.description || "No description provided for this quiz."}</p>
+                    <div className="p-10">
+                        {/* Description */}
+                        <p className="text-muted-foreground text-lg font-bold mb-10 leading-relaxed italic opacity-80 border-l-4 border-primary/20 pl-6">{quiz.description || "Không có mô tả cho quiz này."}</p>
 
-                        <div className="space-y-4 mb-8">
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                                        <BookOpen size={20} />
+                        <div className="space-y-4 mb-10">
+                            <div className="flex items-center justify-between p-6 bg-foreground/5 rounded-3xl border border-white/5 transition-all hover:bg-foreground/10 group/item">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-3xl bg-primary/20 text-primary flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform">
+                                        <BookOpen size={24} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-800">Questions</p>
-                                        <p className="text-xs text-gray-500">{quiz.questions?.length || 0} questions total</p>
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Số câu hỏi</p>
+                                        <p className="text-lg font-bold text-foreground">Bộ câu hỏi chi tiết</p>
                                     </div>
                                 </div>
-                                <span className="font-bold text-lg text-indigo-700">{quiz.questions?.length || 0}</span>
+                                <span className="font-black text-2xl text-primary tabular-nums">{quiz.questions?.length || 0}</span>
                             </div>
 
-                            <div className={`flex items-center justify-between p-4 rounded-2xl border ${isPastDeadline ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isPastDeadline ? 'bg-red-200 text-red-700' : 'bg-orange-200 text-orange-700'}`}>
-                                        <Clock size={20} />
+                            <div className={`flex items-center justify-between p-6 rounded-3xl border transition-all hover:scale-[1.01] ${isPastDeadline ? 'bg-red-500/5 border-red-500/20' : 'bg-orange-500/5 border-orange-500/20'}`}>
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-3xl flex items-center justify-center shadow-lg ${isPastDeadline ? 'bg-red-500/20 text-red-500' : 'bg-orange-500/20 text-orange-500'}`}>
+                                        <Clock size={24} />
                                     </div>
                                     <div>
-                                        <p className={`text-sm font-semibold ${isPastDeadline ? 'text-red-900' : 'text-orange-900'}`}>Deadline</p>
-                                        <p className={`text-xs ${isPastDeadline ? 'text-red-700' : 'text-orange-700'}`}>
-                                            {isPastDeadline ? 'Assignment expired' : 'Complete before time runs out'}
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Hạn chót</p>
+                                        <p className={`text-lg font-bold ${isPastDeadline ? 'text-red-500' : 'text-orange-500'}`}>
+                                            {homework.deadline ? new Date(homework.deadline).toLocaleDateString() : 'Không thời hạn'}
                                         </p>
                                     </div>
                                 </div>
-                                <span className={`font-bold text-sm ${isPastDeadline ? 'text-red-700' : 'text-orange-700 text-right'}`}>
-                                    {deadline ? deadline.toLocaleString() : "No time limit"}
-                                </span>
                             </div>
 
                             {homework.strictMode && (
-                                <div className="flex items-center justify-between p-4 bg-purple-50 rounded-2xl border border-purple-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-purple-200 text-purple-700 flex items-center justify-center">
-                                            <AlertCircle size={20} />
+                                <div className="flex items-center justify-between p-6 bg-violet-500/5 rounded-3xl border border-violet-500/20">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-3xl bg-violet-500/20 text-violet-500 flex items-center justify-center shadow-lg">
+                                            <AlertCircle size={24} />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-purple-900">Strict Mode Enabled</p>
-                                            <p className="text-xs text-purple-700">Do not leave the tab while playing</p>
+                                            <p className="text-[10px] font-black text-violet-500 uppercase tracking-widest mb-1">Chế độ nghiêm ngặt</p>
+                                            <p className="text-lg font-bold text-foreground">Hoàn thành trong 1 lần</p>
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <button
-                            onClick={handleStartHomework}
-                            disabled={!!isPastDeadline}
-                            className="w-full h-16 flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xl rounded-2xl shadow-xl shadow-indigo-500/30 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
-                        >
-                            <PlayCircle size={24} />
-                            {isPastDeadline ? "Dealine Passed" : "Start Assignment"}
-                        </button>
+                        {/* Action Area */}
+                        <div className="flex flex-col gap-4">
+                            <Button
+                                onClick={handleStart}
+                                disabled={isPastDeadline}
+                                className="w-full h-20 text-2xl font-black bg-primary text-primary-foreground rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 uppercase tracking-tighter"
+                            >
+                                {isPastDeadline ? 'ĐÃ HẾT HẠN' : 'Bắt đầu bài tập'}
+                                <ChevronRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+                            </Button>
 
-                        <div className="mt-4 text-center">
                             <button
                                 onClick={() => navigate('/classrooms')}
-                                className="text-gray-500 font-medium hover:text-indigo-600 transition-colors"
+                                className="w-full py-4 text-muted-foreground hover:text-foreground font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group"
                             >
-                                Back to Classrooms
+                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                                Quay lại Danh sách lớp học
                             </button>
                         </div>
                     </div>
@@ -172,4 +155,6 @@ export default function HomeworkStart() {
             </div>
         </div>
     );
-}
+};
+
+export default HomeworkStart;

@@ -61,9 +61,9 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
   return (
     <div className={wrapperClass}>
       <QuestionMedia media={question.media?.[0]} />
-      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-white flex-1 flex flex-col justify-between">
+      <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-xl font-bold mb-6">
+          <h2 className="min-w-[250px] text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
           <Input
@@ -72,15 +72,15 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
             onKeyDown={handleKeyDown}
             placeholder="Nhập câu trả lời..."
             disabled={submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/40 text-lg py-6 rounded-xl focus:ring-purple-400 focus:border-purple-400"
+            className="bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground/40 text-xl py-8 rounded-2xl focus:ring-primary focus:border-primary transition-all border-2"
           />
         </div>
         <Button
           onClick={handleSubmit}
           disabled={!answer.trim() || submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
-          className="mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl py-3"
+          className="mt-6 w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
         >
-          ✅ Xác nhận
+          ✅ XÁC NHẬN
         </Button>
       </div>
     </div>

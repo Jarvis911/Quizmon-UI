@@ -64,7 +64,7 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
       <div className="relative">
         <Avatar className={`w-16 h-16 ring-4 ${config.ringColor} shadow-lg`}>
           {player.avatarUrl && <AvatarImage src={player.avatarUrl} />}
-          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xl font-bold">
+          <AvatarFallback className="bg-linear-to-br from-purple-500 to-pink-500 text-white text-xl font-bold">
             {(player.displayName || player.username || "?")[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
@@ -72,17 +72,17 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
       </div>
 
       {/* Name */}
-      <span className={`text-white font-bold ${config.textSize} truncate max-w-[140px] text-center`}>
+      <span className={`text-foreground font-black ${config.textSize} truncate max-w-[140px] text-center drop-shadow-md`}>
         {player.displayName || player.username}
-        {isCurrentUser && <span className="text-purple-300 text-xs ml-1">(Bạn)</span>}
+        {isCurrentUser && <span className="text-primary text-xs ml-1 font-bold">(Bạn)</span>}
       </span>
 
       {/* Score */}
-      <span className={`text-white font-black ${config.scoreSize}`}>{player.score}</span>
+      <span className={`text-foreground font-black ${config.scoreSize} drop-shadow-lg`}>{player.score}</span>
 
       {/* Podium bar */}
-      <div className={`${config.height} w-28 bg-gradient-to-t ${config.bg} border ${config.borderColor} rounded-t-xl backdrop-blur-xl flex items-end justify-center pb-2`}>
-        <span className="text-white/40 text-xs font-bold">#{rank + 1}</span>
+      <div className={`${config.height} w-28 bg-linear-to-t ${config.bg} border-t-4 ${config.borderColor} rounded-t-2xl backdrop-blur-md flex items-end justify-center pb-3 shadow-2xl transition-all duration-300`}>
+        <span className="text-foreground/30 text-xs font-black uppercase tracking-widest">#{rank + 1}</span>
       </div>
     </div>
   );
@@ -138,7 +138,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   useEffect(() => {
     const fetchMatch = async () => {
       try {
-        const res = await axios.get(endpoints.match(matchId), {
+        const res = await axios.get(endpoints.match(Number(matchId)), {
           headers: { Authorization: token },
         });
         const qId = res.data.quizId;
@@ -174,7 +174,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
-      const res = await axios.get(endpoints.report_excel(matchId), {
+      const res = await axios.get(endpoints.report_excel(Number(matchId)), {
         headers: { Authorization: token },
         responseType: 'blob', // Important for file download
       });
@@ -200,19 +200,19 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const handleGoHome = () => navigate('/');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Ambient effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Ambient effects - use primary color for theme awareness */}
+      <div className="absolute inset-0 pointer-events-none opacity-40">
+        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-primary/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
 
       <div className="relative z-10 w-full max-w-2xl">
         {/* Title */}
-        <h1 className={`text-4xl font-extrabold text-white text-center mb-2 drop-shadow-lg transition-opacity duration-700 ${podiumStep > 0 ? "opacity-100" : "opacity-0"}`}>
+        <h1 className={`text-4xl md:text-5xl font-black text-foreground text-center mb-2 drop-shadow-2xl transition-all duration-700 ${podiumStep > 0 ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
           🏆 Bảng Xếp Hạng
         </h1>
-        <p className={`text-white/50 text-center mb-12 text-sm transition-opacity duration-700 ${podiumStep > 0 ? "opacity-100" : "opacity-0"}`}>
+        <p className={`text-muted-foreground font-bold text-center mb-12 text-sm uppercase tracking-widest transition-opacity duration-700 ${podiumStep > 0 ? "opacity-100" : "opacity-0"}`}>
           Khám phá người chiến thắng!
         </p>
 
@@ -245,51 +245,52 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
         {/* Remaining players - show smoothly only when podium animations finish */}
         <div className={`transition-all duration-1000 transform ${podiumStep >= 4 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           {rest.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-4 mb-6 space-y-2">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-3xl p-4 mb-6 space-y-2 shadow-2xl">
               {rest.map((player, index) => (
                 <div
                   key={player.userId}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${player.userId === currentUserId
-                    ? "bg-purple-500/20 border border-purple-400/30"
+                  className={`flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${player.userId === currentUserId
+                    ? "bg-primary/20 border border-primary/30 shadow-lg scale-102"
                     : "hover:bg-white/5"
                     }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-white/40 font-bold w-8 text-center">#{index + 4}</span>
-                    <Avatar className="w-8 h-8">
+                  <div className="flex items-center gap-4">
+                    <span className="text-muted-foreground font-black w-8 text-center text-lg">#{index + 4}</span>
+                    <Avatar className="w-10 h-10 border-2 border-white/10 shadow-md">
                       {player.avatarUrl && <AvatarImage src={player.avatarUrl} />}
-                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs font-bold">
+                      <AvatarFallback className="bg-linear-to-br from-primary to-primary/60 text-primary-foreground text-sm font-bold">
                         {(player.displayName || player.username || "?")[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-white text-sm font-medium">
+                    <span className="text-foreground text-base font-bold">
                       {player.displayName || player.username}
                       {player.userId === currentUserId && (
-                        <span className="text-purple-300 text-xs ml-1">(Bạn)</span>
+                        <span className="text-primary text-xs ml-2 font-black uppercase tracking-tighter">(Bạn)</span>
                       )}
                     </span>
                   </div>
-                  <span className="text-white font-bold text-lg tabular-nums">{player.score}</span>
+                  <span className="text-foreground font-black text-xl tabular-nums">{player.score}</span>
                 </div>
               ))}
             </div>
           )}
 
           {/* Go Home Button and Download Button */}
-          <div className="flex flex-col gap-3 mt-4">
+          <div className="flex flex-col gap-4 mt-8">
             <Button
               onClick={handleDownloadExcel}
               disabled={isDownloading}
-              className="w-full h-14 text-lg font-bold bg-white/10 hover:bg-white/20 text-white rounded-2xl border border-white/20 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
+              variant="secondary"
+              className="w-full h-16 text-lg font-black bg-card/60 hover:bg-card/90 text-foreground rounded-2xl border-2 border-white/10 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3 shadow-xl backdrop-blur-md"
             >
-              <Download className="w-5 h-5" />
-              {isDownloading ? "Đang tải..." : "Tải Báo Cáo Excel"}
+              <Download className="w-6 h-6 text-primary" />
+              {isDownloading ? "Đang tải..." : "TẢI BÁO CÁO EXCEL"}
             </Button>
             <Button
               onClick={handleGoHome}
-              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-600 hover:to-rose-700 text-white rounded-2xl shadow-lg shadow-orange-500/25 transition-all duration-300 hover:scale-[1.02]"
+              className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-[0_8px_0_0_rgba(0,0,0,0.1)] hover:translate-y-[-2px] hover:shadow-[0_12px_20px_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-none transition-all duration-300"
             >
-              🏠 Trở về Trang Chủ
+              🏠 TRỞ VỀ TRANG CHỦ
             </Button>
           </div>
         </div>
@@ -297,37 +298,37 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
 
       {/* Rating Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 text-white max-w-sm">
+        <DialogContent className="bg-card/95 backdrop-blur-2xl border-white/10 text-foreground max-w-sm rounded-4xl shadow-3xl">
           <DialogHeader>
-            <DialogTitle className="text-white text-center">⭐ Đánh giá Quiz</DialogTitle>
+            <DialogTitle className="text-foreground text-center text-2xl font-black">⭐ Đánh giá Quiz</DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center gap-2 my-4">
+          <div className="flex justify-center gap-3 my-6">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 onClick={() => setRating(star)}
-                className="transition-transform hover:scale-125"
+                className="transition-all duration-300 hover:scale-125 focus:outline-none"
               >
                 <Star
-                  className={`w-10 h-10 ${star <= rating
-                    ? "text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                    : "text-white/20"
+                  className={`w-12 h-12 ${star <= rating
+                    ? "text-yellow-400 fill-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.6)]"
+                    : "text-muted-foreground/20"
                     } transition-all duration-200`}
                 />
               </button>
             ))}
           </div>
           <Textarea
-            placeholder="Nhập đánh giá của bạn..."
+            placeholder="Bạn thấy bộ câu hỏi này thế nào?"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="min-h-[100px] bg-white/10 border-white/20 text-white placeholder:text-white/40"
+            className="min-h-[120px] bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground/40 rounded-2xl p-4 focus:ring-primary focus:border-primary transition-all text-base border-2"
           />
           <DialogFooter>
             <Button
               onClick={handleSubmitRating}
               disabled={rating === 0}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+              className="bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
             >
               ✅ Gửi đánh giá
             </Button>

@@ -144,11 +144,11 @@ export default function Navbar() {
         <div className="flex-1 flex flex-row items-center justify-center gap-2 md:gap-6 mx-2 md:mx-6 max-w-3xl">
           {/* Main Navigation Links */}
           {token && (
-            <div className="hidden md:flex items-center gap-1 bg-white/20 backdrop-blur-md p-1 rounded-full border border-white/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.1)]">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="rounded-full text-primary hover:bg-white/40 font-semibold px-4">
+            <div className="hidden md:flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-inner">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4">
                 <HomeIcon className="w-4 h-4 mr-2" /> Trang chủ
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary hover:bg-white/40 font-semibold px-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4">
                 <BookOpen className="w-4 h-4 mr-2" /> Lớp học
               </Button>
             </div>
@@ -226,21 +226,21 @@ export default function Navbar() {
                   <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-24">
-                <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-medium text-slate-700 dark:text-slate-300" inset={undefined}>
-                  <TrendingUp className="w-4 h-4 mr-2 text-indigo-500" />
+              <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10">
+                <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
+                  <TrendingUp className="w-4 h-4 mr-2 text-primary" />
                   Lịch sử đấu
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700" inset={undefined}>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive font-bold focus:bg-destructive/10 focus:text-destructive" inset={undefined}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Đăng xuất
                 </DropdownMenuItem>
 
 
-                <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
+                <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                    <Palette className="w-4 h-4 mr-2" />
+                  <DropdownMenuSubTrigger className="cursor-pointer font-bold text-foreground">
+                    <Palette className="w-4 h-4 mr-2 text-primary" />
                     Đổi Giao Diện
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>

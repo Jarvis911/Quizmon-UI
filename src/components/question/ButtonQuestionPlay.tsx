@@ -72,9 +72,9 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
   return (
     <div className={wrapperClass}>
       <QuestionMedia media={question.media?.[0]} />
-      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-white flex-1 flex flex-col justify-between">
+      <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-xl font-bold mb-6 text-white">
+          <h2 className="min-w-[250px] text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
           <div className="grid grid-cols-2 gap-3">

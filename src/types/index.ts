@@ -144,6 +144,15 @@ export interface MatchPlayer {
     answers?: PlayerAnswer[];
 }
 
+export interface LobbyPlayer {
+    userId: number;
+    username: string;
+    displayName?: string;
+    avatarUrl?: string;
+    isReady: boolean;
+    isHost: boolean;
+}
+
 export interface PlayerAnswer {
     id: number;
     matchPlayerId: number;

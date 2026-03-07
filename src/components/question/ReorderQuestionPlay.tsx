@@ -91,27 +91,29 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
   return (
     <div className={wrapperClass}>
       <QuestionMedia media={question.media?.[0]} />
-      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-white flex-1 flex flex-col justify-between">
+      <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-xl font-bold mb-6">
+          <h2 className="min-w-[250px] text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={items} strategy={verticalListSortingStrategy}>
-              {items.map((item) => (
-                <SortableItem key={item.id} id={item.id} color={item.color}>
-                  {item.text}
-                </SortableItem>
-              ))}
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <SortableItem key={item.id} id={item.id} color={item.color}>
+                    <span className="text-white font-bold drop-shadow-sm">{item.text}</span>
+                  </SortableItem>
+                ))}
+              </div>
             </SortableContext>
           </DndContext>
         </div>
         <Button
           onClick={handleSubmit}
           disabled={submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
-          className="mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl py-3"
+          className="mt-6 w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
         >
-          ✅ Xác nhận
+          ✅ XÁC NHẬN
         </Button>
       </div>
     </div>

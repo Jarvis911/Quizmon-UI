@@ -48,23 +48,23 @@ const STATUS_CONFIG: Record<
 > = {
     PENDING: {
         label: "Chờ duyệt",
-        color: "text-amber-700",
-        bg: "bg-amber-100 border-amber-200",
+        color: "text-amber-500",
+        bg: "bg-amber-500/10 border-amber-500/20",
     },
     APPROVED: {
         label: "Đã duyệt",
-        color: "text-emerald-700",
-        bg: "bg-emerald-100 border-emerald-200",
+        color: "text-emerald-500",
+        bg: "bg-emerald-500/10 border-emerald-500/20",
     },
     REJECTED: {
         label: "Từ chối",
-        color: "text-red-700",
-        bg: "bg-red-100 border-red-200",
+        color: "text-red-500",
+        bg: "bg-red-500/10 border-red-500/20",
     },
     REGENERATING: {
         label: "Đang tạo lại",
-        color: "text-blue-700",
-        bg: "bg-blue-100 border-blue-200",
+        color: "text-blue-500",
+        bg: "bg-blue-500/10 border-blue-500/20",
     },
 };
 
@@ -283,8 +283,8 @@ const AIQuizReview = () => {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="text-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-violet-500 mx-auto" />
-                    <p className="text-gray-500 mt-3">Đang tải dữ liệu...</p>
+                    <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+                    <p className="text-muted-foreground font-bold tracking-widest uppercase text-xs animate-pulse">Đang tải dữ liệu...</p>
                 </div>
             </div>
         );
@@ -293,12 +293,12 @@ const AIQuizReview = () => {
     if (!job) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="text-center">
-                    <AlertCircle className="w-10 h-10 text-red-400 mx-auto" />
-                    <p className="text-gray-600 mt-3">Không tìm thấy job</p>
+                <div className="text-center bg-card/60 backdrop-blur-xl p-12 rounded-3xl border border-white/5 shadow-2xl">
+                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+                    <p className="text-foreground text-xl font-black mb-8">Không tìm thấy job</p>
                     <Button
-                        variant="outline"
-                        className="mt-4"
+                        variant="default"
+                        className="px-8 h-12 rounded-2xl font-black bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                         onClick={() => navigate("/ai/generate")}
                     >
                         Quay lại
@@ -314,26 +314,26 @@ const AIQuizReview = () => {
     return (
         <div className="flex flex-col lg:flex-row gap-4 px-4 py-6 max-w-7xl mx-auto h-[calc(100vh-100px)]">
             {/* Left Sidebar — Question list */}
-            <div className="lg:w-80 flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg overflow-hidden flex flex-col">
+            <div className="lg:w-96 shrink-0 bg-card/60 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="p-4 border-b border-gray-100">
+                <div className="p-6 border-b border-foreground/5">
                     <button
                         onClick={() => navigate("/ai/generate")}
-                        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-3"
+                        className="flex items-center gap-2 text-xs font-black text-muted-foreground hover:text-primary mb-5 uppercase tracking-widest transition-all hover:-translate-x-1"
                     >
                         <ChevronLeft className="w-4 h-4" /> Quay lại
                     </button>
-                    <h2 className="font-bold text-lg flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-violet-500" />
-                        Review câu hỏi
+                    <h2 className="font-black text-2xl flex items-center gap-3 text-foreground tracking-tight">
+                        <Sparkles className="w-6 h-6 text-primary" />
+                        Duyệt Câu Hỏi
                     </h2>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 opacity-60">
                         {approvedCount}/{questions.length} đã duyệt • {pendingCount} chờ duyệt
                     </p>
                     {/* Progress bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                    <div className="w-full bg-foreground/5 rounded-full h-2 mt-4 overflow-hidden border border-foreground/5">
                         <div
-                            className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-full transition-all"
+                            className="bg-primary h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(var(--primary),0.5)]"
                             style={{
                                 width: `${questions.length > 0 ? (approvedCount / questions.length) * 100 : 0}%`,
                             }}
@@ -342,7 +342,7 @@ const AIQuizReview = () => {
                 </div>
 
                 {/* Question list */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
                     {questions.map((q, i) => {
                         const cfg = STATUS_CONFIG[q.status] || STATUS_CONFIG.PENDING;
                         return (
@@ -352,33 +352,33 @@ const AIQuizReview = () => {
                                     setSelectedIdx(i);
                                     cancelEdit();
                                 }}
-                                className={`p-3 rounded-xl cursor-pointer transition-all ${selectedIdx === i
-                                        ? "bg-violet-100 border-2 border-violet-300"
-                                        : "hover:bg-gray-100 border-2 border-transparent"
+                                className={`p-4 rounded-2xl cursor-pointer transition-all border-2 ${selectedIdx === i
+                                        ? "bg-primary/10 border-primary shadow-lg scale-[1.02]"
+                                        : "hover:bg-foreground/5 border-transparent hover:border-foreground/10"
                                     }`}
                             >
-                                <div className="flex items-start gap-2">
-                                    <span className="text-xs font-bold text-gray-400 mt-0.5">
-                                        {i + 1}
+                                <div className="flex items-start gap-4">
+                                    <span className="text-xs font-black text-muted-foreground opacity-40 tabular-nums mt-1">
+                                        {String(i + 1).padStart(2, '0')}
                                     </span>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium truncate">
+                                        <p className={`text-sm font-bold truncate ${selectedIdx === i ? "text-primary" : "text-foreground"}`}>
                                             {q.questionText}
                                         </p>
-                                        <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex items-center gap-2 mt-2">
                                             <Badge
                                                 variant="outline"
-                                                className={`text-[10px] px-1.5 py-0 ${cfg.bg} ${cfg.color}`}
+                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border shadow-sm ${cfg.bg} ${cfg.color}`}
                                             >
                                                 {cfg.label}
                                             </Badge>
-                                            <span className="text-[10px] text-gray-400">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-40">
                                                 {TYPE_LABELS[q.questionType] || q.questionType}
                                             </span>
                                         </div>
                                     </div>
                                     {actionLoading === q.id && (
-                                        <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
+                                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
                                     )}
                                 </div>
                             </div>
@@ -387,60 +387,61 @@ const AIQuizReview = () => {
                 </div>
 
                 {/* Bulk Actions */}
-                <div className="p-3 border-t border-gray-100 space-y-2">
+                <div className="p-6 border-t border-foreground/5 space-y-3 bg-foreground/3 backdrop-blur-md">
                     <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs"
+                        variant="secondary"
+                        size="lg"
+                        className="w-full text-xs font-black uppercase tracking-[0.2em] h-12 rounded-2xl shadow-sm hover:scale-[1.02] transition-all"
                         onClick={approveAll}
                         disabled={pendingCount === 0}
                     >
-                        <Check className="w-3 h-3 mr-1" /> Duyệt tất cả ({pendingCount})
+                        <Check className="w-4 h-4 mr-2" /> Duyệt tất cả ({pendingCount})
                     </Button>
                     <Button
-                        size="sm"
-                        className="w-full text-xs bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
+                        size="lg"
+                        className="w-full text-xs font-black uppercase tracking-[0.2em] h-12 rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
                         onClick={() => setCreateDialogOpen(true)}
                         disabled={approvedCount === 0 && pendingCount === 0}
                     >
-                        <PartyPopper className="w-3 h-3 mr-1" /> Tạo Quiz (
-                        {approvedCount + pendingCount} câu)
+                        <PartyPopper className="w-4 h-4 mr-2" /> Tạo Quiz ({approvedCount + pendingCount} câu)
                     </Button>
                 </div>
             </div>
 
             {/* Right Panel — Question detail */}
-            <div className="flex-1 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg overflow-y-auto">
+            <div className="flex-1 bg-card/60 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-2xl overflow-y-auto custom-scrollbar">
                 {selectedQuestion ? (
-                    <div className="p-6">
+                    <div className="p-8 lg:p-12">
                         {/* Question header */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-bold">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg text-xl font-black tabular-nums">
                                     {selectedIdx + 1}
                                 </div>
                                 <div>
-                                    <Badge
-                                        variant="outline"
-                                        className={`${STATUS_CONFIG[selectedQuestion.status]?.bg} ${STATUS_CONFIG[selectedQuestion.status]?.color}`}
-                                    >
-                                        {STATUS_CONFIG[selectedQuestion.status]?.label}
-                                    </Badge>
-                                    <span className="text-xs text-gray-400 ml-2">
-                                        {TYPE_LABELS[selectedQuestion.questionType] ||
-                                            selectedQuestion.questionType}
-                                    </span>
+                                    <div className="flex items-center gap-3">
+                                        <Badge
+                                            variant="outline"
+                                            className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 border shadow-sm ${STATUS_CONFIG[selectedQuestion.status]?.bg} ${STATUS_CONFIG[selectedQuestion.status]?.color}`}
+                                        >
+                                            {STATUS_CONFIG[selectedQuestion.status]?.label}
+                                        </Badge>
+                                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground opacity-40">
+                                            {TYPE_LABELS[selectedQuestion.questionType] ||
+                                                selectedQuestion.questionType}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Action buttons */}
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2 bg-foreground/5 p-1.5 rounded-2xl border border-white/5">
                                 {!editing && (
                                     <>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-emerald-600 hover:bg-emerald-50"
+                                            className="h-10 w-10 text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all"
                                             onClick={() =>
                                                 updateStatus(selectedQuestion.id, "APPROVED")
                                             }
@@ -450,12 +451,12 @@ const AIQuizReview = () => {
                                             }
                                             title="Duyệt"
                                         >
-                                            <Check className="w-4 h-4" />
+                                            <Check className="w-5 h-5 font-black" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-red-600 hover:bg-red-50"
+                                            className="h-10 w-10 text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                                             onClick={() =>
                                                 updateStatus(selectedQuestion.id, "REJECTED")
                                             }
@@ -465,12 +466,12 @@ const AIQuizReview = () => {
                                             }
                                             title="Từ chối"
                                         >
-                                            <X className="w-4 h-4" />
+                                            <X className="w-5 h-5 font-black" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-blue-600 hover:bg-blue-50"
+                                            className="h-10 w-10 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all"
                                             onClick={() => {
                                                 setRegenQuestionId(selectedQuestion.id);
                                                 setRegenDialogOpen(true);
@@ -478,67 +479,67 @@ const AIQuizReview = () => {
                                             disabled={actionLoading === selectedQuestion.id}
                                             title="Tạo lại"
                                         >
-                                            <RotateCcw className="w-4 h-4" />
+                                            <RotateCcw className="w-5 h-5 font-black" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-amber-600 hover:bg-amber-50"
+                                            className="h-10 w-10 text-amber-500 hover:bg-amber-500/10 rounded-xl transition-all"
                                             onClick={() => startEdit(selectedQuestion)}
                                             disabled={actionLoading === selectedQuestion.id}
                                             title="Chỉnh sửa"
                                         >
-                                            <Pencil className="w-4 h-4" />
+                                            <Pencil className="w-5 h-5 font-black" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-gray-400 hover:bg-gray-100 hover:text-red-500"
+                                            className="h-10 w-10 text-muted-foreground hover:bg-red-500 hover:text-white rounded-xl transition-all"
                                             onClick={() => deleteQuestion(selectedQuestion.id)}
                                             disabled={actionLoading === selectedQuestion.id}
                                             title="Xoá"
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-5 h-5 font-black" />
                                         </Button>
                                     </>
                                 )}
                                 {editing && (
-                                    <>
+                                    <div className="flex gap-2">
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="text-emerald-600 hover:bg-emerald-50"
+                                            className="text-emerald-500 hover:bg-emerald-500/10 font-black uppercase tracking-widest text-xs h-10 px-6 rounded-xl"
                                             onClick={saveEdit}
                                             disabled={actionLoading === selectedQuestion.id}
                                         >
-                                            <Save className="w-4 h-4 mr-1" /> Lưu
+                                            <Save className="w-4 h-4 mr-2" /> Lưu Thay Đổi
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="text-gray-500"
+                                            className="text-muted-foreground hover:bg-foreground/5 font-black uppercase tracking-widest text-xs h-10 px-6 rounded-xl"
                                             onClick={cancelEdit}
                                         >
                                             Huỷ
                                         </Button>
-                                    </>
+                                    </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Question text */}
-                        <div className="mb-6">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        <div className="mb-10">
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-4 block">
                                 Câu hỏi
                             </label>
                             {editing ? (
                                 <Textarea
                                     value={editText}
                                     onChange={(e) => setEditText(e.target.value)}
-                                    className="mt-2 min-h-[80px] bg-white"
+                                    className="mt-4 min-h-[120px] bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-2xl text-lg font-bold p-6 shadow-inner"
                                 />
                             ) : (
-                                <p className="mt-2 text-lg font-medium leading-relaxed">
+                                <p className="mt-4 text-3xl font-black leading-tight text-foreground tracking-tight drop-shadow-sm">
                                     {selectedQuestion.questionText}
                                 </p>
                             )}
@@ -546,7 +547,7 @@ const AIQuizReview = () => {
 
                         {/* Options */}
                         <div>
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-4 block">
                                 {selectedQuestion.questionType === "TYPEANSWER"
                                     ? "Đáp án đúng"
                                     : selectedQuestion.questionType === "REORDER"
@@ -561,11 +562,11 @@ const AIQuizReview = () => {
                                         <Input
                                             value={editCorrectAnswer}
                                             onChange={(e) => setEditCorrectAnswer(e.target.value)}
-                                            className="bg-white"
+                                            className="h-14 bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-xl font-bold px-6 shadow-inner"
                                         />
                                     ) : (
-                                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                                            <p className="font-medium text-emerald-700">
+                                        <div className="bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl p-6 shadow-sm">
+                                            <p className="font-black text-emerald-500 text-lg tracking-tight">
                                                 {selectedQuestion.optionsData?.correctAnswer || "—"}
                                             </p>
                                         </div>
@@ -581,7 +582,7 @@ const AIQuizReview = () => {
                                             ? editOptions.map((opt, i) => (
                                                 <div
                                                     key={i}
-                                                    className="flex items-center gap-2"
+                                                    className="flex items-center gap-4 bg-foreground/5 p-2 rounded-2xl border border-white/5"
                                                 >
                                                     <input
                                                         type={
@@ -610,7 +611,7 @@ const AIQuizReview = () => {
                                                                 );
                                                             }
                                                         }}
-                                                        className="accent-violet-500"
+                                                        className="w-5 h-5 accent-primary cursor-pointer ml-2"
                                                     />
                                                     <Input
                                                         value={opt.text}
@@ -623,12 +624,12 @@ const AIQuizReview = () => {
                                                                 )
                                                             )
                                                         }
-                                                        className="flex-1 bg-white"
+                                                        className="flex-1 h-12 bg-transparent border-none focus-visible:ring-0 font-bold text-foreground p-0"
                                                     />
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-7 w-7"
+                                                        className="h-10 w-10 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl"
                                                         onClick={() =>
                                                             setEditOptions(
                                                                 editOptions.filter((_, j) => j !== i)
@@ -636,7 +637,7 @@ const AIQuizReview = () => {
                                                         }
                                                         disabled={editOptions.length <= 2}
                                                     >
-                                                        <Trash2 className="w-3 h-3" />
+                                                        <Trash2 className="w-4 h-4" />
                                                     </Button>
                                                 </div>
                                             ))
@@ -644,26 +645,28 @@ const AIQuizReview = () => {
                                                 (opt, i) => (
                                                     <div
                                                         key={i}
-                                                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${opt.isCorrect
-                                                                ? "bg-emerald-50 border-emerald-300"
-                                                                : "bg-white/50 border-gray-200"
+                                                        className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all shadow-sm ${opt.isCorrect
+                                                                ? "bg-emerald-500/10 border-emerald-500 shadow-emerald-500/10"
+                                                                : "bg-foreground/5 border-white/5"
                                                             }`}
                                                     >
                                                         <div
-                                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${opt.isCorrect
+                                                            className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-inner ${opt.isCorrect
                                                                     ? "bg-emerald-500 text-white"
-                                                                    : "bg-gray-200 text-gray-500"
+                                                                    : "bg-foreground/10 text-muted-foreground"
                                                                 }`}
                                                         >
                                                             {String.fromCharCode(65 + i)}
                                                         </div>
                                                         <span
-                                                            className={`flex-1 ${opt.isCorrect ? "font-medium text-emerald-700" : ""}`}
+                                                            className={`flex-1 text-lg ${opt.isCorrect ? "font-black text-emerald-500 tracking-tight" : "font-bold text-foreground opacity-80"}`}
                                                         >
                                                             {opt.text}
                                                         </span>
                                                         {opt.isCorrect && (
-                                                            <Check className="w-4 h-4 text-emerald-500" />
+                                                            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                                                <Check className="w-5 h-5 font-black" />
+                                                            </div>
                                                         )}
                                                     </div>
                                                 )
@@ -672,7 +675,7 @@ const AIQuizReview = () => {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="mt-2"
+                                                className="mt-4 w-full h-12 rounded-xl border-dashed border-2 bg-foreground/3 text-muted-foreground hover:bg-foreground/5 font-black uppercase tracking-widest text-xs"
                                                 onClick={() =>
                                                     setEditOptions([
                                                         ...editOptions,
@@ -680,7 +683,7 @@ const AIQuizReview = () => {
                                                     ])
                                                 }
                                             >
-                                                <Plus className="w-3 h-3 mr-1" /> Thêm đáp án
+                                                <Plus className="w-4 h-4 mr-2" /> Thêm đáp án
                                             </Button>
                                         )}
                                     </div>
@@ -693,8 +696,8 @@ const AIQuizReview = () => {
                                         ? editOptions
                                             .sort((a, b) => (a.order || 0) - (b.order || 0))
                                             .map((opt, i) => (
-                                                <div key={i} className="flex items-center gap-2">
-                                                    <span className="text-xs font-bold text-gray-400 w-5">
+                                                <div key={i} className="flex items-center gap-4 bg-foreground/5 p-2 rounded-2xl border border-white/5">
+                                                    <span className="text-xs font-black text-muted-foreground opacity-40 w-8 text-right underline underline-offset-4">
                                                         {i + 1}.
                                                     </span>
                                                     <Input
@@ -708,7 +711,7 @@ const AIQuizReview = () => {
                                                                 )
                                                             )
                                                         }
-                                                        className="flex-1 bg-white"
+                                                        className="flex-1 h-12 bg-transparent border-none focus-visible:ring-0 font-bold text-foreground p-0 text-lg"
                                                     />
                                                 </div>
                                             ))
@@ -717,12 +720,12 @@ const AIQuizReview = () => {
                                             .map((opt, i) => (
                                                 <div
                                                     key={i}
-                                                    className="flex items-center gap-3 p-3 rounded-xl bg-white/50 border-2 border-gray-200"
+                                                    className="flex items-center gap-4 p-5 rounded-2xl bg-foreground/5 border-2 border-white/5 shadow-sm group"
                                                 >
-                                                    <div className="w-6 h-6 rounded-full bg-violet-500 text-white flex items-center justify-center text-xs font-bold">
+                                                    <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-lg font-black shadow-lg transform group-hover:rotate-6 transition-transform">
                                                         {i + 1}
                                                     </div>
-                                                    <span>{opt.text}</span>
+                                                    <span className="text-xl font-black text-foreground opacity-80 tracking-tight">{opt.text}</span>
                                                 </div>
                                             ))}
                                 </div>
@@ -731,44 +734,49 @@ const AIQuizReview = () => {
 
                         {/* Regeneration info */}
                         {selectedQuestion.regenerationCount > 0 && (
-                            <p className="text-xs text-gray-400 mt-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-8 opacity-40">
                                 Đã tạo lại {selectedQuestion.regenerationCount} lần
                             </p>
                         )}
                     </div>
                 ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
-                        <p>Chọn câu hỏi để xem chi tiết</p>
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-40 space-y-4">
+                        <Sparkles className="w-16 h-16 animate-pulse" />
+                        <p className="font-black uppercase tracking-widest text-xs">Phần xem chi tiết câu hỏi</p>
                     </div>
                 )}
             </div>
 
             {/* Regenerate Dialog */}
             <Dialog open={regenDialogOpen} onOpenChange={setRegenDialogOpen}>
-                <DialogContent>
+                <DialogContent className="bg-card/90 backdrop-blur-2xl border-white/10 rounded-3xl shadow-2xl max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Tạo lại câu hỏi</DialogTitle>
+                        <DialogTitle className="text-2xl font-black text-foreground">Tạo lại câu hỏi</DialogTitle>
                     </DialogHeader>
-                    <div className="py-4">
-                        <label className="text-sm font-medium">
+                    <div className="py-6">
+                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-3 block">
                             Yêu cầu cho AI (tuỳ chọn)
                         </label>
                         <Textarea
                             value={regenFeedback}
                             onChange={(e) => setRegenFeedback(e.target.value)}
                             placeholder="Ví dụ: Làm câu hỏi khó hơn, thêm đáp án gây nhầm lẫn..."
-                            className="mt-2"
+                            className="mt-2 min-h-[120px] bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-2xl font-bold p-4 shadow-inner"
                         />
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="gap-3">
                         <Button
-                            variant="outline"
+                            variant="ghost"
+                            className="h-12 rounded-2xl font-black uppercase tracking-widest text-xs px-8 text-muted-foreground hover:bg-foreground/5"
                             onClick={() => setRegenDialogOpen(false)}
                         >
                             Huỷ
                         </Button>
-                        <Button onClick={handleRegenerate}>
-                            <RotateCcw className="w-4 h-4 mr-1" /> Tạo lại
+                        <Button 
+                            className="h-12 rounded-2xl font-black uppercase tracking-widest text-xs px-8 bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+                            onClick={handleRegenerate}
+                        >
+                            <RotateCcw className="w-4 h-4 mr-2" /> Tạo lại
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -776,57 +784,63 @@ const AIQuizReview = () => {
 
             {/* Create Quiz Dialog */}
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-                <DialogContent>
+                <DialogContent className="bg-card/90 backdrop-blur-2xl border-white/10 rounded-3xl shadow-2xl max-w-lg">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <PartyPopper className="w-5 h-5 text-violet-500" />
-                            Tạo Quiz từ câu hỏi AI
+                        <DialogTitle className="text-3xl font-black text-foreground flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                <PartyPopper className="w-6 h-6 text-primary" />
+                            </div>
+                            Tạo Quiz Mới
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-6 py-8">
                         <div>
-                            <label className="text-sm font-medium">Tên Quiz *</label>
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-3 block">Tên Quiz *</label>
                             <Input
                                 value={quizTitle}
                                 onChange={(e) => setQuizTitle(e.target.value)}
                                 placeholder="Nhập tên quiz..."
-                                className="mt-1"
+                                className="h-14 bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-2xl font-bold px-6 shadow-inner"
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium">Mô tả</label>
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-3 block">Mô tả</label>
                             <Textarea
                                 value={quizDescription}
                                 onChange={(e) => setQuizDescription(e.target.value)}
                                 placeholder="Mô tả quiz..."
-                                className="mt-1"
+                                className="min-h-[100px] bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-2xl font-bold p-6 shadow-inner"
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium">Danh mục *</label>
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-3 block">Danh mục *</label>
                             <Select
                                 value={quizCategoryId}
                                 onValueChange={setQuizCategoryId}
                             >
-                                <SelectTrigger className="mt-1">
+                                <SelectTrigger className="h-14 bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-2xl font-bold px-6">
                                     <SelectValue placeholder="Chọn danh mục" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="bg-card border-white/10 rounded-2xl shadow-2xl">
                                     {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={String(cat.id)}>
+                                        <SelectItem key={cat.id} value={String(cat.id)} className="font-bold hover:bg-primary/10 rounded-xl m-1 cursor-pointer transition-colors focus:bg-primary/20">
                                             {cat.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
-                        <p className="text-xs text-gray-500">
-                            Sẽ tạo quiz với {approvedCount + pendingCount} câu hỏi (đã duyệt + chờ duyệt)
-                        </p>
+                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex items-center gap-3">
+                            <Sparkles className="w-5 h-5 text-primary shrink-0" />
+                            <p className="text-xs font-bold text-primary tracking-tight">
+                                Sẽ tạo quiz với <span className="underline decoration-2 underline-offset-4">{approvedCount + pendingCount}</span> câu hỏi được AI tạo ra.
+                            </p>
+                        </div>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="gap-3">
                         <Button
-                            variant="outline"
+                            variant="ghost"
+                            className="h-12 rounded-2xl font-black uppercase tracking-widest text-xs px-8 text-muted-foreground hover:bg-foreground/5"
                             onClick={() => setCreateDialogOpen(false)}
                         >
                             Huỷ
@@ -834,14 +848,14 @@ const AIQuizReview = () => {
                         <Button
                             onClick={handleCreateQuiz}
                             disabled={!quizTitle || !quizCategoryId || creating}
-                            className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
+                            className="h-12 rounded-2xl font-black uppercase tracking-widest text-xs px-10 bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:scale-100"
                         >
                             {creating ? (
-                                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
                             ) : (
-                                <Sparkles className="w-4 h-4 mr-1" />
+                                <Sparkles className="w-5 h-5 mr-3" />
                             )}
-                            Tạo Quiz
+                            Xác Nhận Tạo Quiz
                         </Button>
                     </DialogFooter>
                 </DialogContent>

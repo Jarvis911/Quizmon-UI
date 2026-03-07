@@ -56,12 +56,12 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
   return (
     <div className={wrapperClass}>
       <QuestionMedia media={question.media?.[0]} />
-      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-white flex-1 flex flex-col justify-between">
+      <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-xl font-bold mb-6">
+          <h2 className="min-w-[250px] text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
-          <div className="my-8 px-2">
+          <div className="my-10 px-4">
             <Slider
               min={question.range.minValue}
               max={question.range.maxValue}
@@ -69,22 +69,23 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
               value={value}
               onValueChange={setValue}
               disabled={isCorrect !== null || timer <= 0 || submitted}
+              className="py-4"
             />
-            <div className="flex justify-between text-xs text-white/40 mt-2">
+            <div className="flex justify-between text-sm font-black text-muted-foreground mt-4 uppercase tracking-widest">
               <span>{question.range.minValue}</span>
               <span>{question.range.maxValue}</span>
             </div>
           </div>
-          <div className="text-center">
-            <span className="text-4xl font-black text-purple-300">{value[0]}</span>
+          <div className="text-center bg-primary/10 rounded-3xl py-6 border-2 border-primary/20 shadow-inner">
+            <span className="text-6xl font-black text-primary drop-shadow-md">{value[0]}</span>
           </div>
         </div>
         <Button
           onClick={handleSubmit}
           disabled={submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
-          className="mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl py-3"
+          className="mt-8 w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
         >
-          ✅ Xác nhận
+          ✅ XÁC NHẬN
         </Button>
       </div>
     </div>

@@ -167,23 +167,28 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
       {/* Question overlay - glassmorphic */}
       <div
         className="absolute top-16 left-8
-                    bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl 
-                    p-6 shadow-2xl text-white w-[400px] pointer-events-auto z-10"
+                    bg-card/60 backdrop-blur-2xl border-2 border-white/20 rounded-3xl 
+                    p-8 shadow-3xl text-foreground w-[420px] pointer-events-auto z-10"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">{question.text}</h2>
+        <h2 className="text-2xl font-black mb-6 text-center drop-shadow-sm">{question.text}</h2>
 
         {location && (
-          <p className="text-sm text-white/50 mb-3 text-center">
-            📍 {location.lat.toFixed(5)}, {location.lon.toFixed(5)}
-          </p>
+          <div className="bg-primary/10 rounded-2xl p-4 mb-6 border border-primary/20">
+            <p className="text-sm font-black text-primary text-center uppercase tracking-widest">
+              📍 Vị trí đã chọn
+            </p>
+            <p className="text-lg font-bold text-foreground text-center tabular-nums">
+              {location.lat.toFixed(5)}, {location.lon.toFixed(5)}
+            </p>
+          </div>
         )}
 
         <Button
-          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl py-3"
+          className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
           onClick={handleSubmit}
           disabled={submitted || !location || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
         >
-          ✅ Xác nhận
+          ✅ XÁC NHẬN
         </Button>
       </div>
     </div>

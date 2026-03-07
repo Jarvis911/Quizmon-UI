@@ -88,26 +88,26 @@ export default function Classrooms() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm mb-8 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-card/80 backdrop-blur-xl p-8 rounded-4xl shadow-xl border border-white/10 mb-10 gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Lớp Học Của Tôi</h1>
-                    <p className="text-gray-500 mt-2">Quản lý không gian học tập và bài tập về nhà của bạn.</p>
+                    <h1 className="text-4xl font-black text-foreground tracking-tight">Lớp Học Của Tôi</h1>
+                    <p className="text-muted-foreground font-bold mt-2 opacity-80 uppercase tracking-widest text-xs">Quản lý không gian học tập và bài tập về nhà của bạn.</p>
                 </div>
                 <div className="flex flex-wrap gap-4">
                     <Button
                         variant="outline"
                         onClick={() => setIsJoinModalOpen(true)}
-                        className="flex items-center gap-2 border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-800"
+                        className="flex items-center gap-2 border-indigo-500/30 text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 font-black h-12 px-6 rounded-2xl transition-all"
                     >
-                        <DoorOpen size={18} />
-                        Tham gia lớp
+                        <DoorOpen size={20} />
+                        THAM GIA LỚP
                     </Button>
                     <Button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 shadow-md transition-all active:scale-95"
+                        className="flex items-center gap-2 bg-primary text-primary-foreground hover:scale-105 shadow-lg shadow-primary/20 transition-all active:scale-95 font-black h-12 px-6 rounded-2xl"
                     >
-                        <Plus size={18} />
-                        Tạo Lớp Học
+                        <Plus size={20} />
+                        TẠO LỚP HỌC
                     </Button>
                 </div>
             </div>
@@ -127,26 +127,27 @@ export default function Classrooms() {
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {classrooms.map(c => (
-                        <div key={c.id} onClick={() => navigate(`/classrooms/${c.id}`)} className="bg-white group cursor-pointer rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xl shadow-inner">
+                        <div key={c.id} onClick={() => navigate(`/classrooms/${c.id}`)} className="bg-card/60 backdrop-blur-xl group cursor-pointer rounded-3xl p-8 shadow-lg border border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="bg-primary text-primary-foreground w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg transform group-hover:rotate-3 transition-transform">
                                     {c.name.substring(0, 2).toUpperCase()}
                                 </div>
-                                <div className="bg-gray-100 text-xs font-semibold px-3 py-1 rounded-full text-gray-500">
+                                <div className="bg-foreground/5 text-xs font-black px-4 py-2 rounded-full text-muted-foreground uppercase tracking-widest border border-foreground/5">
                                     {c._count.members} Thành viên
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-1 group-hover:text-indigo-600 transition-colors">{c.name}</h3>
-                            <p className="text-gray-500 text-sm line-clamp-2 h-10 mb-4">{c.description || "Không có mô tả."}</p>
+                            <h3 className="text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors">{c.name}</h3>
+                            <p className="text-muted-foreground font-medium text-sm line-clamp-2 h-10 mb-6 opacity-70">{c.description || "Không có mô tả."}</p>
 
-                            <div className="flex justify-between items-center border-t border-gray-50 pt-4 mt-2">
-                                <div className="text-sm text-gray-500 flex items-center gap-1">
-                                    <span className="font-semibold text-gray-700">{c.teacher?.username}</span> (Giáo viên)
+                            <div className="flex justify-between items-center border-t border-foreground/5 pt-6 mt-4">
+                                <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <span className="font-black text-foreground">{c.teacher?.username}</span>
+                                    <span className="opacity-60 text-xs uppercase font-black ml-1">(Giáo viên)</span>
                                 </div>
-                                <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                    <ArrowRight size={16} />
+                                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
+                                    <ArrowRight size={20} />
                                 </div>
                             </div>
                         </div>
@@ -160,19 +161,19 @@ export default function Classrooms() {
                     <DialogHeader>
                         <DialogTitle>Tham gia lớp học</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleJoinClassroom} className="space-y-4">
+                    <form onSubmit={handleJoinClassroom} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Mã lớp học</label>
+                            <label className="block text-xs font-black text-muted-foreground mb-3 uppercase tracking-widest">Mã lớp học</label>
                             <Input
                                 type="text"
-                                placeholder="Nhập mã 6 ký tự ví dụ X7A-9P2"
+                                placeholder="X7A-9P2"
                                 value={joinCode}
                                 onChange={e => setJoinCode(e.target.value)}
-                                className="w-full uppercase font-mono text-center tracking-widest text-lg"
+                                className="w-full h-16 uppercase font-black text-center tracking-[0.5em] text-3xl bg-foreground/5 border-2 border-foreground/10 focus:border-primary rounded-2xl"
                                 maxLength={6}
                                 required
                             />
-                            <p className="text-xs text-gray-500 mt-2 text-center">Hỏi giáo viên mã lớp của bạn, sau đó nhập vào đây.</p>
+                            <p className="text-xs text-muted-foreground mt-4 text-center font-bold opacity-60 italic">Hỏi giáo viên mã lớp của bạn, sau đó nhập vào đây.</p>
                         </div>
                         <DialogFooter className="sm:justify-end gap-2">
                             <Button type="button" variant="outline" onClick={() => setIsJoinModalOpen(false)}>Hủy</Button>
@@ -188,24 +189,25 @@ export default function Classrooms() {
                     <DialogHeader>
                         <DialogTitle>Tạo lớp học mới</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleCreateClassroom} className="space-y-4">
+                    <form onSubmit={handleCreateClassroom} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Tên lớp học</label>
+                            <label className="block text-xs font-black text-muted-foreground mb-3 uppercase tracking-widest">Tên lớp học</label>
                             <Input
                                 type="text"
                                 placeholder="ví dụ Lịch sử 101"
                                 value={createForm.name}
                                 onChange={e => setCreateForm({ ...createForm, name: e.target.value })}
+                                className="h-14 bg-foreground/5 border-2 border-foreground/10 focus:border-primary rounded-2xl font-bold px-6"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Mô tả <span className="text-gray-400 font-normal">(Tùy chọn)</span></label>
+                            <label className="block text-xs font-black text-muted-foreground mb-3 uppercase tracking-widest">Mô tả <span className="text-muted-foreground/40 font-normal">(Tùy chọn)</span></label>
                             <Textarea
                                 placeholder="Mô tả ngắn gọn về lớp học này..."
                                 value={createForm.description}
                                 onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
-                                className="resize-none h-24"
+                                className="resize-none h-32 bg-foreground/5 border-2 border-foreground/10 focus:border-primary rounded-2xl font-medium p-6"
                             />
                         </div>
                         <DialogFooter className="sm:justify-end gap-2">
