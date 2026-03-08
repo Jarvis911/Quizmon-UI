@@ -51,8 +51,8 @@ export default function OrganizationSettings() {
     if (!currentOrg) return;
     setIsLoadingMembers(true);
     try {
-      const res = await apiClient.get(endpoints.organization_members(currentOrg.id));
-      setMembers(res.data);
+      const res = await apiClient.get(endpoints.organization(currentOrg.id));
+      setMembers(res.data.members || []);
     } catch (err) {
       console.error("Failed to fetch members", err);
     } finally {

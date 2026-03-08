@@ -29,6 +29,7 @@ const questionSchema = z
     maxValue: z.number({ invalid_type_error: "Phải nhập số" }),
     correctValue: z.number({ invalid_type_error: "Phải nhập số" }),
     mediaType: z.enum(["IMAGE", "YOUTUBE"]).optional(),
+    imageEffect: z.enum(["NONE", "BLUR_TO_CLEAR", "ZOOM_IN", "ZOOM_OUT"]).optional(),
     videoUrl: z
       .string()
       .url("Link YouTube không hợp lệ")
@@ -69,6 +70,7 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
       maxValue: 100,
       correctValue: 50,
       mediaType: undefined,
+      imageEffect: "NONE",
       videoUrl: "",
       startTime: 0,
       duration: 30,
@@ -107,9 +109,8 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
 
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
-        if (!blob) return resolve(null);
-        blob.name = "image.jpg";
-        resolve(blob);
+        const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+        resolve(file);
       }, "image/jpeg");
     });
   };
@@ -127,6 +128,7 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
             ? "YOUTUBE"
             : "IMAGE"
           : undefined,
+        imageEffect: question.media?.[0]?.effect || "NONE",
         videoUrl:
           question.media?.[0]?.type === "VIDEO" ? question.media[0].url : "",
         startTime: question.media?.[0]?.startTime || 0,
@@ -156,6 +158,7 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
         const croppedBlob = await getCroppedImg();
         if (croppedBlob) {
           formData.append("files", croppedBlob, "image.jpg");
+          formData.append("imageEffect", values.imageEffect || "NONE");
         }
       } else if (values.mediaType === "YOUTUBE") {
         const videoData = {
@@ -228,15 +231,39 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
             </div>
 
             {form.watch("mediaType") === "IMAGE" && (
-              <ImagePicker
-                imageSrc={imageSrc}
-                setImageSrc={setImageSrc}
-                crop={crop}
-                setCrop={setCrop}
-                zoom={zoom}
-                setZoom={setZoom}
-                setCroppedAreaPixels={setCroppedAreaPixels}
-              />
+              <div className="flex flex-col gap-3">
+                <ImagePicker
+                  imageSrc={imageSrc}
+                  setImageSrc={setImageSrc}
+                  crop={crop}
+                  setCrop={setCrop}
+                  zoom={zoom}
+                  setZoom={setZoom}
+                  setCroppedAreaPixels={setCroppedAreaPixels}
+                />
+                {imageSrc && (
+                  <FormField
+                    control={form.control}
+                    name="imageEffect"
+                    render={({ field }) => (
+                      <FormItem>
+                         <FormLabel>Hiệu ứng lúc làm bài</FormLabel>
+                         <FormControl>
+                            <select
+                                {...field}
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                                <option value="NONE">Không có</option>
+                                <option value="BLUR_TO_CLEAR">Mờ dần sang Rõ</option>
+                                <option value="ZOOM_IN">Thu phóng (Lớn lên)</option>
+                                <option value="ZOOM_OUT">Thu phóng (Nhỏ lại)</option>
+                            </select>
+                         </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
             )}
 
             {form.watch("mediaType") === "YOUTUBE" && (

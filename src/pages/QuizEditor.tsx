@@ -1,9 +1,10 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, MapIcon } from "lucide-react";
+import { Plus, MapIcon, Settings } from "lucide-react";
 import axios from "axios";
 import endpoints from "@/api/api";
+import type { Quiz } from "@/types";
 
 import ButtonQuestionForm from "@/components/question/ButtonQuestionForm";
 import CheckboxQuestionForm from "@/components/question/CheckboxQuestionForm";
@@ -12,6 +13,7 @@ import ReorderQuestionForm from "@/components/question/ReorderQuestionForm";
 import TypeAnswerQuestionForm from "@/components/question/TypeAnswerQuestionForm";
 import LocationQuestionForm from "@/components/question/LocationQuestionForm";
 import SelectQuestionType from "@/components/quiz/SelectQuestionType";
+import QuizSettingsModal from "@/components/quiz/QuizSettingsModal";
 
 interface QuestionMedia {
     id: number;
@@ -30,12 +32,14 @@ interface EditorQuestion {
     typeAnswer: unknown[];
 }
 
-interface QuizResponse {
+interface QuizResponse extends Omit<Quiz, 'questions'> {
     questions: EditorQuestion[];
 }
 
 const QuizEditor = () => {
     const { id } = useParams<{ id: string }>();
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [questions, setQuestions] = useState<EditorQuestion[]>([]);
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [creatingType, setCreatingType] = useState<string | null>(null);
@@ -45,7 +49,7 @@ const QuizEditor = () => {
         const fetchQuiz = async () => {
             if (!id) return;
             try {
-                const res = await axios.get<QuizResponse>(endpoints.quiz(id));
+                const res = await axios.get<QuizResponse>(endpoints.quiz(Number(id)));
                 const normalized: EditorQuestion[] = (res.data.questions || []).map((q) => ({
                     id: q.id,
                     text: q.text,
@@ -58,6 +62,7 @@ const QuizEditor = () => {
                 }));
                 setQuestions(normalized);
                 setActiveIndex(normalized.length ? 0 : null);
+                setQuiz(res.data as unknown as Quiz);
             } catch (err) {
                 console.error("Failed to load quiz:", err);
             } finally {
@@ -89,7 +94,7 @@ const QuizEditor = () => {
         if (loading) return <p className="text-muted-foreground animate-pulse font-medium">Đang tải quiz...</p>;
 
         if (creatingType) {
-            const formProps = { quizId: id!, onSaved: handleSaveNew };
+            const formProps = { quizId: id!, onSaved: handleSaveNew, question: undefined as any };
 
             switch (creatingType) {
                 case "BUTTONS":
@@ -120,7 +125,7 @@ const QuizEditor = () => {
             );
         }
 
-        const formProps = { question: q, quizId: id! };
+        const formProps = { question: q, quizId: id!, onSaved: () => {} };
 
         switch (q.type) {
             case "BUTTONS":
@@ -141,19 +146,33 @@ const QuizEditor = () => {
     };
 
     return (
-        <div className="flex justify-center">
-            <main className="p-6 inline-flex">
-                {creatingType !== "SELECT" && renderActiveQuestion()}
-                {creatingType === "SELECT" && (
+        <div className="flex justify-center flex-col min-h-screen pb-24">
+            {/* No Header */}
+
+            <main className="p-6 flex-1 flex justify-center">
+                <div className="inline-flex">
+                    {creatingType !== "SELECT" && renderActiveQuestion()}
+                    {creatingType === "SELECT" && (
                     <SelectQuestionType
                         onSelect={(t) => addQuestion(t)}
                         onClose={() => setCreatingType(null)}
                     />
                 )}
+                </div>
             </main>
 
             {/* Navbar preview */}
             <footer className="fixed inset-x-0 bottom-0 overflow-x-auto h-24 flex items-center gap-3 px-4 bg-card/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-40">
+                {/* General Information Square */}
+                <div
+                    className="min-w-20 h-20 relative rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-primary/30 hover:border-primary/50 bg-primary/5 group shrink-0"
+                    onClick={() => setIsSettingsOpen(true)}
+                    title="Cài đặt thông tin chung"
+                >
+                    <Settings className="w-6 h-6 text-primary/80 mb-1 group-hover:rotate-90 transition-transform duration-500" />
+                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Cài đặt</span>
+                </div>
+
                 {questions.map((q, i) => (
                     <div
                         key={q.id}
@@ -206,6 +225,17 @@ const QuizEditor = () => {
                     <Plus className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
             </footer>
+
+            {quiz && (
+                <QuizSettingsModal
+                    quiz={quiz}
+                    open={isSettingsOpen}
+                    onOpenChange={setIsSettingsOpen}
+                    onSuccess={(updatedQuiz) => {
+                        setQuiz(updatedQuiz);
+                    }}
+                />
+            )}
         </div>
     );
 };
