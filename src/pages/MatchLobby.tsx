@@ -10,6 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MatchResponse {
     quiz: Quiz;
@@ -23,6 +31,7 @@ const MatchLobby = () => {
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [isHost, setIsHost] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [alreadyInMatchId, setAlreadyInMatchId] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -54,6 +63,14 @@ const MatchLobby = () => {
         socket.on("playerJoined", updatePlayers);
         socket.on("playerLeft", updatePlayers);
         socket.on("error", updateError);
+        socket.on("alreadyInMatch", ({ currentMatchId }) => {
+            setAlreadyInMatchId(currentMatchId);
+        });
+        socket.on("leftMatch", () => {
+            // After successfully leaving the old match, attempt to join this one again
+            setAlreadyInMatchId(null);
+            socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
+        });
 
         socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
 
@@ -62,11 +79,26 @@ const MatchLobby = () => {
             socket.off("playerLeft");
             socket.off("error", updateError);
             socket.off("gameStarted");
+            socket.off("alreadyInMatch");
+            socket.off("leftMatch");
         };
     }, [matchId, user, token, navigate]);
 
     const startGame = () => {
         socket.emit("startMatch", { matchId });
+    };
+
+    const handleReconnect = () => {
+        if (alreadyInMatchId) {
+            navigate(`/match/${alreadyInMatchId}/lobby`);
+            setAlreadyInMatchId(null);
+        }
+    };
+
+    const handleResign = () => {
+        if (alreadyInMatchId) {
+            socket.emit("leaveMatch", { matchId: alreadyInMatchId });
+        }
     };
 
     if (!user) return null;
@@ -128,6 +160,36 @@ const MatchLobby = () => {
                     </CardContent>
                 </Card>
             )}
+
+            <Dialog open={!!alreadyInMatchId} onOpenChange={(open) => {
+                if (!open && alreadyInMatchId) {
+                    navigate('/'); // If they decline both, send to home
+                }
+            }}>
+                <DialogContent className="sm:max-w-md border-white/10 bg-card">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-black">Hold up!</DialogTitle>
+                        <DialogDescription className="text-base text-muted-foreground pt-2">
+                            Bạn đang trong một phòng khác (Phòng: <span className="font-bold text-primary">{alreadyInMatchId}</span>). Bạn muốn tiếp tục thi đấu ở phòng cũ, hay thoát phòng cũ để vào phòng này?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex gap-2 sm:justify-between mt-4">
+                        <Button 
+                            variant="outline" 
+                            onClick={handleReconnect}
+                            className="flex-1 font-bold border-white/20 hover:bg-white/5 active:scale-95 transition-all"
+                        >
+                            Về phòng cũ
+                        </Button>
+                        <Button 
+                            onClick={handleResign}
+                            className="flex-1 font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-destructive-foreground bg-destructive hover:bg-destructive/90"
+                        >
+                            Thoát & Vào phòng mới
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

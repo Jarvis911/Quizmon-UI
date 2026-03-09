@@ -110,7 +110,7 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
   // };
 
   // Get the cropped Image
-  const getCroppedImg = async () => {
+  const getCroppedImg = async (): Promise<File | null> => {
     if (!imageSrc || !croppedAreaPixels) return null;
     const image = new Image();
     image.src = imageSrc;
@@ -169,13 +169,14 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
 
       // Update if there was question data
       if (question?.id) {
-        await axios.put(endpoints.question_button(question.id), formData, {
+        const res = await axios.put(endpoints.question_button(question.id), formData, {
           headers: {
             Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
         alert("Cập nhật câu hỏi thành công!");
+        if (onSaved) onSaved(res.data);
       }
       // Create new if there was no question data
       else {

@@ -67,9 +67,9 @@ export default function OrganizationSettings() {
     try {
       await apiClient.put(endpoints.organization(currentOrg.id), { name });
       await refreshOrganizations();
-      setMessage({ type: 'success', text: "Organization updated successfully!" });
+      setMessage({ type: 'success', text: "Đã cập nhật tổ chức thành công!" });
     } catch (err) {
-      setMessage({ type: 'error', text: "Failed to update organization." });
+      setMessage({ type: 'error', text: "Cập nhật tổ chức thất bại." });
     } finally {
       setIsUpdating(false);
     }
@@ -87,11 +87,11 @@ export default function OrganizationSettings() {
         email: inviteEmail.trim(),
         role: 'MEMBER'
       });
-      setMessage({ type: 'success', text: "Invitation sent successfully!" });
+      setMessage({ type: 'success', text: "Gửi lời mời thành công!" });
       setInviteEmail("");
       fetchMembers();
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || "Failed to send invitation.";
+      const errorMsg = err.response?.data?.message || "Gửi lời mời thất bại.";
       setMessage({ type: 'error', text: errorMsg });
     } finally {
       setIsUpdating(false);
@@ -124,36 +124,36 @@ export default function OrganizationSettings() {
   };
 
   const handleRemoveMember = async (userId: number) => {
-    if (!currentOrg || !window.confirm("Are you sure you want to remove this member?")) return;
+    if (!currentOrg || !window.confirm("Bạn có chắc chắn muốn xóa thành viên này?")) return;
     try {
       await apiClient.delete(`${endpoints.organization_members(currentOrg.id)}/${userId}`);
       fetchMembers();
     } catch (err) {
-      alert("Failed to remove member. You might be the last owner.");
+      alert("Xóa thành viên thất bại. Bạn có thể là chủ sở hữu cuối cùng.");
     }
   };
 
-  if (!currentOrg) return <div className="p-10 text-center font-bold">No organization selected.</div>;
+  if (!currentOrg) return <div className="p-10 text-center font-bold">Chưa chọn tổ chức nào.</div>;
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-10">
       <header>
         <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-4">
-          <Building2 className="w-10 h-10 text-primary" /> Settings
+          <Building2 className="w-10 h-10 text-primary" /> Cài đặt
         </h1>
-        <p className="text-muted-foreground font-bold mt-2">Manage your workspace members and preferences.</p>
+        <p className="text-muted-foreground font-bold mt-2">Quản lý thành viên và tùy chọn không gian làm việc của bạn.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Org Info */}
         <section className="lg:col-span-1 space-y-6">
-          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-[2rem] p-8 shadow-xl">
+          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-8 shadow-xl">
             <h2 className="text-xl font-black mb-6 flex items-center gap-2">
-              <Building2 size={20} className="text-primary" /> General Info
+              <Building2 size={20} className="text-primary" /> Thông tin chung
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">Org Name</label>
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">Tên tổ chức</label>
                 <Input 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
@@ -166,7 +166,7 @@ export default function OrganizationSettings() {
                 disabled={isUpdating || name === currentOrg.name}
               >
                 {isUpdating ? <Loader2 className="animate-spin mr-2" /> : <CheckCircle2 className="mr-2" />}
-                Save Changes
+                Lưu thay đổi
               </Button>
               {message && (
                 <p className={`text-sm font-bold text-center mt-2 ${message.type === 'success' ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -179,13 +179,13 @@ export default function OrganizationSettings() {
 
         {/* Member Management */}
         <section className="lg:col-span-2 space-y-6">
-          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-[2rem] p-8 shadow-xl">
+          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-8 shadow-xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black flex items-center gap-2">
-                <Users size={20} className="text-primary" /> Members
+                <Users size={20} className="text-primary" /> Thành viên
               </h2>
               <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-black uppercase tracking-tighter">
-                {members.length} Members
+                {members.length} Thành viên
               </span>
             </div>
 
@@ -195,7 +195,7 @@ export default function OrganizationSettings() {
                 <div className="space-y-4">
                   <div className="relative">
                     <Input
-                      placeholder="Enter email or username..."
+                      placeholder="Nhập email hoặc tên người dùng..."
                       value={inviteEmail}
                       onChange={(e) => {
                         setInviteEmail(e.target.value);
@@ -230,7 +230,7 @@ export default function OrganizationSettings() {
               </div>
               <Button type="submit" className="rounded-xl px-6 font-bold h-12" disabled={isUpdating || isSearching}>
                 {isUpdating ? <Loader2 className="animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-                Invite
+                Mời
               </Button>
             </form>
 

@@ -58,6 +58,7 @@ const ImagePicker = ({
                         crop={crop}
                         zoom={zoom}
                         aspect={4 / 3}
+                        restrictPosition={true}
                         onCropChange={setCrop}
                         onZoomChange={setZoom}
                         onCropComplete={onCropComplete}

@@ -238,7 +238,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuLabel className="text-[10px] uppercase font-black text-muted-foreground px-2 py-1">Workspace</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase font-black text-muted-foreground px-2 py-1">Không gian làm việc</DropdownMenuLabel>
                 
                 <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
                   <Building2 className="w-4 h-4 mr-2 text-primary" />

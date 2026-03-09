@@ -32,14 +32,14 @@ export default function OrgSwitcher() {
         >
           <Building2 className="w-4 h-4 text-primary" />
           <span className="font-bold max-w-[100px] truncate">
-            {currentOrg?.name || "Select Workspace"}
+            {currentOrg?.name || "Chọn không gian"}
           </span>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56 bg-card/95 backdrop-blur-xl border-white/10">
         <DropdownMenuLabel className="text-xs uppercase tracking-widest text-muted-foreground font-black px-2 py-1.5">
-          Workspaces
+          Không gian làm việc
         </DropdownMenuLabel>
         {organizations.map((org) => (
           <DropdownMenuItem
@@ -60,7 +60,7 @@ export default function OrgSwitcher() {
           onClick={() => setIsCreateModalOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Create Organization
+          Tạo tổ chức
         </DropdownMenuItem>
       </DropdownMenuContent>
 

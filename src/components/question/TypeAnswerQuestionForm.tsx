@@ -62,7 +62,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
   //   setZoom(1);
   // };
 
-  const getCroppedImg = async () => {
+  const getCroppedImg = async (): Promise<File | null> => {
     if (!imageSrc || !croppedAreaPixels) return null;
     const image = new Image();
     image.src = imageSrc;
@@ -144,7 +144,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
       }
 
       if (question?.id) {
-        await axios.put(endpoints.question_typeanswer(question.id), formData, {
+        const res = await axios.put(endpoints.question_typeanswer(question.id), formData, {
           headers: {
             Authorization: token,
             "Content-Type": "multipart/form-data",
@@ -152,6 +152,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
         });
 
         alert("Cập nhật câu hỏi điền đáp án!");
+        if (onSaved) onSaved(res.data);
       } else {
         const res = await axios.post(endpoints.question_typeanswers, formData, {
           headers: {

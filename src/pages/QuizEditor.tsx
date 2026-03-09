@@ -83,6 +83,10 @@ const QuizEditor = () => {
         setCreatingType(null);
     };
 
+    const handleUpdate = (updatedQ: EditorQuestion) => {
+        setQuestions(questions.map((q) => (q.id === updatedQ.id ? updatedQ : q)));
+    };
+
     const getYoutubeThumbnail = (url: string): string | null => {
         const regex =
             /(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|embed)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
@@ -125,7 +129,7 @@ const QuizEditor = () => {
             );
         }
 
-        const formProps = { question: q, quizId: id!, onSaved: () => {} };
+        const formProps = { question: q, quizId: id!, onSaved: handleUpdate };
 
         switch (q.type) {
             case "BUTTONS":
@@ -150,7 +154,7 @@ const QuizEditor = () => {
             {/* No Header */}
 
             <main className="p-6 flex-1 flex justify-center">
-                <div className="inline-flex">
+                <div className="w-full max-w-5xl">
                     {creatingType !== "SELECT" && renderActiveQuestion()}
                     {creatingType === "SELECT" && (
                     <SelectQuestionType

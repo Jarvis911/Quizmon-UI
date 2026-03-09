@@ -241,7 +241,7 @@ const MatchPlay = () => {
                     </CardContent>
                 </Card>
             </div>
-            <div className="relative">
+            <div className="relative w-full max-w-5xl mx-auto">
                 <Progress value={(timer / 30) * 100} className="mb-2 h-4 shadow-inner bg-white/10" />
                 <p className="text-center mb-6 text-2xl font-black text-foreground drop-shadow-sm">
                     Điểm: <span className="text-primary">{((timer / 30) * 1000).toFixed(0)}</span>

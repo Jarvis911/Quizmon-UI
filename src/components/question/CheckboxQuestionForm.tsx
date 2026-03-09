@@ -107,7 +107,7 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
   // };
 
   // Lấy ảnh crop
-  const getCroppedImg = async () => {
+  const getCroppedImg = async (): Promise<File | null> => {
     if (!imageSrc || !croppedAreaPixels) return null;
     const image = new Image();
     image.src = imageSrc;
@@ -164,14 +164,14 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        await axios.put(endpoints.question_checkbox(question.id), formData, {
+        const res = await axios.put(endpoints.question_checkbox(question.id), formData, {
           headers: {
             Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
         alert("Cập nhật câu hỏi thành công!");
-
+        if (onSaved) onSaved(res.data);
       } else {
         const res = await axios.post(endpoints.question_checkboxes, formData, {
           headers: {

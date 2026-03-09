@@ -38,7 +38,7 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
       onClose();
     } catch (err) {
       console.error("Failed to create organization", err);
-      alert("Failed to create organization. Please try again.");
+      alert("Không thể tạo tổ chức. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -49,18 +49,18 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
       <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-2xl border-white/10 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black flex items-center gap-2">
-            <Building2 className="text-primary" /> Create Workspace
+            <Building2 className="text-primary" /> Tạo không gian làm việc
           </DialogTitle>
           <DialogDescription className="font-bold text-muted-foreground">
-            Give your new organization a name. You can invite your team members afterward.
+            Đặt tên cho tổ chức mới của bạn. Bạn có thể mời các thành viên trong nhóm sau đó.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleCreate} className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest px-1">Organization Name</Label>
+            <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest px-1">Tên tổ chức</Label>
             <Input
               id="name"
-              placeholder="e.g. Science Department, Math Club"
+              placeholder="VD: Khoa Khoa học, Câu lạc bộ Toán học"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="h-12 bg-white/5 border-white/10 rounded-xl font-bold focus:ring-primary"
@@ -74,7 +74,7 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
               onClick={onClose} 
               className="rounded-xl font-bold"
             >
-              Cancel
+              Hủy
             </Button>
             <Button 
               type="submit" 
@@ -82,7 +82,7 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
               disabled={isLoading || !name.trim()}
             >
               {isLoading ? <Loader2 className="animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              Create Workspace
+              Tạo không gian
             </Button>
           </DialogFooter>
         </form>

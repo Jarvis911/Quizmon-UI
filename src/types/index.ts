@@ -264,3 +264,23 @@ export interface AIGenerationJob {
     updatedAt: string;
 }
 
+// ========================
+// Image Picker Types
+// ========================
+
+export interface CropArea {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+export interface ImagePickerProps {
+    imageSrc: string | null;
+    setImageSrc: (src: string | null) => void;
+    crop: { x: number; y: number };
+    setCrop: (crop: { x: number; y: number }) => void;
+    zoom: number;
+    setZoom: (zoom: number) => void;
+    setCroppedAreaPixels: (area: CropArea) => void;
+}

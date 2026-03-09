@@ -107,7 +107,7 @@ const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
   // };
 
   // Crop ảnh
-  const getCroppedImg = async () => {
+  const getCroppedImg = async (): Promise<File | null> => {
     if (!imageSrc || !croppedAreaPixels) return null;
     const image = new Image();
     image.src = imageSrc;
@@ -169,7 +169,7 @@ const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        await axios.put(endpoints.question_reorder(question.id), formData, {
+        const res = await axios.put(endpoints.question_reorder(question.id), formData, {
           headers: {
             Authorization: token,
             "Content-Type": "multipart/form-data",
@@ -177,6 +177,7 @@ const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
         });
 
         alert("Tạo câu hỏi sắp xếp thành công!");
+        if (onSaved) onSaved(res.data);
       } else {
         const res = await axios.post(endpoints.question_reorders, formData, {
           headers: {

@@ -24,8 +24,8 @@ import "leaflet/dist/leaflet.css";
 
 const questionSchema = z.object({
   text: z.string().min(3, "Câu hỏi ít nhất 3 ký tự"),
-  latitude: z.number({ required_error: "Chọn vị trí trên bản đồ" }),
-  longitude: z.number({ required_error: "Chọn vị trí trên bản đồ" }),
+  latitude: z.number().min(-90, "Chọn vị trí trên bản đồ").max(90),
+  longitude: z.number().min(-180, "Chọn vị trí trên bản đồ").max(180),
 });
 
 function LocationPicker({ setLocation }) {
@@ -64,12 +64,13 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       };
 
       if (question?.id) {
-        await axios.put(endpoints.question_location(question.id), payload, {
+        const res = await axios.put(endpoints.question_location(question.id), payload, {
           headers: {
             Authorization: token,
           },
         });
         alert("Cập nhật câu hỏi thành công!");
+        if (onSaved) onSaved(res.data);
       } else {
         const res = await axios.post(endpoints.question_locations, payload, {
           headers: {

@@ -9,7 +9,6 @@ import { BookOpen, Gamepad2, Plus, Sparkles } from "lucide-react";
 
 import QuizCard from "@/components/quiz/QuizCard";
 import QuizSection from "@/components/quiz/QuizSection";
-import FeatureGate from "@/components/FeatureGate";
 
 
 interface Classroom {
@@ -162,18 +161,16 @@ const Home = () => {
                             </div>
 
                             {/* Action 2: Create with AI */}
-                            <FeatureGate feature="AI_GENERATION" showLock>
-                                <div
-                                    onClick={() => navigate('/ai/generate')}
-                                    className="group flex flex-col items-start p-6 bg-primary/10 hover:bg-primary/20 backdrop-blur-xl border-2 border-primary/30 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full"
-                                >
-                                    <div className="w-12 h-12 rounded-2xl bg-primary/30 text-primary flex items-center justify-center mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform shadow-inner">
-                                        <Sparkles className="w-6 h-6" />
-                                    </div>
-                                    <h3 className="font-black text-xl text-foreground mb-1">Tạo bằng AI</h3>
-                                    <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Tiết kiệm 90% thời gian</p>
+                            <div
+                                onClick={() => navigate('/ai/generate')}
+                                className="group flex flex-col items-start p-6 bg-primary/10 hover:bg-primary/20 backdrop-blur-xl border-2 border-primary/30 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full"
+                            >
+                                <div className="w-12 h-12 rounded-2xl bg-primary/30 text-primary flex items-center justify-center mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform shadow-inner">
+                                    <Sparkles className="w-6 h-6" />
                                 </div>
-                            </FeatureGate>
+                                <h3 className="font-black text-xl text-foreground mb-1">Tạo bằng AI</h3>
+                                <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Tiết kiệm 90% thời gian</p>
+                            </div>
 
                             {/* Action 3: Classrooms */}
                             <div

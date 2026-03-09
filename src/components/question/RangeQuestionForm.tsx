@@ -25,9 +25,9 @@ import { Button } from "@/components/ui/button";
 const questionSchema = z
   .object({
     text: z.string().min(3, "Câu hỏi ít nhất 3 ký tự"),
-    minValue: z.number({ invalid_type_error: "Phải nhập số" }),
-    maxValue: z.number({ invalid_type_error: "Phải nhập số" }),
-    correctValue: z.number({ invalid_type_error: "Phải nhập số" }),
+    minValue: z.number().min(-1000000, "Phải nhập số"),
+    maxValue: z.number().min(-1000000, "Phải nhập số"),
+    correctValue: z.number().min(-1000000, "Phải nhập số"),
     mediaType: z.enum(["IMAGE", "YOUTUBE"]).optional(),
     imageEffect: z.enum(["NONE", "BLUR_TO_CLEAR", "ZOOM_IN", "ZOOM_OUT"]).optional(),
     videoUrl: z
@@ -84,7 +84,7 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
   // };
 
   // crop ảnh
-  const getCroppedImg = async () => {
+  const getCroppedImg = async (): Promise<File | null> => {
     if (!imageSrc || !croppedAreaPixels) return null;
     const image = new Image();
     image.src = imageSrc;
@@ -169,13 +169,14 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        await axios.put(endpoints.question_range(question.id), formData, {
+        const res = await axios.put(endpoints.question_range(question.id), formData, {
           headers: {
             Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
         alert("Cập nhật câu hỏi thanh giá trị thành công!");
+        if (onSaved) onSaved(res.data);
       } else {
         const res = await axios.post(endpoints.question_ranges, formData, {
           headers: {

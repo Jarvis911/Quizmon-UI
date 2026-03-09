@@ -168,9 +168,9 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
       <div
         className="absolute top-16 left-8
                     bg-card/60 backdrop-blur-2xl border-2 border-white/20 rounded-3xl 
-                    p-8 shadow-3xl text-foreground w-[420px] pointer-events-auto z-10"
+                    p-8 shadow-3xl text-foreground w-full max-w-lg pointer-events-auto z-10"
       >
-        <h2 className="text-2xl font-black mb-6 text-center drop-shadow-sm">{question.text}</h2>
+        <h2 className="text-2xl font-black mb-6 text-center break-words max-w-full drop-shadow-sm">{question.text}</h2>
 
         {location && (
           <div className="bg-primary/10 rounded-2xl p-4 mb-6 border border-primary/20">

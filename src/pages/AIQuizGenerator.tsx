@@ -11,6 +11,8 @@ import { Slider } from "@/components/ui/slider";
 import {
     Sparkles, Upload, FileText, Loader2, Wand2, X, AlertCircle
 } from "lucide-react";
+import AIGenerationLimit from "@/components/AIGenerationLimit";
+import { useEffect } from "react";
 
 const QUESTION_TYPES = [
     { value: "BUTTONS", label: "Trắc nghiệm (1 đáp án)", description: "Chọn 1 đáp án đúng" },
@@ -29,6 +31,28 @@ const AIQuizGenerator = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [dragOver, setDragOver] = useState(false);
+    const [subscription, setSubscription] = useState<any>(null);
+    const [usageMetrics, setUsageMetrics] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetchSubscription();
+    }, []);
+
+    const fetchSubscription = async () => {
+        try {
+            const res = await axios.get(endpoints.subscription_current, {
+                headers: { Authorization: token }
+            });
+            setSubscription(res.data);
+            setUsageMetrics(res.data.usageMetrics || []);
+        } catch (err) {
+            console.error("Failed to fetch subscription", err);
+        }
+    };
+
+    const aiUsage = usageMetrics.find(u => u.key === 'ai_generations')?.value || 0;
+    const aiLimit = subscription?.plan?.features?.find((f: any) => f.featureKey === 'AI_GENERATION')?.limit ?? null;
+    const isAtLimit = aiLimit !== null && aiUsage >= aiLimit;
 
     const toggleType = (typeValue: string) => {
         setSelectedTypes((prev) =>
@@ -106,6 +130,15 @@ const AIQuizGenerator = () => {
                     <p className="text-muted-foreground font-bold max-w-lg mx-auto leading-relaxed text-sm">
                         Nhập yêu cầu hoặc tải lên tài liệu PDF để AI tự động tạo câu hỏi
                     </p>
+                </div>
+
+                {/* Subscription Info */}
+                <div className="mb-6">
+                    <AIGenerationLimit 
+                        used={aiUsage} 
+                        limit={aiLimit} 
+                        renewalDate={subscription?.currentPeriodEnd} 
+                    />
                 </div>
 
                 {/* Main Card */}
@@ -245,7 +278,7 @@ const AIQuizGenerator = () => {
                         {/* Generate Button */}
                         <Button
                             onClick={handleGenerate}
-                            disabled={loading || (!instruction && !pdfFile)}
+                            disabled={loading || (!instruction && !pdfFile) || isAtLimit}
                             className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 uppercase tracking-tighter disabled:opacity-50 disabled:scale-100"
                         >
                             {loading ? (

@@ -172,8 +172,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                         formData.append("file", croppedBlob, "image.jpg");
                     }
                 } else {
-                    // Signal to backend that image is removed if that's supported
-                    // formData.append("removeImage", "true");
+                    formData.append("removeImage", "true");
                 }
             }
 

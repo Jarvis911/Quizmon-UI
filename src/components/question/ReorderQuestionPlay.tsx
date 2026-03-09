@@ -86,14 +86,14 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
       handleSubmit();
     }
   }, [timer, submitted, mode, items]);
-  const wrapperClass = `flex flex-row gap-6 p-4 relative transition-all duration-300 ${isWrong ? "animate-shake" : ""}`;
+  const wrapperClass = `w-full max-w-5xl mx-auto flex flex-row gap-6 p-4 relative transition-all duration-300 ${isWrong ? "animate-shake" : ""}`;
 
   return (
     <div className={wrapperClass}>
       <QuestionMedia media={question.media?.[0]} />
       <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] text-2xl font-black mb-6 text-foreground drop-shadow-sm">
+          <h2 className="min-w-[250px] max-w-full break-words text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

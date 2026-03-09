@@ -6,9 +6,9 @@ const QuestionMedia = ({ media }) => {
   const isVideo = media.type === "VIDEO";
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 min-w-[300px] flex-shrink-0">
       {isVideo ? (
-        <div className="w-[500px] aspect-[4/3] overflow-hidden rounded-lg">
+        <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
           <ReactPlayer
             url={media.url}
             controls={false}
@@ -27,11 +27,11 @@ const QuestionMedia = ({ media }) => {
           />
         </div>
       ) : (
-        <div className="w-[500px] aspect-[4/3] overflow-hidden rounded-lg">
+        <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
           <img
             src={media.url}
             alt="Question media"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover max-w-full"
           />
         </div>
       )}
