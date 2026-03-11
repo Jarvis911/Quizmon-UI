@@ -20,7 +20,7 @@ const AIGenerationLimit: React.FC<AIGenerationLimitProps> = ({ used, limit, rene
     return (
         <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-xl relative overflow-hidden group">
             <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isAtLimit ? 'bg-destructive' : isCloseToLimit ? 'bg-amber-500' : 'bg-primary'}`} />
-            
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -28,8 +28,14 @@ const AIGenerationLimit: React.FC<AIGenerationLimitProps> = ({ used, limit, rene
                         <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Sử dụng AI Generator</h3>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-black text-foreground">{used}</span>
-                        <span className="text-muted-foreground font-bold">/ {isUnlimited ? '∞' : limit} câu hỏi</span>
+                        {isUnlimited ? (
+                             <span className="text-2xl font-black text-primary italic">Không giới hạn</span>
+                        ) : (
+                            <>
+                                <span className="text-2xl font-black text-foreground">{used}</span>
+                                <span className="text-muted-foreground font-bold">/ {limit} câu hỏi</span>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -52,7 +58,7 @@ const AIGenerationLimit: React.FC<AIGenerationLimitProps> = ({ used, limit, rene
                             <span>Làm mới: {new Date(renewalDate).toLocaleDateString('vi-VN')}</span>
                         </div>
                     )}
-                    
+
                     {(isCloseToLimit || isAtLimit) && (
                         <Link to="/billing">
                             <Button size="sm" variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/20 hover:bg-primary/10 hover:text-primary gap-2 rounded-full">
@@ -67,7 +73,7 @@ const AIGenerationLimit: React.FC<AIGenerationLimitProps> = ({ used, limit, rene
             {isAtLimit && (
                 <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-destructive bg-destructive/10 p-2 rounded-xl border border-destructive/20 animate-pulse">
                     <AlertCircle className="w-3 h-3" />
-                    <span>Bạn đã đạt giới hạn tạo AI trong tháng này. Hãy nâng cấp để tiếp tục!</span>
+                    <span>Bạn đã đạt giới hạn tạo AI cho giai đoạn này. Hãy nâng cấp để tiếp tục!</span>
                 </div>
             )}
         </div>

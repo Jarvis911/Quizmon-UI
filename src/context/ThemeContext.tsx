@@ -17,14 +17,14 @@ export interface Theme {
 
 export const BACKGROUND_THEMES: Theme[] = [
     {
-        id: 'default',
-        name: 'Mặc định (Trong suốt)',
-        className: 'bg-transparent',
+        id: 'lavender',
+        name: 'Hoa oải hương',
+        className: 'bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-300',
         navbarStyles: {
-            logo: 'text-orange-600',
-            buttonPrimary: 'bg-orange-600 hover:bg-orange-700 text-white',
-            buttonSecondary: 'bg-orange-500 hover:bg-orange-600 text-white',
-            borderFocus: 'border-orange-400 focus:border-orange-500'
+            logo: 'text-indigo-600',
+            buttonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+            buttonSecondary: 'bg-indigo-500 hover:bg-indigo-600 text-white',
+            borderFocus: 'border-indigo-400 focus:border-indigo-500'
         }
     },
     {
@@ -71,17 +71,6 @@ export const BACKGROUND_THEMES: Theme[] = [
             borderFocus: 'border-purple-400 focus:border-purple-500'
         }
     },
-    {
-        id: 'lavender',
-        name: 'Hoa oải hương',
-        className: 'bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-300',
-        navbarStyles: {
-            logo: 'text-indigo-600',
-            buttonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-white',
-            buttonSecondary: 'bg-indigo-500 hover:bg-indigo-600 text-white',
-            borderFocus: 'border-indigo-400 focus:border-indigo-500'
-        }
-    },
 ];
 
 interface ThemeContextType {
@@ -94,7 +83,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const [themeId, setThemeId] = useState<string>(() => {
-        return localStorage.getItem("home_bg_theme") || "default";
+        return localStorage.getItem("home_bg_theme") || "lavender";
     });
 
     const selectedTheme = BACKGROUND_THEMES.find(t => t.id === themeId) || BACKGROUND_THEMES[0];
@@ -111,7 +100,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return (
         <ThemeContext.Provider value={{ themeId, selectedTheme, handleThemeChange }}>
             {children}
-            <div className="fixed inset-0 -z-[5] opacity-90 transition-all duration-700 ease-in-out pointer-events-none">
+            <div className="fixed inset-0 -z-5 opacity-90 transition-all duration-700 ease-in-out pointer-events-none">
                 <AnimatedBackground themeId={themeId} />
             </div>
         </ThemeContext.Provider>

@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import endpoints from "@/api/api";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,6 +88,7 @@ const AIQuizReview = () => {
     const [selectedIdx, setSelectedIdx] = useState(0);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<number | null>(null);
+    const pollTimerRef = useRef<any>(null);
 
     // Edit state
     const [editing, setEditing] = useState(false);
@@ -126,6 +128,19 @@ const AIQuizReview = () => {
     useEffect(() => {
         fetchJob();
     }, [fetchJob]);
+
+    // Polling logic for PROCESSING jobs
+    useEffect(() => {
+        if (job?.status === "PROCESSING" || job?.status === "PENDING") {
+            pollTimerRef.current = setTimeout(() => {
+                fetchJob();
+            }, 3000); // Poll every 3 seconds
+        }
+
+        return () => {
+            if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+        };
+    }, [job?.status, fetchJob]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -279,12 +294,19 @@ const AIQuizReview = () => {
         }
     };
 
-    if (loading) {
+    if (loading || job?.status === "PROCESSING" || job?.status === "PENDING") {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <div className="w-64 h-64 mb-4">
+                    <DotLottieReact
+                        src="https://lottie.host/d4ac19c1-a6a1-462d-a523-d14912c1663e/BcdTi4vEb3.lottie"
+                        loop
+                        autoplay
+                    />
+                </div>
                 <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground font-bold tracking-widest uppercase text-xs animate-pulse">Đang tải dữ liệu...</p>
+                    <h2 className="text-2xl font-black text-foreground mb-2 animate-pulse">AI Đang Tạo Câu Hỏi...</h2>
+                    <p className="text-muted-foreground font-bold tracking-widest uppercase text-xs">Vui lòng đợi trong giây lát</p>
                 </div>
             </div>
         );
@@ -353,8 +375,8 @@ const AIQuizReview = () => {
                                     cancelEdit();
                                 }}
                                 className={`p-4 rounded-2xl cursor-pointer transition-all border-2 ${selectedIdx === i
-                                        ? "bg-primary/10 border-primary shadow-lg scale-[1.02]"
-                                        : "hover:bg-foreground/5 border-transparent hover:border-foreground/10"
+                                    ? "bg-primary/10 border-primary shadow-lg scale-[1.02]"
+                                    : "hover:bg-foreground/5 border-transparent hover:border-foreground/10"
                                     }`}
                             >
                                 <div className="flex items-start gap-4">
@@ -646,14 +668,14 @@ const AIQuizReview = () => {
                                                     <div
                                                         key={i}
                                                         className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all shadow-sm ${opt.isCorrect
-                                                                ? "bg-emerald-500/10 border-emerald-500 shadow-emerald-500/10"
-                                                                : "bg-foreground/5 border-white/5"
+                                                            ? "bg-emerald-500/10 border-emerald-500 shadow-emerald-500/10"
+                                                            : "bg-foreground/5 border-white/5"
                                                             }`}
                                                     >
                                                         <div
                                                             className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-inner ${opt.isCorrect
-                                                                    ? "bg-emerald-500 text-white"
-                                                                    : "bg-foreground/10 text-muted-foreground"
+                                                                ? "bg-emerald-500 text-white"
+                                                                : "bg-foreground/10 text-muted-foreground"
                                                                 }`}
                                                         >
                                                             {String.fromCharCode(65 + i)}
@@ -772,7 +794,7 @@ const AIQuizReview = () => {
                         >
                             Huỷ
                         </Button>
-                        <Button 
+                        <Button
                             className="h-12 rounded-2xl font-black uppercase tracking-widest text-xs px-8 bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 transition-all"
                             onClick={handleRegenerate}
                         >

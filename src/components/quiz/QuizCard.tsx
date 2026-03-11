@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Play, Edit3, BookOpen } from 'lucide-react';
+import { SiGoogleclassroom } from 'react-icons/si';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Quiz } from '@/types';
@@ -79,7 +80,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                 onClick={() => onAssign?.(quiz.id)}
                                 className="w-full h-8 px-4 rounded-full bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[10px] uppercase tracking-wider"
                             >
-                                <BookOpen className="w-2.5 h-2.5 mr-2" /> GIAO BÀI
+                                <SiGoogleclassroom className="w-2.5 h-2.5 mr-2" /> GIAO BÀI
                             </Button>
                         </>
                     )}

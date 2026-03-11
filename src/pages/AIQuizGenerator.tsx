@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import endpoints from "@/api/api";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -116,7 +117,23 @@ const AIQuizGenerator = () => {
     };
 
     return (
-        <div className="flex justify-center px-4 py-4 min-h-[calc(100vh-80px)] items-center">
+        <div className="flex justify-center px-4 py-4 min-h-[calc(100vh-80px)] items-center relative">
+            {/* Loading Overlay */}
+            {loading && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
+                    <div className="w-80 h-80">
+                        <DotLottieReact
+                            src="https://lottie.host/d4ac19c1-a6a1-462d-a523-d14912c1663e/BcdTi4vEb3.lottie"
+                            loop
+                            autoplay
+                        />
+                    </div>
+                    <div className="text-center mt-4">
+                        <h2 className="text-3xl font-black text-foreground mb-2 animate-pulse">Đang Khởi Tạo AI...</h2>
+                        <p className="text-muted-foreground font-bold tracking-widest uppercase text-sm">Hệ thống đang chuẩn bị môi trường tạo câu hỏi</p>
+                    </div>
+                </div>
+            )}
             <div className="w-full max-w-5xl">
                 {/* Header */}
                 <div className="text-center mb-6">
@@ -134,17 +151,17 @@ const AIQuizGenerator = () => {
 
                 {/* Subscription Info */}
                 <div className="mb-6">
-                    <AIGenerationLimit 
-                        used={aiUsage} 
-                        limit={aiLimit} 
-                        renewalDate={subscription?.currentPeriodEnd} 
+                    <AIGenerationLimit
+                        used={aiUsage}
+                        limit={aiLimit}
+                        renewalDate={subscription?.currentPeriodEnd}
                     />
                 </div>
 
                 {/* Main Card */}
                 <div className="bg-card/60 backdrop-blur-3xl rounded-4xl shadow-2xl border border-white/10 p-6 lg:p-8 relative overflow-hidden group">
                     <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
                         {/* Left Column: Instruction & PDF */}
                         <div className="space-y-6">
@@ -288,7 +305,13 @@ const AIQuizGenerator = () => {
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-6 h-6" />
+                                    <div className="w-8 h-8">
+                                        <DotLottieReact
+                                            src="https://lottie.host/d4ac19c1-a6a1-462d-a523-d14912c1663e/BcdTi4vEb3.lottie"
+                                            loop
+                                            autoplay
+                                        />
+                                    </div>
                                     Tạo Quiz ngay
                                 </>
                             )}

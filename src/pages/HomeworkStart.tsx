@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Clock, AlertCircle, Sparkles, ChevronRight, ArrowLeft } from "lucide-react";
+import { SiGoogleclassroom } from "react-icons/si";
 import { Quiz } from "@/types";
 
 const HomeworkStart = () => {
@@ -92,7 +93,7 @@ const HomeworkStart = () => {
                             <div className="flex items-center justify-between p-6 bg-foreground/5 rounded-3xl border border-white/5 transition-all hover:bg-foreground/10 group/item">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-3xl bg-primary/20 text-primary flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform">
-                                        <BookOpen size={24} />
+                                        <SiGoogleclassroom size={24} />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Số câu hỏi</p>

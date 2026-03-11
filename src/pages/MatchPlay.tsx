@@ -70,6 +70,7 @@ const MatchPlay = () => {
 
     // Request first question
     useEffect(() => {
+        socket.connect();
         socket.emit("requestCurrentQuestion", { matchId });
     }, [matchId]);
 

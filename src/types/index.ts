@@ -293,3 +293,23 @@ export interface ImagePickerProps {
     setZoom: (zoom: number) => void;
     setCroppedAreaPixels: (area: CropArea) => void;
 }
+// ========================
+// Stats & History Types
+// ========================
+
+export interface RecentMatch {
+    id: number | string;
+    quizId: number | string;
+    quizName: string;
+    score: number;
+    rank: number;
+    createdAt: string;
+}
+
+export interface UserStats {
+    totalMatches: number;
+    totalQuizzes: number;
+    rankCounts: Record<string, number>;
+    winRate: number;
+    recentMatches: RecentMatch[];
+}

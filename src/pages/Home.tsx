@@ -6,6 +6,7 @@ import axios from "axios";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Gamepad2, Plus, Sparkles } from "lucide-react";
+import { SiGoogleclassroom } from "react-icons/si";
 
 import QuizCard from "@/components/quiz/QuizCard";
 import QuizSection from "@/components/quiz/QuizSection";
@@ -138,8 +139,8 @@ const Home = () => {
                     <div className="relative mb-12 flex flex-col lg:flex-row gap-8 lg:items-center justify-between w-full">
                         {/* Welcome Message */}
                         <div className="lg:max-w-[40%]">
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground mb-4 flex items-center gap-4">
-                                Chào mừng, {user.username}! <span className="animate-wave inline-block origin-bottom-right">👋</span>
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground mb-4">
+                                Chào mừng, {user.username}!
                             </h1>
                             <p className="text-xl text-muted-foreground font-bold max-w-xl leading-relaxed opacity-80">
                                 Sẵn sàng khám phá và tạo nên những bài trắc nghiệm thú vị hôm nay?
@@ -166,7 +167,7 @@ const Home = () => {
                                 className="group flex flex-col items-start p-6 bg-primary/10 hover:bg-primary/20 backdrop-blur-xl border-2 border-primary/30 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full"
                             >
                                 <div className="w-12 h-12 rounded-2xl bg-primary/30 text-primary flex items-center justify-center mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform shadow-inner">
-                                    <Sparkles className="w-6 h-6" />
+                                    <Sparkles className="w-6 h-6 fill-primary/40" />
                                 </div>
                                 <h3 className="font-black text-xl text-foreground mb-1">Tạo bằng AI</h3>
                                 <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Tiết kiệm 90% thời gian</p>
@@ -178,7 +179,7 @@ const Home = () => {
                                 className="group flex flex-col items-start p-6 bg-card/60 hover:bg-card/90 backdrop-blur-xl border-2 border-white/5 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer sm:col-span-2 md:col-span-1"
                             >
                                 <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-inner">
-                                    <BookOpen className="w-6 h-6" />
+                                    <SiGoogleclassroom className="w-6 h-6" />
                                 </div>
                                 <h3 className="font-black text-xl text-foreground mb-1">Lớp học</h3>
                                 <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Quản lý bài tập & học sinh</p>
@@ -189,9 +190,9 @@ const Home = () => {
 
                 {/* My Quizzes Section */}
                 {user && myQuizzes.length > 0 && (
-                    <QuizSection 
-                        title="Quiz của tôi" 
-                        quizzes={myQuizzes} 
+                    <QuizSection
+                        title="Quiz của tôi"
+                        quizzes={myQuizzes}
                         onPlay={handlePlayNow}
                         onEdit={handleEditQuiz}
                         onAssign={handleOpenHomeworkModal}
@@ -220,7 +221,7 @@ const Home = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                     <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><BookOpen className="text-indigo-600" size={20} /> Assign Homework</h3>
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><SiGoogleclassroom className="text-indigo-600" size={20} /> Assign Homework</h3>
                             <button onClick={() => setIsHomeworkModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
                         </div>
                         <form onSubmit={handleSubmitHomework} className="p-6 space-y-5">
@@ -351,15 +352,15 @@ const LandingHero = ({ navigate }: { navigate: (path: string) => void }) => {
     );
 };
 
-const CategoryQuizzes = ({ 
-    category, 
-    onPlay, 
-    onEdit, 
-    onAssign, 
+const CategoryQuizzes = ({
+    category,
+    onPlay,
+    onEdit,
+    onAssign,
     iconColor,
     isAiGenerated
-}: { 
-    category: Category, 
+}: {
+    category: Category,
     onPlay: (id: string | number) => void,
     onEdit: (id: string | number) => void,
     onAssign: (id: string | number) => void,
@@ -385,9 +386,9 @@ const CategoryQuizzes = ({
     if (quizzes.length === 0) return null;
 
     return (
-        <QuizSection 
-            title={category.name} 
-            quizzes={quizzes} 
+        <QuizSection
+            title={category.name}
+            quizzes={quizzes}
             onPlay={onPlay}
             onEdit={onEdit}
             onAssign={onAssign}

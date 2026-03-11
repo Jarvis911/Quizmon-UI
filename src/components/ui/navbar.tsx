@@ -8,6 +8,9 @@ import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Libr
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import endpoints from "../../api/api";
+import { SiGoogleclassroom } from "react-icons/si";
+import { FaHistory } from "react-icons/fa";
+import { GrMoney } from "react-icons/gr";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -154,7 +157,7 @@ export default function Navbar() {
                 <HomeIcon className="w-4 h-4 mr-2" /> Trang chủ
               </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4">
-                <BookOpen className="w-4 h-4 mr-2" /> Lớp học
+                <SiGoogleclassroom className="w-4 h-4 mr-2" /> Lớp học
               </Button>
             </div>
           )}
@@ -233,7 +236,7 @@ export default function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10">
                 <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
-                  <TrendingUp className="w-4 h-4 mr-2 text-primary" />
+                  <FaHistory className="w-4 h-4 mr-2 text-primary" />
                   Lịch sử đấu
                 </DropdownMenuItem>
                 
@@ -246,7 +249,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 
                 <DropdownMenuItem onClick={() => navigate('/billing')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
-                  <Sparkles className="w-4 h-4 mr-2 text-primary" />
+                  <GrMoney className="w-4 h-4 mr-2 text-primary" />
                   Gói dịch vụ & Thanh toán
                 </DropdownMenuItem>
 

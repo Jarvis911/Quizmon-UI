@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Trophy, Medal, Clock, Calendar } from "lucide-react";
+import { FaHistory } from "react-icons/fa";
 import {
     Table,
     TableBody,
@@ -131,7 +132,8 @@ const UserStats = () => {
                 {/* Header */}
                 <Card className="bg-card/90 backdrop-blur-md shadow-xl border-white/10">
                     <CardHeader>
-                        <CardTitle className="text-2xl sm:text-3xl font-bold text-center text-foreground">
+                        <CardTitle className="text-2xl sm:text-3xl font-bold flex items-center justify-center gap-3 text-foreground">
+                            <FaHistory className="text-primary" />
                             Thống Kê Lịch Sử Đấu Của {user.username}
                         </CardTitle>
                     </CardHeader>
@@ -210,7 +212,7 @@ const UserStats = () => {
                 <Card className="bg-card/90 backdrop-blur-md shadow-xl border-white/10">
                     <CardHeader>
                         <CardTitle className="text-2xl font-bold flex items-center gap-2 text-foreground">
-                            <Calendar className="w-6 h-6 text-primary" />
+                            <FaHistory className="w-6 h-6 text-primary" />
                             Trận Đấu Gần Đây ({recentMatches.length})
                         </CardTitle>
                     </CardHeader>

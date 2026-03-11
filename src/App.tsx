@@ -45,12 +45,7 @@ function AppContent() {
     return (
         <div className={`w-full h-full min-h-screen ${paddingTopClass}`}>
             {/* Default background — hidden on match/join pages which have their own */}
-            {!isNoNavbarRoute && (
-                <div
-                    className="fixed inset-0 -z-10 
-        bg-[radial-gradient(ellipse_at_top_left,theme(colors.red.300),theme(colors.yellow.200),theme(colors.orange.300))]"
-                />
-            )}
+
             <AuthProvider>
                 <OrganizationProvider>
                     <FeatureProvider>
@@ -74,8 +69,8 @@ function AppContent() {
                             <Route path="/homework/:id/start" element={<ProtectedRoute><HomeworkStart /></ProtectedRoute>} />
                             <Route path="/settings/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
                             <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
-                    <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
-                    <Route path="/billing/cancel" element={<ProtectedRoute><BillingCancel /></ProtectedRoute>} />
+                            <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
+                            <Route path="/billing/cancel" element={<ProtectedRoute><BillingCancel /></ProtectedRoute>} />
 
                             {/* Redirect old home to root */}
                             <Route path="/home" element={<Navigate to="/" replace />} />

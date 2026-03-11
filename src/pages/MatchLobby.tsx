@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import socket from "@/services/socket";
 import { useAuth } from "@/context/AuthContext";
@@ -33,6 +33,16 @@ const MatchLobby = () => {
     const [error, setError] = useState<string | null>(null);
     const [alreadyInMatchId, setAlreadyInMatchId] = useState<string | null>(null);
     const navigate = useNavigate();
+    const isNavigationHandled = useRef(false);
+
+    // Handle component unmount to leave match if user navigates away natively
+    useEffect(() => {
+        return () => {
+            if (!isNavigationHandled.current && matchId) {
+                socket.emit("leaveMatch", { matchId });
+            }
+        };
+    }, [matchId]);
 
     useEffect(() => {
         if (!user || !matchId) return;
@@ -59,10 +69,18 @@ const MatchLobby = () => {
             setError(message);
         };
 
-        socket.on("gameStarted", () => navigate(`/match/${matchId}/play`));
+        socket.on("gameStarted", () => {
+            isNavigationHandled.current = true;
+            navigate(`/match/${matchId}/play`);
+        });
         socket.on("playerJoined", updatePlayers);
         socket.on("playerLeft", updatePlayers);
         socket.on("error", updateError);
+        socket.on("hostChanged", ({ newHostId }) => {
+            if (user && newHostId === user.id) {
+                setIsHost(true);
+            }
+        });
         socket.on("alreadyInMatch", ({ currentMatchId }) => {
             setAlreadyInMatchId(currentMatchId);
         });
@@ -73,15 +91,18 @@ const MatchLobby = () => {
                 socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
             } else {
                 // If it wasn't from the dialog, it means we chose to leave this room
+                isNavigationHandled.current = true;
                 navigate('/');
             }
         });
 
         socket.on("matchCancelled", ({ message }) => {
             alert(message);
+            isNavigationHandled.current = true;
             navigate('/');
         });
 
+        socket.connect();
         socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
 
         return () => {
@@ -92,6 +113,7 @@ const MatchLobby = () => {
             socket.off("alreadyInMatch");
             socket.off("leftMatch");
             socket.off("matchCancelled");
+            socket.off("hostChanged");
         };
     }, [matchId, user, token, navigate, alreadyInMatchId]);
 
@@ -101,6 +123,7 @@ const MatchLobby = () => {
 
     const handleReconnect = () => {
         if (alreadyInMatchId) {
+            isNavigationHandled.current = true;
             navigate(`/match/${alreadyInMatchId}/lobby`);
             setAlreadyInMatchId(null);
         }
@@ -208,14 +231,14 @@ const MatchLobby = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="flex gap-2 sm:justify-between mt-4">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={handleReconnect}
                             className="flex-1 font-bold border-white/20 hover:bg-white/5 active:scale-95 transition-all"
                         >
                             Về phòng cũ
                         </Button>
-                        <Button 
+                        <Button
                             onClick={handleResign}
                             className="flex-1 font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-destructive-foreground bg-destructive hover:bg-destructive/90"
                         >

@@ -58,6 +58,7 @@ interface Endpoints {
 
     // Homework
     homework: string;
+    homework_detail: (id: number) => string;
     homework_start: (id: number) => string;
     homework_answer: (id: number) => string;
     homework_finish: (id: number) => string;
@@ -141,6 +142,7 @@ const endpoints: Endpoints = {
 
     // Homework
     homework: `${BASE_URL}/homework`,
+    homework_detail: (id: number) => `${BASE_URL}/homework/${id}`,
     homework_start: (id: number) => `${BASE_URL}/homework/${id}/start`,
     homework_answer: (id: number) => `${BASE_URL}/homework/${id}/answer`,
     homework_finish: (id: number) => `${BASE_URL}/homework/${id}/finish`,

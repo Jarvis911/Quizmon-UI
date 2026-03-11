@@ -17,6 +17,9 @@ import {
   AlertCircle,
   ArrowRight
 } from "lucide-react";
+import { GrMoney } from "react-icons/gr";
+import { RiAiGenerate2 } from "react-icons/ri";
+import { PiStudent } from "react-icons/pi";
 import { CreateOrgModal } from "@/components/modals/CreateOrgModal";
 import {
   DropdownMenu,
@@ -81,7 +84,9 @@ export default function BillingPage() {
         setActiveSub(results[2].data);
       } else {
         setUsage([]);
-        setActiveSub(null);
+        // Default to FREE plan display if no org
+        const freePlan = (results[0].data as Plan[]).find(p => p.type === 'FREE');
+        setActiveSub(freePlan ? { plan: freePlan, planId: freePlan.id } : null);
       }
     } catch (err) {
       console.error("Failed to fetch billing data", err);
@@ -116,7 +121,8 @@ export default function BillingPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 md:p-10 space-y-12">
       <header className="text-center space-y-4">
-        <h1 className="text-5xl font-black tracking-tighter text-foreground drop-shadow-sm">
+        <h1 className="text-5xl font-black tracking-tighter text-foreground drop-shadow-sm flex items-center justify-center gap-4">
+          <GrMoney className="text-primary shrink-0" />
           Gói dịch vụ & <span className="text-primary italic">Thanh toán</span>
         </h1>
         <p className="text-xl text-muted-foreground font-bold">Nâng cấp sức mạnh cho lớp học của bạn với AI và không giới hạn lượt chơi.</p>
@@ -213,7 +219,7 @@ export default function BillingPage() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <UsageCard
           icon={
-            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="text-primary w-8 h-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="20" y="60" width="22" height="25" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
               <text x="26" y="79" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">2</text>
               <rect x="42" y="50" width="22" height="35" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
@@ -231,17 +237,16 @@ export default function BillingPage() {
           renewalDate={activeSub?.currentPeriodEnd}
         />
         <UsageCard
-          icon={<BrainCircuit className="text-rose-500" />}
+          icon={<RiAiGenerate2 className="text-primary w-6 h-6" />}
           label="Lượt tạo AI"
           value={usage.find(u => u.key === 'ai_generations')?.value || 0}
           limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'AI_GENERATION')?.limit ?? null}
           renewalDate={activeSub?.currentPeriodEnd}
         />
         <UsageCard
-          icon={<Users className="text-emerald-500" />}
-          label="Học sinh tối đa"
-          value="Không giới hạn"
-          limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'MAX_PLAYERS_PER_MATCH')?.limit ?? null}
+          icon={<PiStudent className="text-primary w-7 h-7" />}
+          label="Số người tối đa tham gia trong 1 trận đấu"
+          value={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'MAX_PLAYERS_PER_MATCH')?.limit ?? 10}
         />
       </section>
 
@@ -317,7 +322,13 @@ export default function BillingPage() {
                     <X className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
                   )}
                   <span className={feat.enabled ? "text-foreground" : "text-muted-foreground line-through opacity-50"}>
-                    {feat.featureKey.replace(/_/g, ' ')} {feat.limit && `(Lên đến ${feat.limit})`}
+                    {feat.featureKey === 'MAX_CLASSROOMS' ? 'Số lớp tối đa' :
+                     feat.featureKey === 'MAX_STUDENTS_PER_CLASSROOM' ? 'Học sinh mỗi lớp' :
+                     feat.featureKey === 'MAX_PLAYERS_PER_MATCH' ? 'Số người tối đa/trận' :
+                     feat.featureKey === 'AI_GENERATION' ? 'Lượt tạo AI' :
+                     feat.featureKey === 'UNLIMITED_MATCHES' ? 'Trận đấu tối đa' :
+                     feat.featureKey.replace(/_/g, ' ')}
+                    {feat.limit !== null ? ` (${feat.limit})` : ' (Không giới hạn)'}
                   </span>
                 </li>
               ))}
@@ -325,7 +336,7 @@ export default function BillingPage() {
 
             <Button
               className={`w-full py-6 rounded-2xl font-black text-lg ${activeSub?.planId === plan.id ? 'bg-muted text-muted-foreground' : 'shadow-[0_8px_0_0_rgba(0,0,0,0.1)]'}`}
-              disabled={(activeSub?.planId === plan.id && plan.type !== 'FREE') || checkoutLoading !== null}
+              disabled={activeSub?.planId === plan.id || checkoutLoading !== null}
               onClick={() => {
                 if (!currentOrg) {
                   if (organizations.length > 0) {
@@ -353,7 +364,7 @@ export default function BillingPage() {
   );
 }
 
-function UsageCard({ icon, label, value, limit, renewalDate }: { icon: any, label: string, value: any, limit: any, renewalDate?: string }) {
+function UsageCard({ icon, label, value, limit, renewalDate }: { icon: any, label: string, value: any, limit?: any, renewalDate?: string }) {
   return (
     <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-6 shadow-lg flex flex-col gap-4">
       <div className="flex items-center gap-6">
@@ -363,8 +374,16 @@ function UsageCard({ icon, label, value, limit, renewalDate }: { icon: any, labe
         <div>
           <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-foreground">{value}</span>
-            <span className="text-muted-foreground font-bold">/ {limit === null ? '∞' : limit}</span>
+            {limit === null ? (
+              <span className="text-3xl font-black text-primary italic">Không giới hạn</span>
+            ) : (
+              <>
+                <span className="text-3xl font-black text-foreground">{value}</span>
+                {limit !== undefined && (
+                  <span className="text-muted-foreground font-bold">/ {limit}</span>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
