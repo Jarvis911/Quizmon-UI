@@ -113,6 +113,13 @@ const MatchLobby = () => {
     socket.on("playerLeft", updatePlayers);
     socket.on("error", updateError);
     socket.on("matchSettingsUpdated", onSettingsUpdated);
+    socket.on("matchCancelled", ({ message }) => {
+      alert(message);
+      navigate('/');
+    });
+    socket.on("leftMatch", () => {
+      navigate('/');
+    });
 
     // Join match with custom profile
     socket.emit("joinMatch", {
@@ -129,11 +136,27 @@ const MatchLobby = () => {
       socket.off("error", updateError);
       socket.off("gameStarted");
       socket.off("matchSettingsUpdated", onSettingsUpdated);
+      socket.off("matchCancelled");
+      socket.off("leftMatch");
     };
   }, [matchId, user.id, user.username]);
 
   // ─── Actions ─────────────────────────────────────────────────
   const startGame = () => socket.emit("startMatch", { matchId });
+
+  const leaveRoom = () => {
+    if (matchId) {
+      socket.emit("leaveMatch", { matchId });
+    }
+  };
+
+  const cancelRoom = () => {
+    if (matchId && isHost) {
+      if (window.confirm("Bạn có chắc chắn muốn hủy phòng này không?")) {
+        socket.emit("cancelMatch", { matchId });
+      }
+    }
+  };
 
   const savePlayerProfile = () => {
     socket.emit("updatePlayerInfo", {
@@ -480,22 +503,41 @@ const MatchLobby = () => {
                   </DialogContent>
                 </Dialog>
 
-                {/* Start Game */}
-                <Button
-                  onClick={startGame}
-                  disabled={players.length < 1}
-                  className="w-full h-14 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-2xl shadow-lg shadow-green-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-500/30 disabled:opacity-50 disabled:scale-100"
-                >
-                  🚀 Bắt đầu trận đấu!
-                </Button>
+                {/* Start & Cancel Game */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={startGame}
+                    disabled={players.length < 1}
+                    className="flex-1 h-14 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-2xl shadow-lg shadow-green-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-500/30 disabled:opacity-50 disabled:scale-100"
+                  >
+                    🚀 Bắt đầu!
+                  </Button>
+                  <Button
+                    onClick={cancelRoom}
+                    variant="destructive"
+                    className="h-14 px-6 font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-all"
+                  >
+                    Hủy phòng
+                  </Button>
+                </div>
               </div>
             )}
 
             {/* Non-host waiting message */}
+            {/* Leave Room for non-host */}
             {!isHost && (
-              <div className="flex items-center justify-center gap-2 text-white/50 bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-sm">Đang chờ host bắt đầu...</span>
+              <div className="space-y-3">
+                <Button
+                  onClick={leaveRoom}
+                  variant="outline"
+                  className="w-full h-14 text-lg font-bold bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl transition-all duration-300 hover:scale-[1.02]"
+                >
+                  🚪 Thoát phòng
+                </Button>
+                <div className="flex items-center justify-center gap-2 text-white/50 bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-sm">Đang chờ host bắt đầu...</span>
+                </div>
               </div>
             )}
           </div>

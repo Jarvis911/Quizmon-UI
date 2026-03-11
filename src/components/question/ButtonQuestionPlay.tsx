@@ -27,29 +27,18 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
     setIsSubmitted(false);
   }, [question.id]);
 
-  // Auto-submit when timer runs out
-  useEffect(() => {
-    if (timer === 0 && !isSubmitted && mode !== "HOMEWORK") {
-      handleSubmit();
-    }
-  }, [timer, isSubmitted, mode, selectedAnswerId]);
-
-  const handleAnswerSelect = (index) => {
+  const handleAnswerSelect = async (index) => {
     if (isSubmitted || timer <= 0) return;
     setSelectedAnswerId(index);
-  };
-
-  const handleSubmit = async () => {
-    if (selectedAnswerId === null || isSubmitted) return;
-
     setIsSubmitted(true);
 
+    // Auto-submit immediately for BUTTONS (single-choice)
     if (mode === "HOMEWORK") {
       try {
         const token = localStorage.getItem("token");
         await axios.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: [selectedAnswerId]
+          answerIds: [index]
         }, {
           headers: { Authorization: token }
         });
@@ -61,7 +50,7 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
       socket.emit("submitAnswer", {
         matchId,
         questionId: question.id,
-        answerIds: [selectedAnswerId],
+        answer: index,
         userId,
       });
     }

@@ -97,7 +97,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
     if (question) {
       form.reset({
         text: question.text || "",
-        correctAnswer: question.typeAnswer.correctAnswer || "",
+        correctAnswer: question.data?.correctAnswer || "",
 
         mediaType: question.media?.length
           ? question.media[0].type === "VIDEO"

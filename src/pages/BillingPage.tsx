@@ -3,11 +3,10 @@ import { useOrganization } from "@/context/OrganizationContext";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
-import { 
-  Check, 
-  X, 
-  Gamepad2, 
-  BrainCircuit, 
+import {
+  Check,
+  X,
+  BrainCircuit,
   Users,
   Loader2,
   Wallet,
@@ -19,7 +18,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { CreateOrgModal } from "@/components/modals/CreateOrgModal";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -67,16 +66,16 @@ export default function BillingPage() {
     setIsLoading(true);
     try {
       const promises: any[] = [apiClient.get(endpoints.plans)];
-      
+
       if (currentOrg) {
         promises.push(apiClient.get(endpoints.subscription_usage));
         promises.push(apiClient.get(endpoints.subscription_current).catch(() => ({ data: null })));
       }
 
       const results = await Promise.all(promises);
-      
+
       setPlans(results[0].data);
-      
+
       if (currentOrg) {
         setUsage(results[1].data);
         setActiveSub(results[2].data);
@@ -95,12 +94,12 @@ export default function BillingPage() {
     if (!currentOrg) return;
     setCheckoutLoading(planId);
     try {
-      const res = await apiClient.post(`${endpoints.subscriptions}/checkout`, { 
-        planId, 
+      const res = await apiClient.post(`${endpoints.subscriptions}/checkout`, {
+        planId,
         billingCycle: 'MONTHLY',
         paymentMethod: selectedPayment,
       });
-      
+
       if (res.data.url) {
         window.location.href = res.data.url;
       }
@@ -145,8 +144,8 @@ export default function BillingPage() {
                 <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-white/10 rounded-2xl p-2">
                   <p className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Chọn tổ chức khác</p>
                   {organizations.map(org => (
-                    <DropdownMenuItem 
-                      key={org.id} 
+                    <DropdownMenuItem
+                      key={org.id}
                       onClick={() => switchOrganization(org.id)}
                       className={`rounded-xl font-bold mb-1 cursor-pointer ${org.id === currentOrg.id ? 'bg-primary/20 text-primary' : ''}`}
                     >
@@ -155,7 +154,7 @@ export default function BillingPage() {
                     </DropdownMenuItem>
                   ))}
                   <div className="h-px bg-white/5 my-2" />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => setIsCreateModalOpen(true)}
                     className="rounded-xl font-bold text-primary cursor-pointer"
                   >
@@ -173,32 +172,32 @@ export default function BillingPage() {
             <div className="space-y-2">
               <h3 className="text-2xl font-black text-foreground">Chưa chọn tổ chức</h3>
               <p className="text-muted-foreground font-bold">
-                Bạn cần phải tạo hoặc chọn một tổ chức để có thể đăng ký các gói dịch vụ. 
+                Bạn cần phải tạo hoặc chọn một tổ chức để có thể đăng ký các gói dịch vụ.
                 Gói dịch vụ sẽ được liên kết trực tiếp với tổ chức của bạn.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               {organizations.length > 0 ? (
-                 <DropdownMenu>
-                 <DropdownMenuTrigger asChild>
-                   <Button className="rounded-2xl font-black px-8 py-6 bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20">
-                     Chọn tổ chức sẵn có
-                   </Button>
-                 </DropdownMenuTrigger>
-                 <DropdownMenuContent className="w-64 bg-card/95 backdrop-blur-xl border-white/10 rounded-2xl p-2">
-                   {organizations.map(org => (
-                     <DropdownMenuItem 
-                       key={org.id} 
-                       onClick={() => switchOrganization(org.id)}
-                       className="rounded-xl font-bold mb-1 cursor-pointer"
-                     >
-                       {org.name}
-                     </DropdownMenuItem>
-                   ))}
-                 </DropdownMenuContent>
-               </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="rounded-2xl font-black px-8 py-6 bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20">
+                      Chọn tổ chức sẵn có
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64 bg-card/95 backdrop-blur-xl border-white/10 rounded-2xl p-2">
+                    {organizations.map(org => (
+                      <DropdownMenuItem
+                        key={org.id}
+                        onClick={() => switchOrganization(org.id)}
+                        className="rounded-xl font-bold mb-1 cursor-pointer"
+                      >
+                        {org.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : null}
-              <Button 
+              <Button
                 onClick={() => setIsCreateModalOpen(true)}
                 variant={organizations.length > 0 ? "outline" : "default"}
                 className={`rounded-2xl font-black px-8 py-6 ${organizations.length === 0 ? 'bg-primary hover:bg-primary/90 text-white' : 'border-amber-500/50 text-amber-500 hover:bg-amber-500/10'}`}
@@ -212,24 +211,36 @@ export default function BillingPage() {
 
       {/* Usage Stats */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <UsageCard 
-          icon={<Gamepad2 className="text-indigo-500" />} 
-          label="Trận đấu đã tổ chức" 
-          value={usage.find(u => u.key === 'matches_hosted')?.value || 0} 
+        <UsageCard
+          icon={
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="60" width="22" height="25" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+              <text x="26" y="79" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">2</text>
+              <rect x="42" y="50" width="22" height="35" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+              <text x="49" y="69" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">1</text>
+              <rect x="64" y="65" width="22" height="20" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+              <text x="71" y="81" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">3</text>
+              <line x1="53" y1="50" x2="53" y2="25" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+              <path d="M53 28C45 25 40 32 30 28V42C40 45 45 38 53 42V28Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round" fill="none" />
+              <path d="M68 25L70.5 30H76L71.5 33.5L73 39L68 35.5L63 39L64.5 33.5L60 30H65.5L68 25Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" fill="none" />
+            </svg>
+          }
+          label="Trận đấu đã tổ chức"
+          value={usage.find(u => u.key === 'matches_hosted')?.value || 0}
           limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'UNLIMITED_MATCHES')?.limit ?? null}
           renewalDate={activeSub?.currentPeriodEnd}
         />
-        <UsageCard 
-          icon={<BrainCircuit className="text-rose-500" />} 
-          label="Lượt tạo AI" 
-          value={usage.find(u => u.key === 'ai_generations')?.value || 0} 
+        <UsageCard
+          icon={<BrainCircuit className="text-rose-500" />}
+          label="Lượt tạo AI"
+          value={usage.find(u => u.key === 'ai_generations')?.value || 0}
           limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'AI_GENERATION')?.limit ?? null}
           renewalDate={activeSub?.currentPeriodEnd}
         />
-        <UsageCard 
-          icon={<Users className="text-emerald-500" />} 
-          label="Học sinh tối đa" 
-          value="Không giới hạn" 
+        <UsageCard
+          icon={<Users className="text-emerald-500" />}
+          label="Học sinh tối đa"
+          value="Không giới hạn"
           limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'MAX_PLAYERS_PER_MATCH')?.limit ?? null}
         />
       </section>
@@ -247,10 +258,10 @@ export default function BillingPage() {
                 disabled={!pm.available}
                 className={`
                   relative flex items-center gap-3 px-6 py-4 rounded-2xl border-2 font-bold text-sm transition-all duration-200
-                  ${isSelected 
-                    ? 'border-primary bg-primary/10 shadow-lg shadow-primary/10 scale-105' 
-                    : pm.available 
-                      ? 'border-white/10 bg-card/40 hover:border-white/20 hover:bg-card/60 cursor-pointer' 
+                  ${isSelected
+                    ? 'border-primary bg-primary/10 shadow-lg shadow-primary/10 scale-105'
+                    : pm.available
+                      ? 'border-white/10 bg-card/40 hover:border-white/20 hover:bg-card/60 cursor-pointer'
                       : 'border-white/5 bg-card/20 opacity-50 cursor-not-allowed'
                   }
                 `}
@@ -274,7 +285,7 @@ export default function BillingPage() {
       {/* Pricing Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
         {plans.map(plan => (
-          <div 
+          <div
             key={plan.id}
             className={`relative flex flex-col p-8 bg-card/40 backdrop-blur-xl border-2 rounded-5xl shadow-xl transition-all hover:-translate-y-2 ${activeSub?.planId === plan.id ? 'border-primary ring-4 ring-primary/10' : 'border-white/5'}`}
           >
@@ -283,12 +294,12 @@ export default function BillingPage() {
                 Gói hiện tại
               </span>
             )}
-            
+
             <div className="mb-8">
               <h3 className="text-2xl font-black text-foreground mb-1">{plan.name}</h3>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black">
-                  {selectedPayment === 'MOMO' 
+                <span className="text-3xl font-black">
+                  {selectedPayment === 'MOMO'
                     ? `${plan.priceMonthly.toLocaleString('vi-VN')}₫`
                     : `$${plan.priceMonthly}`
                   }
@@ -312,7 +323,7 @@ export default function BillingPage() {
               ))}
             </ul>
 
-            <Button 
+            <Button
               className={`w-full py-6 rounded-2xl font-black text-lg ${activeSub?.planId === plan.id ? 'bg-muted text-muted-foreground' : 'shadow-[0_8px_0_0_rgba(0,0,0,0.1)]'}`}
               disabled={(activeSub?.planId === plan.id && plan.type !== 'FREE') || checkoutLoading !== null}
               onClick={() => {

@@ -119,9 +119,9 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
     if (question) {
       form.reset({
         text: question.text || "",
-        minValue: question.range.minValue || "",
-        maxValue: question.range.maxValue || "",
-        correctValue: question.range.correctValue || "",
+        minValue: question.data?.minValue || "",
+        maxValue: question.data?.maxValue || "",
+        correctValue: question.data?.correctValue || "",
 
         mediaType: question.media?.length
           ? question.media[0].type === "VIDEO"

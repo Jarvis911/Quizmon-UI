@@ -104,10 +104,10 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
         text: question.text || ""
       });
 
-      if (question.location?.correctLatitude && question.location?.correctLongitude) {
+      if (question.data?.correctLatitude && question.data?.correctLongitude) {
         setLocation({
-          lat: Number(question.location.correctLatitude),
-          lng: Number(question.location.correctLongitude),
+          lat: Number(question.data.correctLatitude),
+          lng: Number(question.data.correctLongitude),
         });
       }
     }

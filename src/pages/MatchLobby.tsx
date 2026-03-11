@@ -67,9 +67,19 @@ const MatchLobby = () => {
             setAlreadyInMatchId(currentMatchId);
         });
         socket.on("leftMatch", () => {
-            // After successfully leaving the old match, attempt to join this one again
-            setAlreadyInMatchId(null);
-            socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
+            if (alreadyInMatchId) {
+                // After successfully leaving the old match, attempt to join this one again
+                setAlreadyInMatchId(null);
+                socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
+            } else {
+                // If it wasn't from the dialog, it means we chose to leave this room
+                navigate('/');
+            }
+        });
+
+        socket.on("matchCancelled", ({ message }) => {
+            alert(message);
+            navigate('/');
         });
 
         socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
@@ -81,8 +91,9 @@ const MatchLobby = () => {
             socket.off("gameStarted");
             socket.off("alreadyInMatch");
             socket.off("leftMatch");
+            socket.off("matchCancelled");
         };
-    }, [matchId, user, token, navigate]);
+    }, [matchId, user, token, navigate, alreadyInMatchId]);
 
     const startGame = () => {
         socket.emit("startMatch", { matchId });
@@ -98,6 +109,20 @@ const MatchLobby = () => {
     const handleResign = () => {
         if (alreadyInMatchId) {
             socket.emit("leaveMatch", { matchId: alreadyInMatchId });
+        }
+    };
+
+    const leaveRoom = () => {
+        if (matchId) {
+            socket.emit("leaveMatch", { matchId });
+        }
+    };
+
+    const cancelRoom = () => {
+        if (matchId && isHost) {
+            if (window.confirm("Bạn có chắc chắn muốn hủy phòng này không?")) {
+                socket.emit("cancelMatch", { matchId });
+            }
         }
     };
 
@@ -126,9 +151,18 @@ const MatchLobby = () => {
                         </div>
                     ))}
                 </div>
-                {isHost && (
-                    <Button onClick={startGame} className="mt-4 w-full py-6 text-lg font-black shadow-xl hover:scale-[1.02] transition-transform">
-                        Bắt đầu game
+                {isHost ? (
+                    <div className="flex gap-4 mt-4">
+                        <Button onClick={startGame} className="flex-1 py-6 text-lg font-black shadow-xl hover:scale-[1.02] transition-transform">
+                            Bắt đầu game
+                        </Button>
+                        <Button onClick={cancelRoom} variant="destructive" className="py-6 px-8 text-lg font-black shadow-xl hover:scale-[1.02] transition-transform">
+                            Hủy phòng
+                        </Button>
+                    </div>
+                ) : (
+                    <Button onClick={leaveRoom} variant="outline" className="mt-4 w-full py-6 text-lg font-black shadow-xl border-white/20 hover:bg-white/5 hover:scale-[1.02] transition-transform">
+                        Thoát phòng
                     </Button>
                 )}
             </div>

@@ -48,7 +48,7 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
       socket.emit("submitAnswer", {
         matchId,
         questionId: question.id,
-        answerIds: selectedIds,
+        answer: selectedIds,
         userId,
       });
     }

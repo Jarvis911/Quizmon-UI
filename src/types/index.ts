@@ -37,12 +37,12 @@ export interface Category {
 // ========================
 
 export type QuestionType =
-    | 'buttons'
-    | 'checkboxes'
-    | 'reorder'
-    | 'range'
-    | 'location'
-    | 'typeanswer';
+    | 'BUTTONS'
+    | 'CHECKBOXES'
+    | 'REORDER'
+    | 'RANGE'
+    | 'LOCATION'
+    | 'TYPEANSWER';
 
 export interface BaseQuestion {
     id: number;
@@ -56,7 +56,7 @@ export interface BaseQuestion {
 }
 
 export interface ButtonQuestion extends BaseQuestion {
-    type: 'buttons';
+    type: 'BUTTONS';
     options: ButtonOption[];
 }
 
@@ -67,7 +67,7 @@ export interface ButtonOption {
 }
 
 export interface CheckboxQuestion extends BaseQuestion {
-    type: 'checkboxes';
+    type: 'CHECKBOXES';
     options: CheckboxOption[];
 }
 
@@ -78,7 +78,7 @@ export interface CheckboxOption {
 }
 
 export interface ReorderQuestion extends BaseQuestion {
-    type: 'reorder';
+    type: 'REORDER';
     items: ReorderItem[];
 }
 
@@ -89,24 +89,27 @@ export interface ReorderItem {
 }
 
 export interface RangeQuestion extends BaseQuestion {
-    type: 'range';
-    min: number;
-    max: number;
-    correctValue: number;
-    tolerance?: number;
+    type: 'RANGE';
+    data?: {
+        minValue: number;
+        maxValue: number;
+        correctValue: number;
+    } | null;
 }
 
 export interface LocationQuestion extends BaseQuestion {
-    type: 'location';
-    correctLat: number;
-    correctLng: number;
-    toleranceRadius?: number;
+    type: 'LOCATION';
+    data?: {
+        correctLatitude: number;
+        correctLongitude: number;
+    } | null;
 }
 
 export interface TypeAnswerQuestion extends BaseQuestion {
-    type: 'typeanswer';
-    correctAnswers: string[];
-    caseSensitive?: boolean;
+    type: 'TYPEANSWER';
+    data?: {
+        correctAnswer: string;
+    } | null;
 }
 
 export type Question =
@@ -204,6 +207,12 @@ export interface ApiError {
 export interface AuthResponse {
     token: string;
     user: User;
+}
+
+export interface MatchScore {
+    userId: number;
+    username: string;
+    score: number;
 }
 
 // ========================

@@ -7,12 +7,12 @@ import axios from "axios";
 import endpoints from "../../api/api";
 
 const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
-  const [value, setValue] = useState([question.range.minValue]);
+  const [value, setValue] = useState([question.data.minValue]);
   const [submitted, setSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(socket, userId, question.id);
 
   useEffect(() => {
-    setValue([question.range.minValue]);
+    setValue([question.data.minValue]);
     setSubmitted(false);
   }, [question.id]);
 
@@ -63,8 +63,8 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
           </h2>
           <div className="my-10 px-4">
             <Slider
-              min={question.range.minValue}
-              max={question.range.maxValue}
+              min={question.data.minValue}
+              max={question.data.maxValue}
               step={1}
               value={value}
               onValueChange={setValue}
@@ -72,8 +72,8 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
               className="py-4"
             />
             <div className="flex justify-between text-sm font-black text-muted-foreground mt-4 uppercase tracking-widest">
-              <span>{question.range.minValue}</span>
-              <span>{question.range.maxValue}</span>
+              <span>{question.data.minValue}</span>
+              <span>{question.data.maxValue}</span>
             </div>
           </div>
           <div className="text-center bg-primary/10 rounded-3xl py-6 border-2 border-primary/20 shadow-inner">

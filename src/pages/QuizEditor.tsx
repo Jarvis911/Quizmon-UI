@@ -27,9 +27,7 @@ interface EditorQuestion {
     type: string;
     media: QuestionMedia[];
     options: unknown[];
-    location: unknown[];
-    range: unknown[];
-    typeAnswer: unknown[];
+    data: unknown;
 }
 
 interface QuizResponse extends Omit<Quiz, 'questions'> {
@@ -56,9 +54,7 @@ const QuizEditor = () => {
                     type: q.type,
                     media: q.media || [],
                     options: q.options || [],
-                    location: q.location || [],
-                    range: q.range || [],
-                    typeAnswer: q.typeAnswer || [],
+                    data: q.data || null,
                 }));
                 setQuestions(normalized);
                 setActiveIndex(normalized.length ? 0 : null);

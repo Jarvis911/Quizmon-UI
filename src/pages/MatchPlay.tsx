@@ -187,20 +187,28 @@ const MatchPlay = () => {
             return <p className="text-center text-muted-foreground font-medium animate-pulse">Đang chờ câu hỏi...</p>;
         }
 
-        const props = { question, socket, matchId: matchId!, userId: user.id, timer };
+        const props = { 
+            question, 
+            socket, 
+            matchId: matchId!, 
+            userId: user.id, 
+            timer,
+            mode: "REALTIME",
+            onHomeworkSubmit: () => {} 
+        };
 
         switch (question.type) {
-            case "buttons":
+            case "BUTTONS":
                 return <ButtonQuestionPlay {...props} />;
-            case "checkboxes":
+            case "CHECKBOXES":
                 return <CheckboxQuestionPlay {...props} />;
-            case "range":
+            case "RANGE":
                 return <RangeQuestionPlay {...props} />;
-            case "reorder":
+            case "REORDER":
                 return <ReorderQuestionPlay {...props} />;
-            case "typeanswer":
+            case "TYPEANSWER":
                 return <TypeAnswerQuestionPlay {...props} />;
-            case "location":
+            case "LOCATION":
                 return <LocationQuestionPlay {...props} />;
             default:
                 return <p className="text-destructive font-bold">Loại câu hỏi không hỗ trợ</p>;
