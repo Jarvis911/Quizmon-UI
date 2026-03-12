@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import apiClient from "@/api/client";
+import { useModal } from "@/context/ModalContext";
 import { useNavigate } from "react-router-dom";
 import endpoints from "../api/api";
 import { Users, Plus, DoorOpen, ArrowRight } from "lucide-react";
@@ -25,6 +26,7 @@ interface Classroom {
 
 export default function Classrooms() {
     const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+    const { showAlert } = useModal();
     const [loading, setLoading] = useState(true);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -56,7 +58,11 @@ export default function Classrooms() {
             setJoinCode("");
             fetchClassrooms();
         } catch (error: any) {
-            alert(error.response?.data?.message || "Failed to join classroom");
+            showAlert({ 
+                title: "Thất bại", 
+                message: error.response?.data?.message || "Không thể tham gia lớp học", 
+                type: "error" 
+            });
         }
     };
 
@@ -68,7 +74,11 @@ export default function Classrooms() {
             setCreateForm({ name: "", description: "" });
             fetchClassrooms();
         } catch (error: any) {
-            alert(error.response?.data?.message || "Failed to create classroom");
+            showAlert({ 
+                title: "Thất bại", 
+                message: error.response?.data?.message || "Không thể tạo lớp học", 
+                type: "error" 
+            });
         }
     };
 

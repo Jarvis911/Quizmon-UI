@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useModal } from "@/context/ModalContext";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const PAYMENT_METHODS: { key: PaymentMethodType; label: string; icon: string; av
 
 export default function BillingPage() {
   const { currentOrg, organizations, switchOrganization } = useOrganization();
+  const { showAlert } = useModal();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [usage, setUsage] = useState<Usage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,7 +121,11 @@ export default function BillingPage() {
       }
     } catch (err: any) {
       const message = err?.response?.data?.message || "Failed to initiate checkout. Please try again.";
-      alert(message);
+      showAlert({
+        title: "Lỗi thanh toán",
+        message: message,
+        type: "error"
+      });
     } finally {
       setCheckoutLoading(null);
     }
@@ -360,7 +366,11 @@ export default function BillingPage() {
                 if (!currentOrg) {
                   if (organizations.length > 0) {
                     // Show some feedback or just open simple list
-                    alert("Vui lòng chọn một tổ chức trước khi nâng cấp.");
+                    showAlert({
+                        title: "Yêu cầu",
+                        message: "Vui lòng chọn một tổ chức trước khi nâng cấp.",
+                        type: "warning"
+                    });
                   } else {
                     setIsCreateModalOpen(true);
                   }

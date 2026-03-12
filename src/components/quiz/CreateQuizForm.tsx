@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import { useModal } from "@/context/ModalContext";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -37,13 +38,14 @@ const quizSchema = z.object({
     description: z.string().min(10, "Mô tả ít nhất 10 ký tự"),
     quiz_category: z.string().nonempty("Phải chọn category"),
     image: z.any(),
-    is_public: z.boolean().default(true),
+    is_public: z.boolean(),
 });
 
 type QuizFormData = z.infer<typeof quizSchema>;
 
 const CreateQuizForm = () => {
     const { token } = useAuth();
+    const { showAlert } = useModal();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -154,7 +156,11 @@ const CreateQuizForm = () => {
         } catch (err) {
             const error = err as { response?: { data?: unknown }; message?: string };
             console.error("Error creating quiz:", error.response?.data || error.message);
-            alert("Failed to create quiz");
+            showAlert({ 
+                title: "Thất bại", 
+                message: "Không thể tạo quiz. Vui lòng thử lại.", 
+                type: "error" 
+            });
         } finally {
             setLoading(false);
         }

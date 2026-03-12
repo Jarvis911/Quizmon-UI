@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useModal } from "@/context/ModalContext";
 import { Quiz, Category } from "@/types";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
@@ -28,6 +29,7 @@ interface HomeworkForm {
 
 const Home = () => {
     const { user, token } = useAuth();
+    const { showAlert } = useModal();
     const [myQuizzes, setMyQuizzes] = useState<Quiz[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const navigate = useNavigate();
@@ -91,7 +93,11 @@ const Home = () => {
         } catch (err: any) {
             console.error(err);
             const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";
-            alert(errorMessage);
+            showAlert({ 
+                title: "Lỗi", 
+                message: errorMessage, 
+                type: "error" 
+            });
         }
     };
 
@@ -115,9 +121,17 @@ const Home = () => {
             });
             setIsHomeworkModalOpen(false);
             setHomeworkForm({ classroomId: "", deadline: "", strictMode: false });
-            alert("Homework assigned successfully!");
+            showAlert({ 
+                title: "Thành công!", 
+                message: "Đã giao bài tập thành công.", 
+                type: "success" 
+            });
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to assign homework");
+            showAlert({ 
+                title: "Thất bại", 
+                message: err.response?.data?.message || "Không thể giao bài tập", 
+                type: "error" 
+            });
         }
     };
 

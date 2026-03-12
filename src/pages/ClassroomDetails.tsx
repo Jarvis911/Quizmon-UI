@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import apiClient from "@/api/client";
+import { useModal } from "@/context/ModalContext";
 import { useParams, useNavigate } from "react-router-dom";
 import endpoints from "../api/api";
 import { ArrowLeft, Users, FileText, Settings, Copy, Check } from "lucide-react";
@@ -40,6 +41,7 @@ interface ClassroomDetails {
 export default function ClassroomDetails() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { showAlert } = useModal();
     const [classroom, setClassroom] = useState<ClassroomDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
@@ -65,11 +67,25 @@ export default function ClassroomDetails() {
             setClassroom(res.data);
         } catch (error: any) {
             console.error("Failed to fetch classroom", error);
-            alert("Lỗi tải thông tin lớp học");
+            showAlert({
+                title: "Lỗi",
+                message: "Lỗi tải thông tin lớp học",
+                type: "error"
+            });
             navigate('/classrooms');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDownloadReport = (assignmentId: number) => {
+        console.log("Downloading report for assignment:", assignmentId);
+        // TODO: Implement report download
+        showAlert({
+            title: "Thông báo",
+            message: "Tính năng này đang được phát triển.",
+            type: "info"
+        });
     };
 
     const handleCopyCode = () => {

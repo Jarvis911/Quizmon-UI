@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
+import { useModal } from "@/context/ModalContext";
 import { Loader2 } from "lucide-react";
 import endpoints from "@/api/api.js";
 
@@ -39,6 +40,7 @@ function LocationPicker({ setLocation }) {
 
 const LocationQuestionForm = ({ quizId, question, onSaved }) => {
   const { token } = useAuth();
+  const { showAlert } = useModal();
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState(null);
 
@@ -65,11 +67,19 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
 
       if (question?.id) {
         const res = await apiClient.put(endpoints.question_location(question.id), payload);
-        alert("Cập nhật câu hỏi thành công!");
+        showAlert({
+            title: "Thành công",
+            message: "Cập nhật câu hỏi thành công!",
+            type: "success"
+        });
         if (onSaved) onSaved(res.data);
       } else {
         const res = await apiClient.post(endpoints.question_locations, payload);
-        alert("Tạo câu hỏi thành công");
+        showAlert({
+            title: "Thành công",
+            message: "Tạo câu hỏi thành công",
+            type: "success"
+        });
         if (onSaved) onSaved(res.data);
       }
 
@@ -77,7 +87,11 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       // setLocation(null);
     } catch (err) {
       console.error(err);
-      alert("Lỗi khi tạo câu hỏi");
+      showAlert({
+        title: "Lỗi",
+        message: "Lỗi khi tạo câu hỏi",
+        type: "error"
+      });
     } finally {
       setLoading(false);
     }

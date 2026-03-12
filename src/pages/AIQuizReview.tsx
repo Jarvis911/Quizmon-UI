@@ -4,6 +4,7 @@ import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAuth } from "@/context/AuthContext";
+import { useModal } from "@/context/ModalContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,6 +83,7 @@ const AIQuizReview = () => {
     const { jobId } = useParams();
     const navigate = useNavigate();
     const { token } = useAuth();
+    const { showAlert, showConfirm } = useModal();
 
     const [job, setJob] = useState<AIGenerationJob | null>(null);
     const [questions, setQuestions] = useState<AIGeneratedQuestion[]>([]);
@@ -193,7 +195,11 @@ const AIQuizReview = () => {
             await fetchJob();
             setEditing(false);
         } catch {
-            alert("Lỗi khi lưu chỉnh sửa");
+            showAlert({
+                title: "Lỗi",
+                message: "Lỗi khi lưu chỉnh sửa",
+                type: "error"
+            });
         } finally {
             setActionLoading(null);
         }
@@ -212,7 +218,11 @@ const AIQuizReview = () => {
             );
             await fetchJob();
         } catch {
-            alert("Lỗi khi cập nhật trạng thái");
+            showAlert({
+                title: "Lỗi",
+                message: "Lỗi khi cập nhật trạng thái",
+                type: "error"
+            });
         } finally {
             setActionLoading(null);
         }
@@ -231,7 +241,11 @@ const AIQuizReview = () => {
             await fetchJob();
             setRegenFeedback("");
         } catch {
-            alert("Lỗi khi tạo lại câu hỏi");
+            showAlert({
+                title: "Lỗi",
+                message: "Lỗi khi tạo lại câu hỏi",
+                type: "error"
+            });
         } finally {
             setActionLoading(null);
         }
@@ -239,7 +253,13 @@ const AIQuizReview = () => {
 
     // Delete question
     const deleteQuestion = async (questionId: number) => {
-        if (!confirm("Bạn có chắc muốn xoá câu hỏi này?")) return;
+        const confirmed = await showConfirm({
+            title: "Xác nhận xóa",
+            message: "Bạn có chắc muốn xoá câu hỏi này?",
+            type: "confirm"
+        });
+        if (!confirmed) return;
+        
         setActionLoading(questionId);
         try {
             await apiClient.delete(
@@ -250,7 +270,11 @@ const AIQuizReview = () => {
                 setSelectedIdx(Math.max(0, questions.length - 2));
             }
         } catch {
-            alert("Lỗi khi xoá câu hỏi");
+            showAlert({
+                title: "Lỗi",
+                message: "Lỗi khi xoá câu hỏi",
+                type: "error"
+            });
         } finally {
             setActionLoading(null);
         }
@@ -281,7 +305,11 @@ const AIQuizReview = () => {
             setCreateDialogOpen(false);
             navigate(`/quiz/${res.data.id}/editor`);
         } catch (err: any) {
-            alert(err.response?.data?.message || "Lỗi tạo quiz");
+            showAlert({
+                title: "Lỗi",
+                message: err.response?.data?.message || "Lỗi tạo quiz",
+                type: "error"
+            });
         } finally {
             setCreating(false);
         }

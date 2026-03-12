@@ -3,6 +3,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useAuth } from "../../context/AuthContext"
+import { useModal } from "@/context/ModalContext";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Smile } from "lucide-react";
 
@@ -29,6 +30,7 @@ interface User {
 
 export function SignUpForm({ className, ...props }: SignupFormProps) {
   const { signup } = useAuth();
+  const { showAlert } = useModal();
   const navigate = useNavigate();
   const {
     register,
@@ -43,7 +45,11 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
   const onSubmit = async (data: any) => {
     const ok = await signup(data.username, data.email, data.password);
     if (!ok) {
-      alert("Đăng ký thất bại, vui lòng thử lại!");
+      showAlert({ 
+        title: "Đăng ký thất bại", 
+        message: "Vui lòng kiểm tra lại thông tin và thử lại!", 
+        type: "error" 
+      });
     }
     else {
       navigate("/quiz/create");
@@ -161,15 +167,15 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
       <div className="hidden md:flex flex-1 h-full bg-[#A8E6CF] relative items-center justify-center border-l-8 border-slate-100/50 shadow-[inset_10px_0_20px_-10px_rgba(0,0,0,0.1)] overflow-hidden">
         {/* Subtle pattern overlays - mimicking Blooket ghost squares */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 20%, transparent 20%)', backgroundSize: '40px 40px' }}></div>
-        <div className="absolute w-[200%] h-[200%] rotate-12 flex flex-wrap gap-8 p-12 -z-0 opacity-10">
+        <div className="absolute w-[200%] h-[200%] rotate-12 flex flex-wrap gap-8 p-12 z-0 opacity-10">
           {Array.from({ length: 40 }).map((_, i) => (
-            <div key={i} className="w-32 h-32 rounded-[2rem] bg-white opacity-40 shrink-0 shadow-lg"></div>
+            <div key={i} className="w-32 h-32 rounded-4xl bg-white opacity-40 shrink-0 shadow-lg"></div>
           ))}
         </div>
 
         {/* Decorative Center "Mascot" Block */}
-        <div className="w-48 h-48 bg-emerald-400 rounded-3xl -rotate-[15deg] shadow-[15px_15px_0_rgba(0,0,0,0.1)] flex items-center justify-center relative translate-y-[-40px] z-10 animate-pulse" style={{ animationDuration: '4s' }}>
-          <Sparkles className="w-24 h-24 text-white drop-shadow-md rotate-[15deg]" />
+        <div className="w-48 h-48 bg-emerald-400 rounded-3xl -rotate-15 shadow-[15px_15px_0_rgba(0,0,0,0.1)] flex items-center justify-center relative translate-y-[-40px] z-10 animate-pulse" style={{ animationDuration: '4s' }}>
+          <Sparkles className="w-24 h-24 text-white drop-shadow-md rotate-15" />
           {/* Shapes */}
           <div className="absolute -bottom-4 right-4 w-10 h-10 bg-emerald-300 rounded-lg rotate-12"></div>
           <div className="absolute -top-6 left-6 w-8 h-8 bg-emerald-200 rounded-full"></div>

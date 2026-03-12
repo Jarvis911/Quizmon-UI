@@ -7,6 +7,7 @@ import endpoints from "@/api/api.js";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
 import { useAuth } from "@/context/AuthContext";
+import { useModal } from "@/context/ModalContext";
 import { ImageIcon, Youtube, Trash2, Loader2 } from "lucide-react";
 
 import {
@@ -43,6 +44,7 @@ const questionSchema = z.object({
 
 const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
   const { token } = useAuth();
+  const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -169,23 +171,35 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
             "Content-Type": "multipart/form-data",
           },
         });
-        alert("Cập nhật câu hỏi thành công!");
-        if (onSaved) onSaved(res.data);
-      } else {
-        const res = await apiClient.post(endpoints.question_checkboxes, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        alert("Tạo câu hỏi thành công!");
-        if (onSaved) onSaved(res.data);
-      }
+          showAlert({
+            title: "Thành công",
+            message: "Cập nhật câu hỏi thành công!",
+            type: "success"
+          });
+          if (onSaved) onSaved(res.data);
+        } else {
+          const res = await apiClient.post(endpoints.question_checkboxes, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          showAlert({
+            title: "Thành công",
+            message: "Tạo câu hỏi thành công!",
+            type: "success"
+          });
+          if (onSaved) onSaved(res.data);
+        }
 
       // form.reset();
       // removeImage();
     } catch (err) {
       console.error(err);
-      alert("Lỗi khi tạo câu hỏi");
+      showAlert({
+        title: "Lỗi",
+        message: "Lỗi khi tạo câu hỏi",
+        type: "error"
+      });
     } finally {
       setLoading(false);
     }

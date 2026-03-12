@@ -14,6 +14,7 @@ import { Label } from "../ui/label";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useModal } from "@/context/ModalContext";
 
 interface CreateOrgModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { refreshOrganizations, switchOrganization } = useOrganization();
+  const { showAlert } = useModal();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +40,11 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
       onClose();
     } catch (err) {
       console.error("Failed to create organization", err);
-      alert("Không thể tạo tổ chức. Vui lòng thử lại.");
+      showAlert({
+        title: "Lỗi",
+        message: "Không thể tạo tổ chức. Vui lòng thử lại.",
+        type: "error"
+      });
     } finally {
       setIsLoading(false);
     }

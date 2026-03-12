@@ -21,6 +21,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { OrganizationProvider } from "./context/OrganizationContext";
 import { FeatureProvider } from "./context/FeatureContext";
+import { ModalProvider } from "./context/ModalContext";
+import GlobalModal from "./components/ui/GlobalModal";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
 
@@ -47,10 +49,12 @@ function AppContent() {
             {/* Default background — hidden on match/join pages which have their own */}
 
             <AuthProvider>
-                <OrganizationProvider>
-                    <FeatureProvider>
-                        {!isNoNavbarRoute && <Navbar />}
-                        <Routes>
+                <ModalProvider>
+                    <OrganizationProvider>
+                        <FeatureProvider>
+                            {!isNoNavbarRoute && <Navbar />}
+                            <GlobalModal />
+                            <Routes>
                             <Route path="/join" element={<JoinMatch />} />
                             <Route path="/login" element={<LoginForm />} />
                             <Route path="/sign-up" element={<SignUpForm />} />
@@ -77,7 +81,8 @@ function AppContent() {
                         </Routes>
                     </FeatureProvider>
                 </OrganizationProvider>
-            </AuthProvider>
+            </ModalProvider>
+        </AuthProvider>
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import socket from "@/services/socket";
 import { useAuth } from "@/context/AuthContext";
 import apiClient from "@/api/client";
+import { useModal } from "@/context/ModalContext";
 import endpoints from "@/api/api";
 import type { Quiz, LobbyPlayer } from "../types";
 
@@ -30,6 +31,7 @@ interface MatchResponse {
 const MatchLobby = () => {
     const { id: matchId } = useParams<{ id: string }>();
     const { user, token } = useAuth();
+    const { showAlert, showConfirm } = useModal();
     const [players, setPlayers] = useState<LobbyPlayer[]>([]);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [isHost, setIsHost] = useState(false);
@@ -118,7 +120,11 @@ const MatchLobby = () => {
         });
 
         socket.on("matchCancelled", ({ message }) => {
-            alert(message);
+            showAlert({ 
+                title: "Thông báo", 
+                message, 
+                type: "info" 
+            });
             isNavigationHandled.current = true;
             navigate('/');
         });
@@ -165,9 +171,14 @@ const MatchLobby = () => {
         }
     };
 
-    const cancelRoom = () => {
+    const cancelRoom = async () => {
         if (matchId && isHost) {
-            if (window.confirm("Bạn có chắc chắn muốn hủy phòng này không?")) {
+            const confirmed = await showConfirm({
+                title: "Hủy phòng",
+                message: "Bạn có chắc chắn muốn hủy phòng này không?",
+                type: "confirm"
+            });
+            if (confirmed) {
                 socket.emit("cancelMatch", { matchId });
             }
         }

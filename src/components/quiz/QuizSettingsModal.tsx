@@ -8,6 +8,7 @@ import Cropper, { Area } from "react-easy-crop";
 import { Upload, Loader2, Settings } from "lucide-react";
 import { MdImageNotSupported } from "react-icons/md";
 import endpoints from "@/api/api";
+import { useModal } from "@/context/ModalContext";
 import type { Category, Quiz } from "@/types";
 
 import {
@@ -58,6 +59,7 @@ interface QuizSettingsModalProps {
 
 const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettingsModalProps) => {
     const { token } = useAuth();
+    const { showAlert } = useModal();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -183,12 +185,15 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                 },
             });
 
-            onSuccess(res.data);
             onOpenChange(false);
         } catch (err) {
             const error = err as { response?: { data?: unknown }; message?: string };
             console.error("Error updating quiz:", error.response?.data || error.message);
-            alert("Lỗi cập nhật quiz");
+            showAlert({
+                title: "Lỗi",
+                message: "Lỗi cập nhật quiz",
+                type: "error"
+            });
         } finally {
             setLoading(false);
         }

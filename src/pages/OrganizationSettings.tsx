@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useAuth } from "@/context/AuthContext";
+import { useModal } from "@/context/ModalContext";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ interface Member {
 export default function OrganizationSettings() {
   const { currentOrg, refreshOrganizations } = useOrganization();
   const { user } = useAuth();
+  const { showAlert, showConfirm } = useModal();
   const [name, setName] = useState(currentOrg?.name || "");
   const [members, setMembers] = useState<Member[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -124,12 +126,28 @@ export default function OrganizationSettings() {
   };
 
   const handleRemoveMember = async (userId: number) => {
-    if (!currentOrg || !window.confirm("Bạn có chắc chắn muốn xóa thành viên này?")) return;
+    if (!currentOrg) return;
+    const confirmed = await showConfirm({
+      title: "Xác nhận xóa",
+      message: "Bạn có chắc chắn muốn xóa thành viên này?",
+      type: "confirm"
+    });
+    if (!confirmed) return;
+    
     try {
       await apiClient.delete(`${endpoints.organization_members(currentOrg.id)}/${userId}`);
       fetchMembers();
+      showAlert({
+        title: "Thành công",
+        message: "Đã xóa thành viên khỏi tổ chức.",
+        type: "success"
+      });
     } catch (err) {
-      alert("Xóa thành viên thất bại. Bạn có thể là chủ sở hữu cuối cùng.");
+      showAlert({
+        title: "Thất bại",
+        message: "Xóa thành viên thất bại. Bạn có thể là chủ sở hữu cuối cùng.",
+        type: "error"
+      });
     }
   };
 
