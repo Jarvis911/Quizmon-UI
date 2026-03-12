@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useNavigate } from "react-router-dom";
 import endpoints from "../api/api";
 import { Users, Plus, DoorOpen, ArrowRight } from "lucide-react";
@@ -39,11 +39,7 @@ export default function Classrooms() {
     const fetchClassrooms = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
-            if (!token) return;
-            const res = await axios.get(endpoints.classrooms, {
-                headers: { Authorization: token }
-            });
+            const res = await apiClient.get(endpoints.classrooms);
             setClassrooms(res.data);
         } catch (error) {
             console.error("Failed to fetch classrooms", error);
@@ -55,10 +51,7 @@ export default function Classrooms() {
     const handleJoinClassroom = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("token");
-            await axios.post(endpoints.classroom_join, { code: joinCode }, {
-                headers: { Authorization: token }
-            });
+            await apiClient.post(endpoints.classroom_join, { code: joinCode });
             setIsJoinModalOpen(false);
             setJoinCode("");
             fetchClassrooms();
@@ -70,10 +63,7 @@ export default function Classrooms() {
     const handleCreateClassroom = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("token");
-            await axios.post(endpoints.classrooms, createForm, {
-                headers: { Authorization: token }
-            });
+            await apiClient.post(endpoints.classrooms, createForm);
             setIsCreateModalOpen(false);
             setCreateForm({ name: "", description: "" });
             fetchClassrooms();

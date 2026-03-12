@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Play, Edit3, BookOpen } from 'lucide-react';
 import { SiGoogleclassroom } from 'react-icons/si';
+import { MdImageNotSupported } from "react-icons/md";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Quiz } from '@/types';
@@ -29,12 +30,19 @@ const QuizCard: React.FC<QuizCardProps> = ({
     return (
         <div className="group relative bg-white dark:bg-slate-900 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden flex flex-col h-full border border-slate-200 dark:border-slate-800">
             {/* Image Container */}
-            <div className="relative aspect-video overflow-hidden">
-                <img
-                    src={quiz.image || 'https://images.unsplash.com/photo-1606326666430-2c2305592231?q=80&w=2070&auto=format&fit=crop'}
-                    alt={quiz.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+            <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                {quiz.image ? (
+                    <img
+                        src={quiz.image}
+                        alt={quiz.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
+                        <MdImageNotSupported className="w-12 h-12 mb-2" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
+                    </div>
+                )}
                 
                 {/* Badges */}
                 <div className="absolute bottom-2 left-2 flex flex-col gap-1">

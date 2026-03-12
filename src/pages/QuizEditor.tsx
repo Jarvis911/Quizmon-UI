@@ -2,7 +2,8 @@ import { useState, useEffect, ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, MapIcon, Settings } from "lucide-react";
-import axios from "axios";
+import { MdImageNotSupported } from "react-icons/md";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import type { Quiz } from "@/types";
 
@@ -47,7 +48,7 @@ const QuizEditor = () => {
         const fetchQuiz = async () => {
             if (!id) return;
             try {
-                const res = await axios.get<QuizResponse>(endpoints.quiz(Number(id)));
+                const res = await apiClient.get<QuizResponse>(endpoints.quiz(Number(id)));
                 const normalized: EditorQuestion[] = (res.data.questions || []).map((q) => ({
                     id: q.id,
                     text: q.text,
@@ -212,7 +213,7 @@ const QuizEditor = () => {
                                 return null;
                             })
                         ) : (
-                            <MapIcon className="w-10 h-10 text-muted-foreground/40" />
+                            <MdImageNotSupported className="w-10 h-10 text-muted-foreground/40" />
                         )}
                     </div>
                 ))}

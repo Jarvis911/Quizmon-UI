@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Quiz, Category } from "@/types";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Gamepad2, Plus, Sparkles } from "lucide-react";
@@ -44,9 +44,7 @@ const Home = () => {
         const fetchClassrooms = async () => {
             if (!token) return;
             try {
-                const res = await axios.get(endpoints.classrooms, {
-                    headers: { Authorization: token }
-                });
+                const res = await apiClient.get(endpoints.classrooms);
                 setClassrooms(res.data.filter((c: Classroom) => (c.teacher?.id as any) === user?.id)); // Only classes they teach
             } catch (err) { console.error(err); }
         };
@@ -54,11 +52,7 @@ const Home = () => {
         const fetchMyQuizzes = async () => {
             try {
                 if (token) {
-                    const res = await axios.get(endpoints.quizzes, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    });
+                    const res = await apiClient.get(endpoints.quizzes);
 
                     setMyQuizzes(res.data);
                 }
@@ -69,7 +63,7 @@ const Home = () => {
 
         const fetchCategories = async () => {
             try {
-                const res = await axios.get(endpoints.category);
+                const res = await apiClient.get(endpoints.category);
                 setCategories(res.data);
             } catch (err) {
                 console.error(err);
@@ -83,20 +77,21 @@ const Home = () => {
 
     const handlePlayNow = async (quizId: string | number) => {
         try {
-            const res = await axios.post(
+            const res = await apiClient.post(
                 endpoints.matches,
                 { quizId },
                 {
                     headers: {
-                        Authorization: token,
                         "Content-Type": "application/json",
                     },
                 }
             );
 
             navigate(`/match/${res.data.id}/lobby`);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";
+            alert(errorMessage);
         }
     };
 
@@ -112,13 +107,11 @@ const Home = () => {
     const handleSubmitHomework = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await axios.post(endpoints.homework, {
+            await apiClient.post(endpoints.homework, {
                 quizId: selectedQuizId,
                 classroomId: homeworkForm.classroomId,
                 deadline: homeworkForm.deadline || null,
                 strictMode: homeworkForm.strictMode
-            }, {
-                headers: { Authorization: token }
             });
             setIsHomeworkModalOpen(false);
             setHomeworkForm({ classroomId: "", deadline: "", strictMode: false });
@@ -372,7 +365,7 @@ const CategoryQuizzes = ({
     useEffect(() => {
         const fetchQuizzesByCategory = async () => {
             try {
-                const res = await axios.get(endpoints.getQuizByCategory(category.id as any));
+                const res = await apiClient.get(endpoints.getQuizByCategory(category.id as any));
                 setQuizzes(res.data);
             } catch (err) {
                 console.error(err);

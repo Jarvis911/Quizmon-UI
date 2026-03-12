@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 import endpoints from "@/api/api.js";
@@ -64,19 +64,11 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       };
 
       if (question?.id) {
-        const res = await axios.put(endpoints.question_location(question.id), payload, {
-          headers: {
-            Authorization: token,
-          },
-        });
+        const res = await apiClient.put(endpoints.question_location(question.id), payload);
         alert("Cập nhật câu hỏi thành công!");
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await axios.post(endpoints.question_locations, payload, {
-          headers: {
-            Authorization: token,
-          },
-        });
+        const res = await apiClient.post(endpoints.question_locations, payload);
         alert("Tạo câu hỏi thành công");
         if (onSaved) onSaved(res.data);
       }

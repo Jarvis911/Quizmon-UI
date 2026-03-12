@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
 import endpoints from "@/api/api";
@@ -169,9 +169,8 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
 
       // Update if there was question data
       if (question?.id) {
-        const res = await axios.put(endpoints.question_button(question.id), formData, {
+        const res = await apiClient.put(endpoints.question_button(question.id), formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
@@ -180,9 +179,8 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
       }
       // Create new if there was no question data
       else {
-        const res = await axios.post(endpoints.question_buttons, formData, {
+        const res = await apiClient.post(endpoints.question_buttons, formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });

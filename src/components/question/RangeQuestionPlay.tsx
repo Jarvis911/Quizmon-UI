@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import QuestionMedia from "./QuestionMedia";
 import useQuestionSocket from "@/hooks/useQuestionSocket";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
 const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
@@ -23,13 +23,10 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
 
     if (mode === "HOMEWORK") {
       try {
-        const token = localStorage.getItem("token");
-        await axios.post(endpoints.homework_answer(Number(matchId)), {
+        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerIds: [],
           numberAnswer: answer
-        }, {
-          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

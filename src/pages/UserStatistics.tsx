@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,9 +48,7 @@ const UserStats = () => {
                     ? `${endpoints.user_stats}`
                     : `${endpoints.user_stats}?period=${selectedPeriod}`;
 
-            const res = await axios.get<UserStatsType>(url, {
-                headers: { Authorization: token },
-            });
+            const res = await apiClient.get<UserStatsType>(url);
 
             setStats(res.data);
         } catch (err) {

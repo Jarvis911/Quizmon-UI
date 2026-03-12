@@ -1,6 +1,7 @@
 import { useCallback, ChangeEvent } from "react";
 import Cropper from "react-easy-crop";
 import { Upload, Trash2 } from "lucide-react";
+import { MdImageNotSupported } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import type { CropArea, ImagePickerProps } from "@/types";
 
@@ -42,8 +43,8 @@ const ImagePicker = ({
         <div className="relative w-[500px] h-[300px] border rounded-lg overflow-hidden">
             {!imageSrc ? (
                 <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                    <Upload className="w-10 h-10 text-gray-400" />
-                    <span>Chọn ảnh</span>
+                    <MdImageNotSupported className="w-12 h-12 text-gray-400 mb-2" />
+                    <span className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Chọn ảnh</span>
                     <input
                         type="file"
                         accept="image/*"

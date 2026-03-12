@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
 import { useAuth } from "@/context/AuthContext";
@@ -144,9 +144,8 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
       }
 
       if (question?.id) {
-        const res = await axios.put(endpoints.question_typeanswer(question.id), formData, {
+        const res = await apiClient.put(endpoints.question_typeanswer(question.id), formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
@@ -154,9 +153,8 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
         alert("Cập nhật câu hỏi điền đáp án!");
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await axios.post(endpoints.question_typeanswers, formData, {
+        const res = await apiClient.post(endpoints.question_typeanswers, formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });

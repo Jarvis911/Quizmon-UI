@@ -41,6 +41,7 @@ interface Plan {
 interface Usage {
   key: string;
   value: number;
+  periodEnd?: string;
 }
 
 type PaymentMethodType = 'MOMO' | 'VNPAY' | 'STRIPE';
@@ -68,24 +69,32 @@ export default function BillingPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const promises: any[] = [apiClient.get(endpoints.plans)];
+      // 1. Always fetch plans
+      const plansRes = await apiClient.get(endpoints.plans);
+      setPlans(plansRes.data);
 
-      if (currentOrg) {
-        promises.push(apiClient.get(endpoints.subscription_usage));
-        promises.push(apiClient.get(endpoints.subscription_current).catch(() => ({ data: null })));
-      }
-
-      const results = await Promise.all(promises);
-
-      setPlans(results[0].data);
-
-      if (currentOrg) {
-        setUsage(results[1].data);
-        setActiveSub(results[2].data);
-      } else {
+      // 2. Fetch usage and current subscription
+      // We do this even if currentOrg is null because the backend handles org context resolution
+      // (falling back to user's first org or auto-creating one).
+      try {
+        const [usageRes, subRes] = await Promise.all([
+          apiClient.get(endpoints.subscription_usage),
+          apiClient.get(endpoints.subscription_current).catch(() => ({ data: null }))
+        ]);
+        
+        setUsage(usageRes.data);
+        
+        if (subRes.data) {
+          setActiveSub(subRes.data);
+        } else {
+          // Default to FREE plan if no active subscription
+          const freePlan = (plansRes.data as Plan[]).find(p => p.type === 'FREE');
+          setActiveSub(freePlan ? { plan: freePlan, planId: freePlan.id } : null);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch usage/subscription (waiting for org context?)", err);
         setUsage([]);
-        // Default to FREE plan display if no org
-        const freePlan = (results[0].data as Plan[]).find(p => p.type === 'FREE');
+        const freePlan = (plansRes.data as Plan[]).find(p => p.type === 'FREE');
         setActiveSub(freePlan ? { plan: freePlan, planId: freePlan.id } : null);
       }
     } catch (err) {
@@ -217,32 +226,42 @@ export default function BillingPage() {
 
       {/* Usage Stats */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <UsageCard
-          icon={
-            <svg className="text-primary w-8 h-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="20" y="60" width="22" height="25" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-              <text x="26" y="79" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">2</text>
-              <rect x="42" y="50" width="22" height="35" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-              <text x="49" y="69" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">1</text>
-              <rect x="64" y="65" width="22" height="20" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-              <text x="71" y="81" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">3</text>
-              <line x1="53" y1="50" x2="53" y2="25" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-              <path d="M53 28C45 25 40 32 30 28V42C40 45 45 38 53 42V28Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round" fill="none" />
-              <path d="M68 25L70.5 30H76L71.5 33.5L73 39L68 35.5L63 39L64.5 33.5L60 30H65.5L68 25Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" fill="none" />
-            </svg>
-          }
-          label="Trận đấu đã tổ chức"
-          value={usage.find(u => u.key === 'matches_hosted')?.value || 0}
-          limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'UNLIMITED_MATCHES')?.limit ?? null}
-          renewalDate={activeSub?.currentPeriodEnd}
-        />
-        <UsageCard
-          icon={<RiAiGenerate2 className="text-primary w-6 h-6" />}
-          label="Lượt tạo AI"
-          value={usage.find(u => u.key === 'ai_generations')?.value || 0}
-          limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'AI_GENERATION')?.limit ?? null}
-          renewalDate={activeSub?.currentPeriodEnd}
-        />
+        {(() => {
+          const matchUsage = usage.find(u => u.key === 'matches_hosted');
+          return (
+            <UsageCard
+              icon={
+                <svg className="text-primary w-8 h-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="20" y="60" width="22" height="25" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+                  <text x="26" y="79" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">2</text>
+                  <rect x="42" y="50" width="22" height="35" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+                  <text x="49" y="69" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">1</text>
+                  <rect x="64" y="65" width="22" height="20" rx="4" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+                  <text x="71" y="81" fill="currentColor" font-family="Arial, sans-serif" font-weight="bold" font-size="14">3</text>
+                  <line x1="53" y1="50" x2="53" y2="25" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                  <path d="M53 28C45 25 40 32 30 28V42C40 45 45 38 53 42V28Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round" fill="none" />
+                  <path d="M68 25L70.5 30H76L71.5 33.5L73 39L68 35.5L63 39L64.5 33.5L60 30H65.5L68 25Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" fill="none" />
+                </svg>
+              }
+              label="Trận đấu đã tổ chức"
+              value={matchUsage?.value || 0}
+              limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'UNLIMITED_MATCHES')?.limit ?? null}
+              renewalDate={matchUsage?.periodEnd || activeSub?.currentPeriodEnd}
+            />
+          );
+        })()}
+        {(() => {
+          const aiUsage = usage.find(u => u.key === 'ai_generations');
+          return (
+            <UsageCard
+              icon={<RiAiGenerate2 className="text-primary w-6 h-6" />}
+              label="Lượt tạo AI"
+              value={aiUsage?.value || 0}
+              limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === 'AI_GENERATION')?.limit ?? null}
+              renewalDate={aiUsage?.periodEnd || activeSub?.currentPeriodEnd}
+            />
+          );
+        })()}
         <UsageCard
           icon={<PiStudent className="text-primary w-7 h-7" />}
           label="Số người tối đa tham gia trong 1 trận đấu"

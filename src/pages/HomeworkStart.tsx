@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Clock, AlertCircle, Sparkles, ChevronRight, ArrowLeft } from "lucide-react";
 import { SiGoogleclassroom } from "react-icons/si";
+import { MdImageNotSupported } from "react-icons/md";
 import { Quiz } from "@/types";
 
 const HomeworkStart = () => {
@@ -21,9 +22,7 @@ const HomeworkStart = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(endpoints.homework_detail(Number(id)), {
-                    headers: { Authorization: token }
-                });
+                const res = await apiClient.get(endpoints.homework_detail(Number(id)));
                 setHomework(res.data);
                 setQuiz(res.data.quiz);
             } catch (err: any) {
@@ -73,8 +72,12 @@ const HomeworkStart = () => {
                     {/* Header Image Area */}
                     <div className="relative h-64 bg-linear-to-br from-primary to-indigo-600 p-10 flex flex-col justify-end overflow-hidden">
                         <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
-                        {quiz.image && (
+                        {quiz.image ? (
                             <img src={quiz.image} alt="Quiz Cover" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 group-hover:scale-110 transition-transform duration-1000" />
+                        ) : (
+                            <div className="absolute inset-0 w-full h-full flex items-center justify-center mix-blend-overlay opacity-30 group-hover:scale-110 transition-transform duration-1000">
+                                <MdImageNotSupported className="w-48 h-48 text-white" />
+                            </div>
                         )}
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 text-primary-foreground/60 text-[10px] font-black uppercase tracking-[0.2em] mb-3">

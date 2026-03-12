@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import socket from "@/services/socket";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import type { Quiz, LobbyPlayer } from "../types";
 
@@ -52,9 +52,7 @@ const MatchLobby = () => {
 
         const fetchMatch = async () => {
             try {
-                const res = await axios.get<MatchResponse>(endpoints.match(Number(matchId)), {
-                    headers: { Authorization: token },
-                });
+                const res = await apiClient.get<MatchResponse>(endpoints.match(Number(matchId)));
                 setQuiz(res.data.quiz);
                 setIsHost(res.data.hostId === user.id);
                 

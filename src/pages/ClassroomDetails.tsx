@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useParams, useNavigate } from "react-router-dom";
 import endpoints from "../api/api";
 import { ArrowLeft, Users, FileText, Settings, Copy, Check } from "lucide-react";
@@ -61,11 +61,7 @@ export default function ClassroomDetails() {
     const fetchClassroom = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
-            if (!token) return;
-            const res = await axios.get(endpoints.classroom(Number(id)), {
-                headers: { Authorization: token }
-            });
+            const res = await apiClient.get(endpoints.classroom(Number(id)));
             setClassroom(res.data);
         } catch (error: any) {
             console.error("Failed to fetch classroom", error);
@@ -184,7 +180,7 @@ export default function ClassroomDetails() {
                                         <div className="flex gap-3 w-full sm:w-auto">
                                             {isTeacher ? (
                                                 <button
-                                                    onClick={() => window.location.href = `${endpoints.report_excel(assignment.id)}`}
+                                                    onClick={() => handleDownloadReport(assignment.id)}
                                                     className="flex-1 sm:flex-none px-6 py-3 bg-emerald-500/10 text-emerald-500 font-black rounded-xl hover:bg-emerald-500 hover:text-white transition-all text-xs uppercase tracking-widest border border-emerald-500/20"
                                                 >
                                                     BÁO CÁO EXCEL

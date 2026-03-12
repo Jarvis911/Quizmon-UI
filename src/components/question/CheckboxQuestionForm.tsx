@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api.js";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
@@ -164,18 +164,16 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        const res = await axios.put(endpoints.question_checkbox(question.id), formData, {
+        const res = await apiClient.put(endpoints.question_checkbox(question.id), formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
         alert("Cập nhật câu hỏi thành công!");
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await axios.post(endpoints.question_checkboxes, formData, {
+        const res = await apiClient.post(endpoints.question_checkboxes, formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });

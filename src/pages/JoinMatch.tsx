@@ -1,7 +1,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Sparkles, AlertCircle } from "lucide-react";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "../api/api";
 
 export default function JoinMatch() {
@@ -27,7 +27,7 @@ export default function JoinMatch() {
         setIsLoading(true);
         try {
             // Check if the match exists before navigating
-            await axios.get(`${endpoints.matches}/${code.trim()}`);
+            await apiClient.get(`${endpoints.matches}/${code.trim()}`);
             navigate(`/match/${code.trim()}/lobby`);
         } catch (err: any) {
             console.error(err);

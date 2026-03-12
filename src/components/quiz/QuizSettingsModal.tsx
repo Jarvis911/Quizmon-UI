@@ -3,9 +3,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import Cropper, { Area } from "react-easy-crop";
 import { Upload, Loader2, Settings } from "lucide-react";
+import { MdImageNotSupported } from "react-icons/md";
 import endpoints from "@/api/api";
 import type { Category, Quiz } from "@/types";
 
@@ -80,7 +81,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
 
     useEffect(() => {
         if (open) {
-            axios.get(endpoints.category).then((res) => {
+            apiClient.get(endpoints.category).then((res) => {
                 setCategories(res.data);
             });
             // Reset form when opened with new quiz data
@@ -176,9 +177,8 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                 }
             }
 
-            const res = await axios.put(endpoints.quiz(quiz.id), formData, {
+            const res = await apiClient.put(endpoints.quiz(quiz.id), formData, {
                 headers: {
-                    Authorization: `${token}`,
                     "Content-Type": "multipart/form-data",
                 },
             });
@@ -247,7 +247,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                                                     >
                                                         {!imageSrc ? (
                                                             <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
-                                                                <Upload className="w-10 h-10 text-muted-foreground mb-2" />
+                                                                <MdImageNotSupported className="w-12 h-12 text-muted-foreground mb-2" />
                                                                 <span className="text-muted-foreground text-sm text-center px-4">
                                                                     Kéo thả hoặc click để chọn ảnh
                                                                 </span>

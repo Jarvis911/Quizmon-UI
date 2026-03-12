@@ -3,10 +3,11 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useEffect, useState, useCallback, ChangeEvent, DragEvent } from "react";
 import Cropper from "react-easy-crop";
 import { Upload, Loader2 } from "lucide-react";
+import { MdImageNotSupported } from "react-icons/md";
 import endpoints from "@/api/api";
 import type { CropArea, Category } from "@/types";
 
@@ -65,7 +66,7 @@ const CreateQuizForm = () => {
     });
 
     useEffect(() => {
-        axios.get(endpoints.category).then((res) => {
+        apiClient.get(endpoints.category).then((res) => {
             setCategories(res.data);
         });
     }, []);
@@ -138,9 +139,8 @@ const CreateQuizForm = () => {
                 formData.append("file", croppedBlob, "image.jpg");
             }
 
-            const res = await axios.post(endpoints.quizzes, formData, {
+            const res = await apiClient.post(endpoints.quizzes, formData, {
                 headers: {
-                    Authorization: `${token}`,
                     "Content-Type": "multipart/form-data",
                 },
             });
@@ -205,7 +205,7 @@ const CreateQuizForm = () => {
                                                 >
                                                     {!imageSrc ? (
                                                         <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
-                                                            <Upload className="w-12 h-12 text-gray-400" />
+                                                            <MdImageNotSupported className="w-16 h-16 text-gray-400 mb-2" />
                                                             <span className="text-gray-500">
                                                                 Kéo & thả hoặc click để chọn ảnh
                                                             </span>

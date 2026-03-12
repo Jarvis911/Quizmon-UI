@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
 import { useAuth } from "@/context/AuthContext";
@@ -169,9 +169,8 @@ const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        const res = await axios.put(endpoints.question_reorder(question.id), formData, {
+        const res = await apiClient.put(endpoints.question_reorder(question.id), formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
@@ -179,9 +178,8 @@ const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
         alert("Tạo câu hỏi sắp xếp thành công!");
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await axios.post(endpoints.question_reorders, formData, {
+        const res = await apiClient.post(endpoints.question_reorders, formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });

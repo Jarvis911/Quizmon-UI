@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
 import { useAuth } from "@/context/AuthContext";
@@ -169,18 +169,16 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        const res = await axios.put(endpoints.question_range(question.id), formData, {
+        const res = await apiClient.put(endpoints.question_range(question.id), formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
         alert("Cập nhật câu hỏi thanh giá trị thành công!");
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await axios.post(endpoints.question_ranges, formData, {
+        const res = await apiClient.post(endpoints.question_ranges, formData, {
           headers: {
-            Authorization: token,
             "Content-Type": "multipart/form-data",
           },
         });
