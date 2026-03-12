@@ -36,7 +36,7 @@ const questionSchema = z.object({
   duration: z.number().optional(),
 });
 
-const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
+const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
@@ -94,6 +94,12 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved }) => {
       }, "image/jpeg");
     });
   };
+
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(form.formState.isDirty);
+    }
+  }, [form.formState.isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (question) {

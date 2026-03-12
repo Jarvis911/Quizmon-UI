@@ -53,7 +53,7 @@ const questionSchema = z
   );
 
 // ---------------- Component ----------------
-const RangeQuestion = ({ quizId, question, onSaved }) => {
+const RangeQuestion = ({ quizId, question, onSaved, onDirtyChange }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
@@ -116,6 +116,12 @@ const RangeQuestion = ({ quizId, question, onSaved }) => {
       }, "image/jpeg");
     });
   };
+
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(form.formState.isDirty);
+    }
+  }, [form.formState.isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (question) {

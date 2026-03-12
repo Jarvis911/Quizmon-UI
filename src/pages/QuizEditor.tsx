@@ -15,6 +15,7 @@ import TypeAnswerQuestionForm from "@/components/question/TypeAnswerQuestionForm
 import LocationQuestionForm from "@/components/question/LocationQuestionForm";
 import SelectQuestionType from "@/components/quiz/SelectQuestionType";
 import QuizSettingsModal from "@/components/quiz/QuizSettingsModal";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 interface QuestionMedia {
     id: number;
@@ -43,6 +44,9 @@ const QuizEditor = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [creatingType, setCreatingType] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isDirty, setIsDirty] = useState(false);
+
+    useUnsavedChanges(isDirty);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -78,10 +82,12 @@ const QuizEditor = () => {
         setQuestions([...questions, newQ]);
         setActiveIndex(questions.length);
         setCreatingType(null);
+        setIsDirty(false);
     };
 
     const handleUpdate = (updatedQ: EditorQuestion) => {
         setQuestions(questions.map((q) => (q.id === updatedQ.id ? updatedQ : q)));
+        setIsDirty(false);
     };
 
     const getYoutubeThumbnail = (url: string): string | null => {
@@ -95,7 +101,12 @@ const QuizEditor = () => {
         if (loading) return <p className="text-muted-foreground animate-pulse font-medium">Đang tải quiz...</p>;
 
         if (creatingType) {
-            const formProps = { quizId: id!, onSaved: handleSaveNew, question: undefined as any };
+            const formProps = { 
+                quizId: id!, 
+                onSaved: handleSaveNew, 
+                question: undefined as any,
+                onDirtyChange: setIsDirty 
+            };
 
             switch (creatingType) {
                 case "BUTTONS":
@@ -126,7 +137,12 @@ const QuizEditor = () => {
             );
         }
 
-        const formProps = { question: q, quizId: id!, onSaved: handleUpdate };
+        const formProps = { 
+            question: q, 
+            quizId: id!, 
+            onSaved: handleUpdate,
+            onDirtyChange: setIsDirty
+        };
 
         switch (q.type) {
             case "BUTTONS":

@@ -41,7 +41,7 @@ const questionSchema = z.object({
   duration: z.number().optional(),
 });
 
-const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
+const ReorderQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
@@ -73,6 +73,12 @@ const ReorderQuestionForm = ({ quizId, question, onSaved }) => {
     name: "options",
   });
 
+
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(form.formState.isDirty);
+    }
+  }, [form.formState.isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (question) {

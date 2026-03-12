@@ -44,7 +44,7 @@ const questionSchema = z.object({
 });
 
 // If there is a question data, initialize with the question data
-const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
+const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
@@ -74,6 +74,12 @@ const ButtonQuestionForm = ({ quizId, question, onSaved }) => {
     control: form.control,
     name: "options",
   });
+
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(form.formState.isDirty);
+    }
+  }, [form.formState.isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (question) {

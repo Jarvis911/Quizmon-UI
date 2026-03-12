@@ -37,6 +37,7 @@ import {
     AlertCircle,
     PartyPopper,
 } from "lucide-react";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import type {
     AIGenerationJob,
     AIGeneratedQuestion,
@@ -112,6 +113,8 @@ const AIQuizReview = () => {
     const [quizCategoryId, setQuizCategoryId] = useState<string>("");
     const [categories, setCategories] = useState<Category[]>([]);
     const [creating, setCreating] = useState(false);
+
+    useUnsavedChanges(editing);
 
     const fetchJob = useCallback(async () => {
         try {
@@ -303,6 +306,7 @@ const AIQuizReview = () => {
                 }
             );
             setCreateDialogOpen(false);
+            setEditing(false); // Just in case
             navigate(`/quiz/${res.data.id}/editor`);
         } catch (err: any) {
             showAlert({

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import AIGenerationLimit from "@/components/AIGenerationLimit";
 import { useEffect } from "react";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 const QUESTION_TYPES = [
     { value: "BUTTONS", label: "Trắc nghiệm (1 đáp án)", description: "Chọn 1 đáp án đúng" },
@@ -34,6 +35,13 @@ const AIQuizGenerator = () => {
     const [dragOver, setDragOver] = useState(false);
     const [subscription, setSubscription] = useState<any>(null);
     const [usageMetrics, setUsageMetrics] = useState<any[]>([]);
+    const [isDirty, setIsDirty] = useState(false);
+
+    useUnsavedChanges(isDirty);
+
+    useEffect(() => {
+        setIsDirty(!!instruction || !!pdfFile);
+    }, [instruction, pdfFile]);
 
     useEffect(() => {
         fetchSubscription();
@@ -101,6 +109,7 @@ const AIQuizGenerator = () => {
                 },
             });
 
+            setIsDirty(false); // Reset before navigation
             navigate(`/ai/review/${res.data.id}`);
         } catch (err: any) {
             setError(

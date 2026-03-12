@@ -42,7 +42,7 @@ const questionSchema = z.object({
   duration: z.number().optional(),
 });
 
-const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
+const CheckboxQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
@@ -71,6 +71,12 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved }) => {
     control: form.control,
     name: "options",
   });
+
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(form.formState.isDirty);
+    }
+  }, [form.formState.isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (question) {

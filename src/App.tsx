@@ -23,7 +23,7 @@ import { OrganizationProvider } from "./context/OrganizationContext";
 import { FeatureProvider } from "./context/FeatureContext";
 import { ModalProvider } from "./context/ModalContext";
 import GlobalModal from "./components/ui/GlobalModal";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate, useLocation, Outlet } from "react-router-dom";
 import { ReactNode } from "react";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
 };
 
-function AppContent() {
+function RootLayout() {
     const location = useLocation();
 
     // Hide navbar and standard bg on match, join, login, and sign-up routes
@@ -46,54 +46,55 @@ function AppContent() {
 
     return (
         <div className={`w-full h-full min-h-screen ${paddingTopClass}`}>
-            {/* Default background — hidden on match/join pages which have their own */}
-
             <AuthProvider>
                 <ModalProvider>
                     <OrganizationProvider>
                         <FeatureProvider>
                             {!isNoNavbarRoute && <Navbar />}
                             <GlobalModal />
-                            <Routes>
-                            <Route path="/join" element={<JoinMatch />} />
-                            <Route path="/login" element={<LoginForm />} />
-                            <Route path="/sign-up" element={<SignUpForm />} />
-                            <Route path="/" element={<Home />} />
-
-                            {/* Protected Routes */}
-                            <Route path="/quiz/:id/editor" element={<ProtectedRoute><QuizEditor /></ProtectedRoute>} />
-                            <Route path="/match/:id/lobby" element={<ProtectedRoute><MatchLobby /></ProtectedRoute>} />
-                            <Route path="/match/:id/play" element={<ProtectedRoute><MatchPlay /></ProtectedRoute>} />
-                            <Route path="/quiz" element={<ProtectedRoute><CreateQuizForm /></ProtectedRoute>} />
-                            <Route path="/statistics" element={<ProtectedRoute><UserStats /></ProtectedRoute>} />
-                            <Route path="/ai/generate" element={<ProtectedRoute><AIQuizGenerator /></ProtectedRoute>} />
-                            <Route path="/ai/review/:jobId" element={<ProtectedRoute><AIQuizReview /></ProtectedRoute>} />
-                            <Route path="/classrooms" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
-                            <Route path="/classrooms/:id" element={<ProtectedRoute><ClassroomDetails /></ProtectedRoute>} />
-                            <Route path="/homework/:id/start" element={<ProtectedRoute><HomeworkStart /></ProtectedRoute>} />
-                            <Route path="/settings/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
-                            <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
-                            <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
-                            <Route path="/billing/cancel" element={<ProtectedRoute><BillingCancel /></ProtectedRoute>} />
-
-                            {/* Redirect old home to root */}
-                            <Route path="/home" element={<Navigate to="/" replace />} />
-                        </Routes>
-                    </FeatureProvider>
-                </OrganizationProvider>
-            </ModalProvider>
-        </AuthProvider>
+                            <Outlet />
+                        </FeatureProvider>
+                    </OrganizationProvider>
+                </ModalProvider>
+            </AuthProvider>
         </div>
     );
 }
 
+const router = createBrowserRouter([
+    {
+        element: <RootLayout />,
+        children: [
+            { path: "/join", element: <JoinMatch /> },
+            { path: "/login", element: <LoginForm /> },
+            { path: "/sign-up", element: <SignUpForm /> },
+            { path: "/", element: <Home /> },
+            { path: "/home", element: <Navigate to="/" replace /> },
+            
+            // Protected Routes
+            { path: "/quiz/:id/editor", element: <ProtectedRoute><QuizEditor /></ProtectedRoute> },
+            { path: "/match/:id/lobby", element: <ProtectedRoute><MatchLobby /></ProtectedRoute> },
+            { path: "/match/:id/play", element: <ProtectedRoute><MatchPlay /></ProtectedRoute> },
+            { path: "/quiz", element: <ProtectedRoute><CreateQuizForm /></ProtectedRoute> },
+            { path: "/statistics", element: <ProtectedRoute><UserStats /></ProtectedRoute> },
+            { path: "/ai/generate", element: <ProtectedRoute><AIQuizGenerator /></ProtectedRoute> },
+            { path: "/ai/review/:jobId", element: <ProtectedRoute><AIQuizReview /></ProtectedRoute> },
+            { path: "/classrooms", element: <ProtectedRoute><Classrooms /></ProtectedRoute> },
+            { path: "/classrooms/:id", element: <ProtectedRoute><ClassroomDetails /></ProtectedRoute> },
+            { path: "/homework/:id/start", element: <ProtectedRoute><HomeworkStart /></ProtectedRoute> },
+            { path: "/settings/organization", element: <ProtectedRoute><OrganizationSettings /></ProtectedRoute> },
+            { path: "/billing", element: <ProtectedRoute><BillingPage /></ProtectedRoute> },
+            { path: "/billing/success", element: <ProtectedRoute><BillingSuccess /></ProtectedRoute> },
+            { path: "/billing/cancel", element: <ProtectedRoute><BillingCancel /></ProtectedRoute> },
+        ]
+    }
+]);
+
 function App() {
     return (
-        <BrowserRouter>
-            <ThemeProvider>
-                <AppContent />
-            </ThemeProvider>
-        </BrowserRouter>
+        <ThemeProvider>
+            <RouterProvider router={router} />
+        </ThemeProvider>
     );
 }
 
