@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import QuestionMedia from "./QuestionMedia";
 import useQuestionSocket from "@/hooks/useQuestionSocket";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
 const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
@@ -33,12 +33,9 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
 
     if (mode === "HOMEWORK") {
       try {
-        const token = localStorage.getItem("token");
-        await axios.post(endpoints.homework_answer(Number(matchId)), {
+        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerIds: selectedIds
-        }, {
-          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

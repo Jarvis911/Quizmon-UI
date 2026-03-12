@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import useQuestionSocket from "@/hooks/useQuestionSocket"
 import QuestionMedia from "./QuestionMedia";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 import { CheckCircle2, XCircle } from "lucide-react";
 
@@ -35,12 +35,9 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
     // Auto-submit immediately for BUTTONS (single-choice)
     if (mode === "HOMEWORK") {
       try {
-        const token = localStorage.getItem("token");
-        await axios.post(endpoints.homework_answer(Number(matchId)), {
+        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerIds: [index]
-        }, {
-          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

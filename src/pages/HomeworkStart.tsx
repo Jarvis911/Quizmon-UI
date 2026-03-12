@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,7 @@ const HomeworkStart = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(endpoints.homework_detail(Number(id)), {
-                    headers: { Authorization: token }
-                });
+                const res = await apiClient.get(endpoints.homework_detail(Number(id)));
                 setHomework(res.data);
                 setQuiz(res.data.quiz);
             } catch (err: any) {

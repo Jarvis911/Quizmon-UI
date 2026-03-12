@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import socket from "@/services/socket";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import { usePopup } from "@/context/PopupContext";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import type { Quiz, LobbyPlayer } from "../types";
 
@@ -18,6 +19,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { MdImageNotSupported } from "react-icons/md";
 
 interface MatchResponse {
     quiz: Quiz;
@@ -30,6 +32,7 @@ interface MatchResponse {
 const MatchLobby = () => {
     const { id: matchId } = useParams<{ id: string }>();
     const { user, token } = useAuth();
+    const { showPopup } = usePopup();
     const [players, setPlayers] = useState<LobbyPlayer[]>([]);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [isHost, setIsHost] = useState(false);
@@ -52,9 +55,7 @@ const MatchLobby = () => {
 
         const fetchMatch = async () => {
             try {
-                const res = await axios.get<MatchResponse>(endpoints.match(Number(matchId)), {
-                    headers: { Authorization: token },
-                });
+                const res = await apiClient.get<MatchResponse>(endpoints.match(Number(matchId)));
                 setQuiz(res.data.quiz);
                 setIsHost(res.data.hostId === user.id);
                 
@@ -120,7 +121,7 @@ const MatchLobby = () => {
         });
 
         socket.on("matchCancelled", ({ message }) => {
-            alert(message);
+            showPopup("Thông báo", message, "warning");
             isNavigationHandled.current = true;
             navigate('/');
         });
@@ -169,6 +170,13 @@ const MatchLobby = () => {
 
     const cancelRoom = () => {
         if (matchId && isHost) {
+            // Since we don't have a confirm popup yet, I'll use showPopup for info/error 
+            // but for actual confirm we might need a separate mechanism or use showPopup with callbacks.
+            // For now, let's keep it simple as requested: "thay vì dùng alert... hãy dùng pop up"
+            // If it's a confirm, I'll stick to native for now OR implement confirm in PopupContext if really needed.
+            // Actually, the user said "ở các thông báo", which usually means alerts. 
+            // I'll replace confirm with a simplified flow or implement confirm in next step.
+            // Let's replace the alert first.
             if (window.confirm("Bạn có chắc chắn muốn hủy phòng này không?")) {
                 socket.emit("cancelMatch", { matchId });
             }
@@ -224,10 +232,14 @@ const MatchLobby = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <CardDescription className="text-foreground/70 font-medium italic">{quiz.description}</CardDescription>
-                        {quiz.image && (
+                        {quiz.image ? (
                             <div className="relative group">
                                 <img src={quiz.image} alt={quiz.title} className="w-full h-40 object-cover rounded-xl shadow-md border border-white/10 group-hover:scale-[1.02] transition-transform duration-300" />
                                 <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                        ) : (
+                            <div className="w-full h-40 bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
+                                <MdImageNotSupported className="w-12 h-12 text-white/20" />
                             </div>
                         )}
                         <div className="grid grid-cols-2 gap-4 pt-2">

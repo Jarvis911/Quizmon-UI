@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useAuth } from "@/context/AuthContext";
+import { usePopup } from "@/context/PopupContext";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ interface Member {
 export default function OrganizationSettings() {
   const { currentOrg, refreshOrganizations } = useOrganization();
   const { user } = useAuth();
+  const { showPopup } = usePopup();
   const [name, setName] = useState(currentOrg?.name || "");
   const [members, setMembers] = useState<Member[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -129,7 +131,7 @@ export default function OrganizationSettings() {
       await apiClient.delete(`${endpoints.organization_members(currentOrg.id)}/${userId}`);
       fetchMembers();
     } catch (err) {
-      alert("Xóa thành viên thất bại. Bạn có thể là chủ sở hữu cuối cùng.");
+      showPopup("Lỗi", "Xóa thành viên thất bại. Bạn có thể là chủ sở hữu cuối cùng.", "destructive");
     }
   };
 

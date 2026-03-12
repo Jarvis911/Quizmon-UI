@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
+import { usePopup } from "@/context/PopupContext";
 import { Loader2 } from "lucide-react";
 import endpoints from "@/api/api.js";
 
@@ -37,8 +38,9 @@ function LocationPicker({ setLocation }) {
   return null;
 }
 
-const LocationQuestionForm = ({ quizId, question, onSaved }) => {
+const LocationQuestionForm = ({ quizId, question, onSaved, setIsDirty }) => {
   const { token } = useAuth();
+  const { showPopup } = usePopup();
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState(null);
 
@@ -50,6 +52,14 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       longitude: undefined,
     },
   });
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    if (setIsDirty) {
+      setIsDirty(isDirty);
+    }
+  }, [isDirty, setIsDirty]);
 
   const onSubmit = async (values) => {
     try {
@@ -64,20 +74,12 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       };
 
       if (question?.id) {
-        const res = await axios.put(endpoints.question_location(question.id), payload, {
-          headers: {
-            Authorization: token,
-          },
-        });
-        alert("Cập nhật câu hỏi thành công!");
+        const res = await apiClient.put(endpoints.question_location(question.id), payload);
+        showPopup("Thành công", "Cập nhật câu hỏi thành công!", "success");
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await axios.post(endpoints.question_locations, payload, {
-          headers: {
-            Authorization: token,
-          },
-        });
-        alert("Tạo câu hỏi thành công");
+        const res = await apiClient.post(endpoints.question_locations, payload);
+        showPopup("Thành công", "Tạo câu hỏi thành công", "success");
         if (onSaved) onSaved(res.data);
       }
 
@@ -85,17 +87,19 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       // setLocation(null);
     } catch (err) {
       console.error(err);
-      alert("Lỗi khi tạo câu hỏi");
+      showPopup("Lỗi", "Lỗi khi tạo câu hỏi", "destructive");
     } finally {
       setLoading(false);
     }
   };
 
   // đồng bộ form khi chọn điểm
-  if (location) {
-    form.setValue("latitude", location.lat);
-    form.setValue("longitude", location.lng);
-  }
+  useEffect(() => {
+    if (location) {
+      form.setValue("latitude", location.lat);
+      form.setValue("longitude", location.lng);
+    }
+  }, [location, form]);
 
   // Centering the data from backend
   useEffect(() => {

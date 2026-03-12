@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAuth } from "@/context/AuthContext";
@@ -41,9 +41,7 @@ const AIQuizGenerator = () => {
 
     const fetchSubscription = async () => {
         try {
-            const res = await axios.get(endpoints.subscription_current, {
-                headers: { Authorization: token }
-            });
+            const res = await apiClient.get(endpoints.subscription_current);
             setSubscription(res.data);
             setUsageMetrics(res.data.usageMetrics || []);
         } catch (err) {
@@ -97,9 +95,8 @@ const AIQuizGenerator = () => {
             formData.append("questionCount", String(questionCount));
             formData.append("questionTypes", JSON.stringify(selectedTypes));
 
-            const res = await axios.post(endpoints.ai_create_job, formData, {
+            const res = await apiClient.post(endpoints.ai_create_job, formData, {
                 headers: {
-                    Authorization: token,
                     "Content-Type": "multipart/form-data",
                 },
             });

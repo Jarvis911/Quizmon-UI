@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
 // Call api
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api.js"
 import { Download } from "lucide-react";
 
@@ -138,15 +138,11 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   useEffect(() => {
     const fetchMatch = async () => {
       try {
-        const res = await axios.get(endpoints.match(Number(matchId)), {
-          headers: { Authorization: token },
-        });
+        const res = await apiClient.get(endpoints.match(Number(matchId)));
         const qId = res.data.quizId;
         setQuizId(qId);
 
-        const ratedRes = await axios.get(endpoints.quiz_isRated(qId), {
-          headers: { Authorization: token },
-        });
+        const ratedRes = await apiClient.get(endpoints.quiz_isRated(qId));
         if (ratedRes) {
           setIsRated(ratedRes.data.rated);
           // Only show rating dialog after the whole animation sequence finishes
@@ -161,9 +157,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
 
   const handleSubmitRating = async () => {
     try {
-      await axios.post(endpoints.rating, { quizId, rating, text }, {
-        headers: { Authorization: token },
-      });
+      await apiClient.post(endpoints.rating, { quizId, rating, text });
       setOpen(false);
       setIsRated(true);
     } catch (err) {
@@ -174,8 +168,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
-      const res = await axios.get(endpoints.report_excel(Number(matchId)), {
-        headers: { Authorization: token },
+      const res = await apiClient.get(endpoints.report_excel(Number(matchId)), {
         responseType: 'blob', // Important for file download
       });
 

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAuth } from "@/context/AuthContext";
+import { usePopup } from "@/context/PopupContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,6 +83,7 @@ const AIQuizReview = () => {
     const { jobId } = useParams();
     const navigate = useNavigate();
     const { token } = useAuth();
+    const { showPopup } = usePopup();
 
     const [job, setJob] = useState<AIGenerationJob | null>(null);
     const [questions, setQuestions] = useState<AIGeneratedQuestion[]>([]);
@@ -113,9 +115,7 @@ const AIQuizReview = () => {
 
     const fetchJob = useCallback(async () => {
         try {
-            const res = await axios.get(endpoints.ai_job(Number(jobId)), {
-                headers: { Authorization: token },
-            });
+            const res = await apiClient.get(endpoints.ai_job(Number(jobId)));
             setJob(res.data);
             setQuestions(res.data.generatedQuestions || []);
         } catch {
@@ -145,7 +145,7 @@ const AIQuizReview = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await axios.get(endpoints.category);
+                const res = await apiClient.get(endpoints.category);
                 setCategories(res.data);
             } catch {
                 console.error("Failed to fetch categories");
@@ -188,15 +188,14 @@ const AIQuizReview = () => {
                 optionsData = { options: editOptions };
             }
 
-            await axios.put(
+            await apiClient.put(
                 endpoints.ai_job_question_content(Number(jobId), selectedQuestion.id),
-                { questionText: editText, optionsData },
-                { headers: { Authorization: token } }
+                { questionText: editText, optionsData }
             );
             await fetchJob();
             setEditing(false);
         } catch {
-            alert("Lỗi khi lưu chỉnh sửa");
+            showPopup("Lỗi", "Không thể lưu chỉnh sửa", "destructive");
         } finally {
             setActionLoading(null);
         }
@@ -209,14 +208,13 @@ const AIQuizReview = () => {
     ) => {
         setActionLoading(questionId);
         try {
-            await axios.put(
+            await apiClient.put(
                 endpoints.ai_job_question(Number(jobId), questionId),
-                { status },
-                { headers: { Authorization: token } }
+                { status }
             );
             await fetchJob();
         } catch {
-            alert("Lỗi khi cập nhật trạng thái");
+            showPopup("Lỗi", "Không thể cập nhật trạng thái", "destructive");
         } finally {
             setActionLoading(null);
         }
@@ -228,15 +226,14 @@ const AIQuizReview = () => {
         setActionLoading(regenQuestionId);
         setRegenDialogOpen(false);
         try {
-            await axios.post(
+            await apiClient.post(
                 endpoints.ai_job_question_regenerate(Number(jobId), regenQuestionId),
-                { userFeedback: regenFeedback || undefined },
-                { headers: { Authorization: token } }
+                { userFeedback: regenFeedback || undefined }
             );
             await fetchJob();
             setRegenFeedback("");
         } catch {
-            alert("Lỗi khi tạo lại câu hỏi");
+            showPopup("Lỗi", "Không thể tạo lại câu hỏi", "destructive");
         } finally {
             setActionLoading(null);
         }
@@ -247,16 +244,15 @@ const AIQuizReview = () => {
         if (!confirm("Bạn có chắc muốn xoá câu hỏi này?")) return;
         setActionLoading(questionId);
         try {
-            await axios.delete(
-                endpoints.ai_job_question_delete(Number(jobId), questionId),
-                { headers: { Authorization: token } }
+            await apiClient.delete(
+                endpoints.ai_job_question_delete(Number(jobId), questionId)
             );
             await fetchJob();
             if (selectedIdx >= questions.length - 1) {
                 setSelectedIdx(Math.max(0, questions.length - 2));
             }
         } catch {
-            alert("Lỗi khi xoá câu hỏi");
+            showPopup("Lỗi", "Không thể xoá câu hỏi", "destructive");
         } finally {
             setActionLoading(null);
         }
@@ -276,19 +272,18 @@ const AIQuizReview = () => {
         if (!quizTitle || !quizCategoryId) return;
         setCreating(true);
         try {
-            const res = await axios.post(
+            const res = await apiClient.post(
                 endpoints.ai_job_approve_all(Number(jobId)),
                 {
                     title: quizTitle,
                     description: quizDescription || quizTitle,
                     categoryId: Number(quizCategoryId),
-                },
-                { headers: { Authorization: token } }
+                }
             );
             setCreateDialogOpen(false);
             navigate(`/quiz/${res.data.id}/editor`);
         } catch (err: any) {
-            alert(err.response?.data?.message || "Lỗi tạo quiz");
+            showPopup("Lỗi", err.response?.data?.message || "Không thể tạo quiz", "destructive");
         } finally {
             setCreating(false);
         }

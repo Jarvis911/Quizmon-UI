@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
 import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2 } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import axios from "axios";
+import apiClient from "../../api/client";
 import endpoints from "../../api/api";
 import { SiGoogleclassroom } from "react-icons/si";
 import { FaHistory } from "react-icons/fa";
@@ -40,9 +40,7 @@ export default function Navbar() {
   const fetchNotifications = async () => {
     if (!token) return;
     try {
-      const res = await axios.get(endpoints.notifications, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiClient.get(endpoints.notifications);
       setNotifications(res.data);
       setUnreadCount(res.data.filter((n: any) => !n.isRead).length);
     } catch (error) {
@@ -60,9 +58,7 @@ export default function Navbar() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await axios.put(endpoints.notification_read_all, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await apiClient.put(endpoints.notification_read_all, {});
       fetchNotifications();
     } catch (error) {
       console.error("Failed to mark all as read", error);
@@ -72,9 +68,7 @@ export default function Navbar() {
   const handleNotificationClick = async (notif: any) => {
     if (!notif.isRead) {
       try {
-        await axios.put(endpoints.notification_read(notif.id), {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await apiClient.put(endpoints.notification_read(notif.id), {});
         fetchNotifications();
       } catch (error) {
         console.error("Failed to mark as read", error);

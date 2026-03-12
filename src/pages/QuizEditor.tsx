@@ -1,9 +1,11 @@
-import { useState, useEffect, ReactNode } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect, ReactNode, useCallback } from "react";
+import { useNavigate, useParams, useBeforeUnload, useBlocker } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, MapIcon, Settings } from "lucide-react";
-import axios from "axios";
+import { Plus, MapIcon, Settings, Save, LogOut } from "lucide-react";
+import { MdImageNotSupported } from "react-icons/md";
+import apiClient from "@/api/client";
 import endpoints from "@/api/api";
+import { usePopup } from "@/context/PopupContext";
 import type { Quiz } from "@/types";
 
 import ButtonQuestionForm from "@/components/question/ButtonQuestionForm";
@@ -42,12 +44,44 @@ const QuizEditor = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [creatingType, setCreatingType] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isDirty, setIsDirty] = useState(false);
+    const { showPopup } = usePopup();
+    const navigate = useNavigate();
+
+    // Browser-level navigation warning (refresh/close)
+    useBeforeUnload(
+        (event) => {
+            if (isDirty) {
+                event.preventDefault();
+            }
+        },
+        { capture: true }
+    );
+
+    // React Router navigation blocker
+    const blocker = useBlocker(
+        ({ currentLocation, nextLocation }) =>
+            isDirty && currentLocation.pathname !== nextLocation.pathname
+    );
+
+    useEffect(() => {
+        if (blocker.state === "blocked") {
+            showPopup(
+                "Thay đổi chưa lưu",
+                "Bạn có thay đổi chưa lưu. Mọi thay đổi sẽ bị mất nếu bạn rời đi. Bạn có chắc chắn muốn thoát?",
+                "warning",
+                () => {
+                    blocker.proceed();
+                }
+            );
+        }
+    }, [blocker.state, showPopup]);
 
     useEffect(() => {
         const fetchQuiz = async () => {
             if (!id) return;
             try {
-                const res = await axios.get<QuizResponse>(endpoints.quiz(Number(id)));
+                const res = await apiClient.get<QuizResponse>(endpoints.quiz(Number(id)));
                 const normalized: EditorQuestion[] = (res.data.questions || []).map((q) => ({
                     id: q.id,
                     text: q.text,
@@ -94,7 +128,10 @@ const QuizEditor = () => {
         if (loading) return <p className="text-muted-foreground animate-pulse font-medium">Đang tải quiz...</p>;
 
         if (creatingType) {
-            const formProps = { quizId: id!, onSaved: handleSaveNew, question: undefined as any };
+            const formProps = { quizId: id!, onSaved: (newQ) => {
+                handleSaveNew(newQ);
+                setIsDirty(false);
+            }, question: undefined as any, setIsDirty };
 
             switch (creatingType) {
                 case "BUTTONS":
@@ -125,7 +162,10 @@ const QuizEditor = () => {
             );
         }
 
-        const formProps = { question: q, quizId: id!, onSaved: handleUpdate };
+        const formProps = { question: q, quizId: id!, onSaved: (updated) => {
+            handleUpdate(updated);
+            setIsDirty(false);
+        }, setIsDirty };
 
         switch (q.type) {
             case "BUTTONS":
@@ -142,6 +182,22 @@ const QuizEditor = () => {
                 return <LocationQuestionForm {...formProps} />;
             default:
                 return <p className="text-destructive font-bold">Loại câu hỏi chưa được hỗ trợ</p>;
+        }
+    };
+
+    const handleBack = () => {
+        if (isDirty) {
+            showPopup(
+                "Thay đổi chưa lưu",
+                "Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn thoát?",
+                "warning",
+                () => {
+                    setIsDirty(false);
+                    setTimeout(() => navigate("/"), 0);
+                }
+            );
+        } else {
+            navigate("/");
         }
     };
 
@@ -163,6 +219,16 @@ const QuizEditor = () => {
 
             {/* Navbar preview */}
             <footer className="fixed inset-x-0 bottom-0 overflow-x-auto h-24 flex items-center gap-3 px-4 bg-card/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-40">
+                {/* Save and Exit button */}
+                <div
+                    className="min-w-20 h-20 relative rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-green-500/30 hover:border-green-500/50 bg-green-500/10 group shrink-0"
+                    onClick={handleBack}
+                    title="Lưu quiz và thoát"
+                >
+                    <LogOut className="w-6 h-6 text-green-500 mb-1 group-hover:translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Lưu & Thoát</span>
+                </div>
+
                 {/* General Information Square */}
                 <div
                     className="min-w-20 h-20 relative rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-primary/30 hover:border-primary/50 bg-primary/5 group shrink-0"
@@ -212,7 +278,7 @@ const QuizEditor = () => {
                                 return null;
                             })
                         ) : (
-                            <MapIcon className="w-10 h-10 text-muted-foreground/40" />
+                            <MdImageNotSupported className="w-10 h-10 text-muted-foreground/40" />
                         )}
                     </div>
                 ))}

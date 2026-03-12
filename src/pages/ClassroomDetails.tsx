@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useParams, useNavigate } from "react-router-dom";
+import { usePopup } from "@/context/PopupContext";
 import endpoints from "../api/api";
 import { ArrowLeft, Users, FileText, Settings, Copy, Check } from "lucide-react";
 
@@ -40,6 +41,7 @@ interface ClassroomDetails {
 export default function ClassroomDetails() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { showPopup } = usePopup();
     const [classroom, setClassroom] = useState<ClassroomDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
@@ -61,15 +63,11 @@ export default function ClassroomDetails() {
     const fetchClassroom = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
-            if (!token) return;
-            const res = await axios.get(endpoints.classroom(Number(id)), {
-                headers: { Authorization: token }
-            });
+            const res = await apiClient.get(endpoints.classroom(Number(id)));
             setClassroom(res.data);
         } catch (error: any) {
             console.error("Failed to fetch classroom", error);
-            alert("Lỗi tải thông tin lớp học");
+            showPopup("Lỗi", "Không thể tải thông tin lớp học", "destructive");
             navigate('/classrooms');
         } finally {
             setLoading(false);

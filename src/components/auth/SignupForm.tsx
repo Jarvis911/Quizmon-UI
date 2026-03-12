@@ -3,6 +3,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useAuth } from "../../context/AuthContext"
+import { usePopup } from "@/context/PopupContext";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Smile } from "lucide-react";
 
@@ -29,6 +30,7 @@ interface User {
 
 export function SignUpForm({ className, ...props }: SignupFormProps) {
   const { signup } = useAuth();
+  const { showPopup } = usePopup();
   const navigate = useNavigate();
   const {
     register,
@@ -43,7 +45,7 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
   const onSubmit = async (data: any) => {
     const ok = await signup(data.username, data.email, data.password);
     if (!ok) {
-      alert("Đăng ký thất bại, vui lòng thử lại!");
+      showPopup("Đăng ký thất bại", "Vui lòng kiểm tra lại thông tin và thử lại!", "destructive");
     }
     else {
       navigate("/quiz/create");

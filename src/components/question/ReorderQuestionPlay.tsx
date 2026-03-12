@@ -5,7 +5,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { SortableItem } from "@/components/SortableItem";
 import QuestionMedia from "./QuestionMedia";
 import useQuestionSocket from "@/hooks/useQuestionSocket";
-import axios from "axios";
+import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
 const ITEM_COLORS = [
@@ -59,12 +59,9 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
 
     if (mode === "HOMEWORK") {
       try {
-        const token = localStorage.getItem("token");
-        await axios.post(endpoints.homework_answer(Number(matchId)), {
+        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerIds: answerIds
-        }, {
-          headers: { Authorization: token }
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

@@ -1,8 +1,16 @@
-// QuestionMedia.jsx (Component chung để hiển thị media, giảm trùng lặp UI)
 import ReactPlayer from "react-player";
+import { MdImageNotSupported } from "react-icons/md";
 
 const QuestionMedia = ({ media }) => {
-  if (!media) return null;
+  if (!media) {
+    return (
+      <div className="flex-1 min-w-[300px] flex-shrink-0">
+        <div className="w-full aspect-[4/3] overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <MdImageNotSupported className="w-16 h-16 text-slate-300 dark:text-slate-600" />
+        </div>
+      </div>
+    );
+  }
   const isVideo = media.type === "VIDEO";
 
   return (

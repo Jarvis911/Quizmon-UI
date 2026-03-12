@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import apiClient from "@/api/client";
 import { useNavigate } from "react-router-dom";
+import { usePopup } from "@/context/PopupContext";
 import endpoints from "../api/api";
 import { Users, Plus, DoorOpen, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ export default function Classrooms() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [joinCode, setJoinCode] = useState("");
     const [createForm, setCreateForm] = useState({ name: "", description: "" });
+    const { showPopup } = usePopup();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -39,11 +41,7 @@ export default function Classrooms() {
     const fetchClassrooms = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
-            if (!token) return;
-            const res = await axios.get(endpoints.classrooms, {
-                headers: { Authorization: token }
-            });
+            const res = await apiClient.get(endpoints.classrooms);
             setClassrooms(res.data);
         } catch (error) {
             console.error("Failed to fetch classrooms", error);
@@ -55,30 +53,24 @@ export default function Classrooms() {
     const handleJoinClassroom = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("token");
-            await axios.post(endpoints.classroom_join, { code: joinCode }, {
-                headers: { Authorization: token }
-            });
-            setIsJoinModalOpen(false);
+            await apiClient.post(endpoints.classroom_join, { code: joinCode });
             setJoinCode("");
             fetchClassrooms();
+            showPopup("Thành công", "Đã tham gia lớp học thành công!", "success");
         } catch (error: any) {
-            alert(error.response?.data?.message || "Failed to join classroom");
+            showPopup("Lỗi", error.response?.data?.message || "Không thể tham gia lớp học", "destructive");
         }
     };
 
     const handleCreateClassroom = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("token");
-            await axios.post(endpoints.classrooms, createForm, {
-                headers: { Authorization: token }
-            });
-            setIsCreateModalOpen(false);
+            await apiClient.post(endpoints.classrooms, createForm);
             setCreateForm({ name: "", description: "" });
             fetchClassrooms();
+            showPopup("Thành công", "Đã tạo lớp học thành công!", "success");
         } catch (error: any) {
-            alert(error.response?.data?.message || "Failed to create classroom");
+            showPopup("Lỗi", error.response?.data?.message || "Không thể tạo lớp học", "destructive");
         }
     };
 

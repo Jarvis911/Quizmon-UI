@@ -1,9 +1,10 @@
 import { useState, useCallback, ChangeEvent, DragEvent, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { usePopup } from "@/context/PopupContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import apiClient from "@/api/client";
 import Cropper, { Area } from "react-easy-crop";
 import { Upload, Loader2, Settings } from "lucide-react";
 import endpoints from "@/api/api";
@@ -57,6 +58,7 @@ interface QuizSettingsModalProps {
 
 const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettingsModalProps) => {
     const { token } = useAuth();
+    const { showPopup } = usePopup();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -80,7 +82,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
 
     useEffect(() => {
         if (open) {
-            axios.get(endpoints.category).then((res) => {
+            apiClient.get(endpoints.category).then((res) => {
                 setCategories(res.data);
             });
             // Reset form when opened with new quiz data
@@ -176,9 +178,8 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                 }
             }
 
-            const res = await axios.put(endpoints.quiz(quiz.id), formData, {
+            const res = await apiClient.put(endpoints.quiz(quiz.id), formData, {
                 headers: {
-                    Authorization: `${token}`,
                     "Content-Type": "multipart/form-data",
                 },
             });
@@ -188,7 +189,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
         } catch (err) {
             const error = err as { response?: { data?: unknown }; message?: string };
             console.error("Error updating quiz:", error.response?.data || error.message);
-            alert("Lỗi cập nhật quiz");
+            showPopup("Lỗi", "Không thể cập nhật quiz", "destructive");
         } finally {
             setLoading(false);
         }
