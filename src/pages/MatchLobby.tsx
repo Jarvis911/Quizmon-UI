@@ -22,6 +22,9 @@ import {
 interface MatchResponse {
     quiz: Quiz;
     hostId: number;
+    participants: {
+        user: { id: number; username: string };
+    }[];
 }
 
 const MatchLobby = () => {
@@ -54,6 +57,17 @@ const MatchLobby = () => {
                 });
                 setQuiz(res.data.quiz);
                 setIsHost(res.data.hostId === user.id);
+                
+                // Initialize players list immediately from DB
+                if (res.data.participants) {
+                    const lobbyPlayers: LobbyPlayer[] = res.data.participants.map(p => ({
+                        userId: p.user.id,
+                        username: p.user.username,
+                        isReady: false,
+                        isHost: p.user.id === res.data.hostId,
+                    }));
+                    setPlayers(lobbyPlayers);
+                }
             } catch (err) {
                 console.error(err);
                 setError("Cannot load match data!");
@@ -61,7 +75,17 @@ const MatchLobby = () => {
         };
         fetchMatch();
 
+        const onConnect = () => {
+            console.log("⚡ [Socket] Connected/Reconnected. Joining match...");
+            socket.emit("joinMatch", { 
+                matchId, 
+                userId: user.id, 
+                username: user.username 
+            });
+        };
+
         const updatePlayers = (value: LobbyPlayer[]) => {
+            console.log("👥 [Socket] Player list updated:", value);
             setPlayers(value);
         };
 
@@ -69,6 +93,7 @@ const MatchLobby = () => {
             setError(message);
         };
 
+        socket.on("connect", onConnect);
         socket.on("gameStarted", () => {
             isNavigationHandled.current = true;
             navigate(`/match/${matchId}/play`);
@@ -86,11 +111,9 @@ const MatchLobby = () => {
         });
         socket.on("leftMatch", () => {
             if (alreadyInMatchId) {
-                // After successfully leaving the old match, attempt to join this one again
                 setAlreadyInMatchId(null);
                 socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
             } else {
-                // If it wasn't from the dialog, it means we chose to leave this room
                 isNavigationHandled.current = true;
                 navigate('/');
             }
@@ -102,10 +125,13 @@ const MatchLobby = () => {
             navigate('/');
         });
 
-        socket.connect();
-        socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
+        // If already connected, manual emit once. If not, the 'connect' listener will handle it.
+        if (socket.connected) {
+            onConnect();
+        }
 
         return () => {
+            socket.off("connect", onConnect);
             socket.off("playerJoined");
             socket.off("playerLeft");
             socket.off("error", updateError);

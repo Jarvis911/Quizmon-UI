@@ -68,10 +68,22 @@ const MatchPlay = () => {
         };
     }, []);
 
-    // Request first question
+    // Request first question and handle reconnection
     useEffect(() => {
-        socket.connect();
-        socket.emit("requestCurrentQuestion", { matchId });
+        const onConnect = () => {
+            console.log("⚡ [Socket] Connected/Reconnected. Requesting current question...");
+            socket.emit("requestCurrentQuestion", { matchId });
+        };
+
+        socket.on("connect", onConnect);
+
+        if (socket.connected) {
+            onConnect();
+        }
+
+        return () => {
+            socket.off("connect", onConnect);
+        };
     }, [matchId]);
 
     // Socket event handlers
