@@ -182,28 +182,28 @@ const RangeQuestion = ({ quizId, question, onSaved, onDirtyChange }) => {
             "Content-Type": "multipart/form-data",
           },
         });
-          showAlert({
-            title: "Thành công",
-            message: "Cập nhật câu hỏi thanh giá trị thành công!",
-            type: "success"
-          });
-          if (onSaved) onSaved(res.data);
-        } else {
-          const res = await apiClient.post(endpoints.question_ranges, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-  
-          showAlert({
-            title: "Thành công",
-            message: "Tạo câu hỏi thanh giá trị thành công!",
-            type: "success"
-          });
-          if (onSaved) onSaved(res.data);
-          // form.reset();
-          // removeImage();
-        }
+        showAlert({
+          title: "Thành công",
+          message: "Cập nhật câu hỏi thanh giá trị thành công!",
+          type: "success"
+        });
+        if (onSaved) onSaved(res.data);
+      } else {
+        const res = await apiClient.post(endpoints.question_ranges, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        showAlert({
+          title: "Thành công",
+          message: "Tạo câu hỏi thanh giá trị thành công!",
+          type: "success"
+        });
+        if (onSaved) onSaved(res.data);
+        // form.reset();
+        // removeImage();
+      }
     } catch (err) {
       console.error(err);
       showAlert({
@@ -266,18 +266,18 @@ const RangeQuestion = ({ quizId, question, onSaved, onDirtyChange }) => {
                     name="imageEffect"
                     render={({ field }) => (
                       <FormItem>
-                         <FormLabel>Hiệu ứng lúc làm bài</FormLabel>
-                         <FormControl>
-                            <select
-                                {...field}
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            >
-                                <option value="NONE">Không có</option>
-                                <option value="BLUR_TO_CLEAR">Mờ dần sang Rõ</option>
-                                <option value="ZOOM_IN">Thu phóng (Lớn lên)</option>
-                                <option value="ZOOM_OUT">Thu phóng (Nhỏ lại)</option>
-                            </select>
-                         </FormControl>
+                        <FormLabel>Hiệu ứng lúc làm bài</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          >
+                            <option value="NONE">Không có</option>
+                            <option value="BLUR_TO_CLEAR">Mờ dần sang Rõ</option>
+                            <option value="ZOOM_IN">Thu phóng (Lớn lên)</option>
+                            <option value="ZOOM_OUT">Thu phóng (Nhỏ lại)</option>
+                          </select>
+                        </FormControl>
                       </FormItem>
                     )}
                   />

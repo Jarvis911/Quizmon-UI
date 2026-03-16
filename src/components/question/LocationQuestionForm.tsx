@@ -68,17 +68,17 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       if (question?.id) {
         const res = await apiClient.put(endpoints.question_location(question.id), payload);
         showAlert({
-            title: "Thành công",
-            message: "Cập nhật câu hỏi thành công!",
-            type: "success"
+          title: "Thành công",
+          message: "Cập nhật câu hỏi thành công!",
+          type: "success"
         });
         if (onSaved) onSaved(res.data);
       } else {
         const res = await apiClient.post(endpoints.question_locations, payload);
         showAlert({
-            title: "Thành công",
-            message: "Tạo câu hỏi thành công",
-            type: "success"
+          title: "Thành công",
+          message: "Tạo câu hỏi thành công",
+          type: "success"
         });
         if (onSaved) onSaved(res.data);
       }

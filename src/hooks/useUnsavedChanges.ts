@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useBlocker } from "react-router-dom";
 import { useModal } from "@/context/ModalContext";
 
@@ -9,10 +9,14 @@ import { useModal } from "@/context/ModalContext";
 export const useUnsavedChanges = (isDirty: boolean) => {
   const { showConfirm } = useModal();
 
+  const isDirtyRef = useRef(isDirty);
+  // Update ref during render to ensure it's always fresh for callbacks
+  isDirtyRef.current = isDirty;
+
   // Handlers for browser-level navigation (refresh, tab close)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
+      if (isDirtyRef.current) {
         e.preventDefault();
         e.returnValue = ""; // Most browsers require this to show the default dialog
       }
@@ -20,14 +24,14 @@ export const useUnsavedChanges = (isDirty: boolean) => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
+  }, []);
 
   // Handler for internal React Router navigation
   const blocker = useBlocker(
     useCallback(
       ({ currentLocation, nextLocation }) =>
-        isDirty && currentLocation.pathname !== nextLocation.pathname,
-      [isDirty]
+        isDirtyRef.current && currentLocation.pathname !== nextLocation.pathname,
+      []
     )
   );
 

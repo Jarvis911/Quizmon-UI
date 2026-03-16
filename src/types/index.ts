@@ -266,6 +266,9 @@ export interface AIGenerationJob {
     status: AIGenerationStatus;
     questionCount: number;
     errorMessage?: string | null;
+    suggestedTitle?: string | null;
+    suggestedDescription?: string | null;
+    suggestedCategoryId?: number | null;
     userId: number;
     generatedQuestions?: AIGeneratedQuestion[];
     _count?: { generatedQuestions: number };

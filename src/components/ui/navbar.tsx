@@ -11,6 +11,8 @@ import endpoints from "../../api/api";
 import { SiGoogleclassroom } from "react-icons/si";
 import { FaHistory } from "react-icons/fa";
 import { GrMoney } from "react-icons/gr";
+import QuizSearch from "../quiz/QuizSearch";
+import { Quiz } from "../../types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +36,8 @@ export default function Navbar() {
   const { selectedTheme, themeId, handleThemeChange } = useTheme();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,6 +58,41 @@ export default function Navbar() {
     // Poll every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
+  }, [token]);
+
+  // Fetch all quizzes for search index
+  useEffect(() => {
+    const fetchAllQuizzes = async () => {
+      try {
+        const categoriesRes = await apiClient.get(endpoints.category);
+        const categories = categoriesRes.data;
+        
+        let allQuizzes: Quiz[] = [];
+        
+        // Fetch my quizzes
+        if (token) {
+          const myQuizzesRes = await apiClient.get(endpoints.quizzes);
+          allQuizzes = [...myQuizzesRes.data];
+        }
+
+        // Fetch category quizzes
+        const categoryPromises = categories.map((cat: any) => 
+          apiClient.get(endpoints.getQuizByCategory(cat.id))
+        );
+        const categoryResponses = await Promise.all(categoryPromises);
+        categoryResponses.forEach(res => {
+          allQuizzes = [...allQuizzes, ...res.data];
+        });
+
+        // Unique by ID
+        const uniqueQuizzes = Array.from(new Map(allQuizzes.map(q => [q.id, q])).values());
+        setQuizzes(uniqueQuizzes);
+      } catch (err) {
+        console.error("Navbar: Failed to fetch quizzes for search", err);
+      }
+    };
+
+    fetchAllQuizzes();
   }, [token]);
 
   const handleMarkAllAsRead = async () => {
@@ -138,7 +177,7 @@ export default function Navbar() {
         >
           Quizmon
         </div>
-        {token && <OrgSwitcher />}
+        {token && !isSearchExpanded && <OrgSwitcher />}
       </div>
 
       {/* Middle - Search & Navigation (Hidden in compact variant) */}
@@ -146,20 +185,31 @@ export default function Navbar() {
         <div className="flex-1 flex flex-row items-center justify-center gap-2 md:gap-6 mx-2 md:mx-6 max-w-3xl">
           {/* Main Navigation Links */}
           {token && (
-            <div className="hidden md:flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-inner">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4">
+            <div className={`hidden lg:flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-inner transition-opacity duration-300 ${isSearchExpanded ? 'opacity-0 pointer-events-none w-0' : 'opacity-100'}`}>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
                 <HomeIcon className="w-4 h-4 mr-2" /> Trang chủ
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
                 <SiGoogleclassroom className="w-4 h-4 mr-2" /> Lớp học
               </Button>
             </div>
           )}
 
+          {/* Search Bar Integration */}
+          <div className={`flex items-center transition-all duration-300 ${isSearchExpanded ? 'flex-1 justify-center' : 'w-auto'}`}>
+            <QuizSearch 
+              quizzes={quizzes}
+              variant="navbar"
+              onExpandChange={setIsSearchExpanded}
+              onPlay={(id) => navigate(`/match/${id}/lobby`)} // Simplified play logic for navbar
+              onEdit={(id) => navigate(`/quiz/${id}/editor`)}
+            />
+          </div>
+
           {/* Join Form */}
-          <div className="flex-1 flex flex-row gap-2 max-w-md ml-auto justify-end">
+          <div className={`flex flex-row gap-2 max-w-md ml-auto justify-end transition-opacity duration-300 ${isSearchExpanded ? 'opacity-0 pointer-events-none w-0' : 'opacity-100'}`}>
             <Button
-              className="text-sm md:text-base font-black px-6"
+              className="text-sm md:text-base font-black px-6 whitespace-nowrap"
               variant="outline"
               size="default"
               onClick={handleJoinCode}>Tham gia đấu</Button>
@@ -168,7 +218,7 @@ export default function Navbar() {
       )}
 
       {/* Right - Avatar + Actions */}
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center gap-3 transition-opacity duration-300 ${isSearchExpanded ? 'hidden md:flex' : 'flex'}`}>
 
         {token ? (
           <div className="flex items-center gap-3">

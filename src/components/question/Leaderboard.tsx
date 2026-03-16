@@ -22,7 +22,7 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
       ringColor: "ring-yellow-400",
       bg: "from-yellow-500/30 to-amber-600/30",
       borderColor: "border-yellow-400/40",
-      label: "🥇",
+      label: "HẠNG 1",
       labelBg: "bg-yellow-400",
       scale: "scale-110",
       textSize: "text-lg",
@@ -33,7 +33,7 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
       ringColor: "ring-gray-300",
       bg: "from-gray-400/20 to-gray-500/20",
       borderColor: "border-gray-300/40",
-      label: "🥈",
+      label: "HẠNG 2",
       labelBg: "bg-gray-300",
       scale: "",
       textSize: "text-base",
@@ -44,7 +44,7 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
       ringColor: "ring-amber-600",
       bg: "from-amber-700/20 to-amber-800/20",
       borderColor: "border-amber-600/40",
-      label: "🥉",
+      label: "HẠNG 3",
       labelBg: "bg-amber-600",
       scale: "",
       textSize: "text-base",
@@ -68,7 +68,9 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
             {(player.displayName || player.username || "?")[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className="absolute -top-1 -right-1 text-lg">{config.label}</span>
+        <span className={`absolute -top-3 -right-3 text-[10px] font-black px-2 py-1 rounded-full text-white shadow-lg ${config.labelBg}`}>
+          {config.label}
+        </span>
       </div>
 
       {/* Name */}
@@ -203,7 +205,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
       <div className="relative z-10 w-full max-w-2xl">
         {/* Title */}
         <h1 className={`text-4xl md:text-5xl font-black text-foreground text-center mb-2 drop-shadow-2xl transition-all duration-700 ${podiumStep > 0 ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
-          🏆 Bảng Xếp Hạng
+          Bảng Xếp Hạng
         </h1>
         <p className={`text-muted-foreground font-bold text-center mb-12 text-sm uppercase tracking-widest transition-opacity duration-700 ${podiumStep > 0 ? "opacity-100" : "opacity-0"}`}>
           Khám phá người chiến thắng!
@@ -283,7 +285,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
               onClick={handleGoHome}
               className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-[0_8px_0_0_rgba(0,0,0,0.1)] hover:translate-y-[-2px] hover:shadow-[0_12px_20px_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-none transition-all duration-300"
             >
-              🏠 TRỞ VỀ TRANG CHỦ
+              TRỞ VỀ TRANG CHỦ
             </Button>
           </div>
         </div>
@@ -293,7 +295,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-card/95 backdrop-blur-2xl border-white/10 text-foreground max-w-sm rounded-4xl shadow-3xl">
           <DialogHeader>
-            <DialogTitle className="text-foreground text-center text-2xl font-black">⭐ Đánh giá Quiz</DialogTitle>
+            <DialogTitle className="text-foreground text-center text-2xl font-black">Đánh giá bộ câu hỏi</DialogTitle>
           </DialogHeader>
           <div className="flex justify-center gap-3 my-6">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -323,7 +325,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
               disabled={rating === 0}
               className="bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
             >
-              ✅ Gửi đánh giá
+              Gửi đánh giá
             </Button>
           </DialogFooter>
         </DialogContent>

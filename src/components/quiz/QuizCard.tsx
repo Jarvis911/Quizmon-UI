@@ -40,7 +40,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
                 ) : (
                     <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
                         <MdImageNotSupported className="w-12 h-12 mb-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Không có ảnh</span>
                     </div>
                 )}
                 
@@ -52,14 +52,15 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                 difficulty === 'EASY' ? 'text-emerald-500' : 
                                 difficulty === 'MEDIUM' ? 'text-amber-500' : 'text-rose-500'
                              }`}>
-                                {difficulty}
+                                {difficulty === 'EASY' ? 'DỄ' : 
+                                difficulty === 'MEDIUM' ? 'VỪA' : 'KHÓ'}
                              </span>
                         </div>
                     )}
                     {isAiGenerated && (
                         <div className="bg-emerald-500/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-emerald-400">
                              <span className="text-[10px] font-black text-white uppercase tracking-wider">
-                                AI GENERATED
+                                TẠO BỞI AI
                              </span>
                         </div>
                     )}

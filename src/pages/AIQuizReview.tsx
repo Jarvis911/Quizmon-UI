@@ -121,6 +121,17 @@ const AIQuizReview = () => {
             const res = await apiClient.get(endpoints.ai_job(Number(jobId)));
             setJob(res.data);
             setQuestions(res.data.generatedQuestions || []);
+            
+            // Set suggestions as initial defaults
+            if (res.data.suggestedTitle) {
+                setQuizTitle(prev => prev || res.data.suggestedTitle);
+            }
+            if (res.data.suggestedDescription) {
+                setQuizDescription(prev => prev || res.data.suggestedDescription);
+            }
+            if (res.data.suggestedCategoryId) {
+                setQuizCategoryId(prev => prev || String(res.data.suggestedCategoryId));
+            }
         } catch {
             console.error("Failed to fetch job");
         } finally {
@@ -306,8 +317,10 @@ const AIQuizReview = () => {
                 }
             );
             setCreateDialogOpen(false);
-            setEditing(false); // Just in case
-            navigate(`/quiz/${res.data.id}/editor`);
+            setEditing(false);
+            requestAnimationFrame(() => {
+                navigate(`/quiz/${res.data.id}/editor`);
+            });
         } catch (err: any) {
             showAlert({
                 title: "Lỗi",

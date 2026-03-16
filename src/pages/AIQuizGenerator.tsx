@@ -39,9 +39,15 @@ const AIQuizGenerator = () => {
 
     useUnsavedChanges(isDirty);
 
-    useEffect(() => {
-        setIsDirty(!!instruction || !!pdfFile);
-    }, [instruction, pdfFile]);
+    const handleInstructionChange = (val: string) => {
+        setInstruction(val);
+        if (val) setIsDirty(true);
+    };
+
+    const handleFileChange = (file: File | null) => {
+        setPdfFile(file);
+        if (file) setIsDirty(true);
+    };
 
     useEffect(() => {
         fetchSubscription();
@@ -74,13 +80,13 @@ const AIQuizGenerator = () => {
         setDragOver(false);
         const file = e.dataTransfer.files[0];
         if (file && file.type === "application/pdf") {
-            setPdfFile(file);
+            handleFileChange(file);
         }
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) setPdfFile(file);
+        if (file) handleFileChange(file);
     };
 
     const handleGenerate = async () => {
@@ -109,8 +115,11 @@ const AIQuizGenerator = () => {
                 },
             });
 
-            setIsDirty(false); // Reset before navigation
-            navigate(`/ai/review/${res.data.id}`);
+            setIsDirty(false); 
+            // Small delay to ensure state update is processed before navigation
+            requestAnimationFrame(() => {
+                navigate(`/ai/review/${res.data.id}`);
+            });
         } catch (err: any) {
             setError(
                 err.response?.data?.message ||
@@ -181,7 +190,7 @@ const AIQuizGenerator = () => {
                                 <Textarea
                                     placeholder="Ví dụ: Tạo quiz về lịch sử Việt Nam thời kỳ phong kiến, tập trung vào các triều đại Lý, Trần, Lê..."
                                     value={instruction}
-                                    onChange={(e) => setInstruction(e.target.value)}
+                                    onChange={(e) => handleInstructionChange(e.target.value)}
                                     className="min-h-[120px] bg-foreground/5 border-2 border-white/5 focus:border-primary/50 rounded-2xl resize-none text-foreground font-medium p-4 transition-all text-sm"
                                 />
                             </div>
@@ -229,7 +238,7 @@ const AIQuizGenerator = () => {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                                            onClick={() => setPdfFile(null)}
+                                            onClick={() => handleFileChange(null)}
                                         >
                                             <X className="w-4 h-4" />
                                         </Button>

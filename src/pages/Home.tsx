@@ -228,28 +228,28 @@ const Home = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                     <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><SiGoogleclassroom className="text-indigo-600" size={20} /> Assign Homework</h3>
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><SiGoogleclassroom className="text-indigo-600" size={20} /> Giao Bài Tập</h3>
                             <button onClick={() => setIsHomeworkModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
                         </div>
                         <form onSubmit={handleSubmitHomework} className="p-6 space-y-5">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Classroom *</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Chọn Lớp Học *</label>
                                 <select
                                     required
                                     value={homeworkForm.classroomId}
                                     onChange={e => setHomeworkForm({ ...homeworkForm, classroomId: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                                 >
-                                    <option value="" disabled>-- Choose a class --</option>
+                                    <option value="" disabled>-- Chọn một lớp --</option>
                                     {classrooms.map(c => (
                                         <option key={c.id} value={c.id}>{c.name}</option>
                                     ))}
                                 </select>
-                                {classrooms.length === 0 && <p className="text-xs text-red-500 mt-2">You haven't created any classrooms yet.</p>}
+                                {classrooms.length === 0 && <p className="text-xs text-red-500 mt-2">Bạn chưa tạo lớp học nào.</p>}
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Deadline (Optional)</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Hạn chót (Tùy chọn)</label>
                                 <input
                                     type="datetime-local"
                                     value={homeworkForm.deadline}
@@ -267,13 +267,13 @@ const Home = () => {
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                                 />
                                 <label htmlFor="strictMode" className="text-sm font-medium text-orange-900 cursor-pointer select-none">
-                                    <strong>Strict Mode:</strong> Prevent students from switching browser tabs while taking the quiz.
+                                    <strong>Chế độ Nghiêm ngặt:</strong> Ngăn học sinh chuyển tab trình duyệt khi đang làm bài.
                                 </label>
                             </div>
 
                             <div className="flex gap-3 pt-4">
-                                <button type="button" onClick={() => setIsHomeworkModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Cancel</button>
-                                <button type="submit" disabled={!homeworkForm.classroomId || classrooms.length === 0} className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50">Assign Match</button>
+                                <button type="button" onClick={() => setIsHomeworkModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Hủy</button>
+                                <button type="submit" disabled={!homeworkForm.classroomId || classrooms.length === 0} className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50">Giao Bài</button>
                             </div>
                         </form>
                     </div>
@@ -287,19 +287,15 @@ const Home = () => {
 const LandingHero = ({ navigate }: { navigate: (path: string) => void }) => {
     return (
         <div className="relative w-full py-12 lg:py-20 flex flex-col items-center justify-center text-center overflow-hidden">
-            <div className="absolute top-10 left-10 w-16 h-16 bg-blue-500 rounded-2xl rotate-12 opacity-80 animate-bounce" style={{ animationDuration: '3s' }} />
-            <div className="absolute bottom-20 left-20 w-12 h-12 bg-orange-400 rounded-full opacity-80 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }} />
-            <div className="absolute top-20 right-20 w-20 h-20 bg-emerald-400 rounded-3xl -rotate-12 opacity-80 animate-bounce" style={{ animationDuration: '5s', animationDelay: '0.5s' }} />
-            <div className="absolute bottom-10 right-32 w-14 h-14 bg-purple-500 rounded-full opacity-80 animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '2s' }} />
 
             <div className="relative z-10 max-w-4xl mx-auto px-4">
                 <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-foreground mb-8 leading-tight drop-shadow-2xl">
-                    Level Up Your{"\n"}
-                    <span className="text-primary inline-block transform hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_30px_rgba(var(--primary),0.3)]">Classroom!</span>
+                    Nâng Tầm{"\n"}
+                    <span className="text-primary inline-block transform hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_30px_rgba(var(--primary),0.3)]">Lớp Học!</span>
                 </h1>
 
                 <p className="text-xl md:text-3xl text-muted-foreground font-black max-w-3xl mx-auto mb-16 leading-relaxed opacity-90">
-                    Quizmon makes learning awesome with AI-powered quizzes and intense live games.
+                    Quizmon giúp việc học trở nên tuyệt vời hơn với các bộ trắc nghiệm AI và các trận đấu trực tiếp kịch tính.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mb-24 w-full">
@@ -329,9 +325,9 @@ const LandingHero = ({ navigate }: { navigate: (path: string) => void }) => {
                     <div className="w-28 h-28 rounded-3xl bg-primary border-4 border-primary-foreground/30 shadow-[0_8px_0_0_rgba(0,0,0,0.1)] flex items-center justify-center mb-8 transform -rotate-6">
                         <Sparkles className="w-14 h-14 text-primary-foreground fill-primary-foreground" />
                     </div>
-                    <h3 className="text-3xl font-black text-foreground mb-4">AI Magic</h3>
+                    <h3 className="text-3xl font-black text-foreground mb-4">Phép màu AI</h3>
                     <p className="text-muted-foreground font-bold text-xl leading-relaxed opacity-80">
-                        Generate full quizzes instantly from any text or PDF. Save hours of manual typing!
+                        Tạo bài trắc nghiệm đầy đủ ngay lập tức từ văn bản hoặc PDF. Tiết kiệm hàng giờ nhập liệu!
                     </p>
                 </div>
 
@@ -339,9 +335,9 @@ const LandingHero = ({ navigate }: { navigate: (path: string) => void }) => {
                     <div className="w-28 h-28 rounded-3xl bg-primary border-4 border-primary-foreground/30 shadow-[0_8px_0_0_rgba(0,0,0,0.1)] flex items-center justify-center mb-8 transform rotate-6">
                         <Gamepad2 className="w-14 h-14 text-primary-foreground" />
                     </div>
-                    <h3 className="text-3xl font-black text-foreground mb-4">Live Games</h3>
+                    <h3 className="text-3xl font-black text-foreground mb-4">Đấu Trực Tiếp</h3>
                     <p className="text-muted-foreground font-bold text-xl leading-relaxed opacity-80">
-                        Host live racing matches where students answer on their devices to win.
+                        Tổ chức các trận đấu đua top trực tiếp, nơi học sinh trả lời trên thiết bị cá nhân để thắng.
                     </p>
                 </div>
 
@@ -349,9 +345,9 @@ const LandingHero = ({ navigate }: { navigate: (path: string) => void }) => {
                     <div className="w-28 h-28 rounded-3xl bg-primary border-4 border-primary-foreground/30 shadow-[0_8px_0_0_rgba(0,0,0,0.1)] flex items-center justify-center mb-8 transform -rotate-3">
                         <BookOpen className="w-14 h-14 text-primary-foreground fill-primary-foreground" />
                     </div>
-                    <h3 className="text-3xl font-black text-foreground mb-4">Homework</h3>
+                    <h3 className="text-3xl font-black text-foreground mb-4">Bài Tập</h3>
                     <p className="text-muted-foreground font-bold text-xl leading-relaxed opacity-80">
-                        Assign quizzes as homework and track completion through our intuitive classroom hub.
+                        Giao trắc nghiệm làm bài tập và theo dõi kết quả qua trung tâm lớp học trực quan.
                     </p>
                 </div>
             </div>

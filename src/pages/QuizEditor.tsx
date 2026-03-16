@@ -101,11 +101,11 @@ const QuizEditor = () => {
         if (loading) return <p className="text-muted-foreground animate-pulse font-medium">Đang tải quiz...</p>;
 
         if (creatingType) {
-            const formProps = { 
-                quizId: id!, 
-                onSaved: handleSaveNew, 
+            const formProps = {
+                quizId: id!,
+                onSaved: handleSaveNew,
                 question: undefined as any,
-                onDirtyChange: setIsDirty 
+                onDirtyChange: setIsDirty
             };
 
             switch (creatingType) {
@@ -137,9 +137,9 @@ const QuizEditor = () => {
             );
         }
 
-        const formProps = { 
-            question: q, 
-            quizId: id!, 
+        const formProps = {
+            question: q,
+            quizId: id!,
             onSaved: handleUpdate,
             onDirtyChange: setIsDirty
         };
@@ -170,11 +170,11 @@ const QuizEditor = () => {
                 <div className="w-full max-w-5xl">
                     {creatingType !== "SELECT" && renderActiveQuestion()}
                     {creatingType === "SELECT" && (
-                    <SelectQuestionType
-                        onSelect={(t) => addQuestion(t)}
-                        onClose={() => setCreatingType(null)}
-                    />
-                )}
+                        <SelectQuestionType
+                            onSelect={(t) => addQuestion(t)}
+                            onClose={() => setCreatingType(null)}
+                        />
+                    )}
                 </div>
             </main>
 
