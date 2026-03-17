@@ -44,6 +44,10 @@ import type {
     AIQuestionStatus,
     Category,
 } from "@/types";
+import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 
 const STATUS_CONFIG: Record<
     string,
@@ -80,6 +84,16 @@ const TYPE_LABELS: Record<string, string> = {
     LOCATION: "Vị trí",
 };
 
+function LocationPickerHelper({ setLocation }: { setLocation: (lat: number, lon: number) => void }) {
+    const map = useMapEvents({
+        click(e) {
+            setLocation(e.latlng.lat, e.latlng.lng);
+            map.flyTo(e.latlng, map.getZoom());
+        },
+    });
+    return null;
+}
+
 const AIQuizReview = () => {
     const { jobId } = useParams();
     const navigate = useNavigate();
@@ -100,6 +114,15 @@ const AIQuizReview = () => {
         Array<{ text: string; isCorrect?: boolean; order?: number }>
     >([]);
     const [editCorrectAnswer, setEditCorrectAnswer] = useState("");
+    const [editRange, setEditRange] = useState({ min: 0, max: 100, val: 50 });
+    const [editLocation, setEditLocation] = useState({ 
+        lat: 0, 
+        lon: 0, 
+        radius1000: 5000, 
+        radius750: 15000, 
+        radius500: 30000,
+        mapType: 'SIMPLE' as 'SIMPLE' | 'SATELLITE'
+    });
 
     // Regenerate dialog
     const [regenDialogOpen, setRegenDialogOpen] = useState(false);
@@ -176,6 +199,21 @@ const AIQuizReview = () => {
         setEditText(q.questionText);
         if (q.questionType === "TYPEANSWER") {
             setEditCorrectAnswer(q.optionsData?.correctAnswer || "");
+        } else if (q.questionType === "RANGE") {
+            setEditRange({
+                min: q.optionsData?.minValue ?? 0,
+                max: q.optionsData?.maxValue ?? 100,
+                val: q.optionsData?.correctValue ?? 50
+            });
+        } else if (q.questionType === "LOCATION") {
+            setEditLocation({
+                lat: q.optionsData?.correctLatitude ?? 0,
+                lon: q.optionsData?.correctLongitude ?? 0,
+                radius1000: q.optionsData?.radius1000 ?? 5000,
+                radius750: q.optionsData?.radius750 ?? 15000,
+                radius500: q.optionsData?.radius500 ?? 30000,
+                mapType: q.optionsData?.mapType ?? 'SIMPLE'
+            });
         } else {
             setEditOptions(
                 (q.optionsData?.options || []).map((o) => ({ ...o }))
@@ -188,6 +226,15 @@ const AIQuizReview = () => {
         setEditText("");
         setEditOptions([]);
         setEditCorrectAnswer("");
+        setEditRange({ min: 0, max: 100, val: 50 });
+        setEditLocation({ 
+            lat: 0, 
+            lon: 0, 
+            radius1000: 5000, 
+            radius750: 15000, 
+            radius500: 30000,
+            mapType: 'SIMPLE'
+        });
     };
 
     // Save edit
@@ -198,6 +245,21 @@ const AIQuizReview = () => {
             let optionsData: Record<string, unknown>;
             if (selectedQuestion.questionType === "TYPEANSWER") {
                 optionsData = { correctAnswer: editCorrectAnswer };
+            } else if (selectedQuestion.questionType === "RANGE") {
+                optionsData = {
+                    minValue: editRange.min,
+                    maxValue: editRange.max,
+                    correctValue: editRange.val
+                };
+            } else if (selectedQuestion.questionType === "LOCATION") {
+                optionsData = {
+                    correctLatitude: editLocation.lat,
+                    correctLongitude: editLocation.lon,
+                    radius1000: editLocation.radius1000,
+                    radius750: editLocation.radius750,
+                    radius500: editLocation.radius500,
+                    mapType: editLocation.mapType
+                };
             } else {
                 optionsData = { options: editOptions };
             }
@@ -788,6 +850,154 @@ const AIQuizReview = () => {
                                                     <span className="text-xl font-black text-foreground opacity-80 tracking-tight">{opt.text}</span>
                                                 </div>
                                             ))}
+                                </div>
+                            )}
+
+                            {/* LOCATION */}
+                            {selectedQuestion.questionType === "LOCATION" && (
+                                <div className="mt-4">
+                                    {editing ? (
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col gap-3 bg-card p-2 rounded-xl border border-white/5">
+                                                <MapContainer
+                                                    className="w-full relative z-0"
+                                                    center={editLocation.lat ? [editLocation.lat, editLocation.lon] : [10.7904, 106.69285]}
+                                                    zoom={10}
+                                                    style={{ height: "300px", borderRadius: "8px" }}
+                                                >
+                                                    <TileLayer
+                                                        attribution={editLocation.mapType === 'SATELLITE' ? "Tiles &copy; Esri" : "&copy; OpenStreetMap &copy; CARTO"}
+                                                        url={editLocation.mapType === 'SATELLITE'
+                                                            ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                                            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                                        }
+                                                    />
+                                                    <LocationPickerHelper setLocation={(lat, lon) => setEditLocation(prev => ({ ...prev, lat, lon }))} />
+                                                    {editLocation.lat !== 0 && (
+                                                        <>
+                                                            <Marker position={[editLocation.lat, editLocation.lon]} />
+                                                            <Circle
+                                                                center={[editLocation.lat, editLocation.lon]}
+                                                                radius={editLocation.radius500}
+                                                                pathOptions={{ color: "red", fillColor: "red", fillOpacity: 0.1, weight: 1 }}
+                                                            />
+                                                            <Circle
+                                                                center={[editLocation.lat, editLocation.lon]}
+                                                                radius={editLocation.radius750}
+                                                                pathOptions={{ color: "orange", fillColor: "orange", fillOpacity: 0.15, weight: 1 }}
+                                                            />
+                                                            <Circle
+                                                                center={[editLocation.lat, editLocation.lon]}
+                                                                radius={editLocation.radius1000}
+                                                                pathOptions={{ color: "green", fillColor: "green", fillOpacity: 0.2, weight: 1 }}
+                                                            />
+                                                        </>
+                                                    )}
+                                                </MapContainer>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 block">Loại Bản Đồ</label>
+                                                    <Select
+                                                        value={editLocation.mapType}
+                                                        onValueChange={(val: any) => setEditLocation(prev => ({ ...prev, mapType: val }))}
+                                                    >
+                                                        <SelectTrigger className="h-12 bg-foreground/5 border-2 border-white/5 focus:border-primary rounded-xl font-bold px-4 shadow-inner">
+                                                            <SelectValue placeholder="Chọn loại bản đồ" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="SIMPLE">Bản đồ tiêu chuẩn</SelectItem>
+                                                            <SelectItem value="SATELLITE">Bản đồ vệ tinh</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div>
+                                                    <label className="text-[10px] font-black text-green-500 uppercase tracking-widest mb-2 block">1000đ (m)</label>
+                                                    <Input
+                                                        type="number"
+                                                        value={editLocation.radius1000}
+                                                        onChange={(e) => setEditLocation(prev => ({ ...prev, radius1000: Number(e.target.value) }))}
+                                                        className="h-12 bg-foreground/5 border-2 border-white/5 focus:border-green-500 rounded-xl font-bold px-4 shadow-inner"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2 block">750đ (m)</label>
+                                                    <Input
+                                                        type="number"
+                                                        value={editLocation.radius750}
+                                                        onChange={(e) => setEditLocation(prev => ({ ...prev, radius750: Number(e.target.value) }))}
+                                                        className="h-12 bg-foreground/5 border-2 border-white/5 focus:border-orange-500 rounded-xl font-bold px-4 shadow-inner"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2 block">500đ (m)</label>
+                                                    <Input
+                                                        type="number"
+                                                        value={editLocation.radius500}
+                                                        onChange={(e) => setEditLocation(prev => ({ ...prev, radius500: Number(e.target.value) }))}
+                                                        className="h-12 bg-foreground/5 border-2 border-white/5 focus:border-red-500 rounded-xl font-bold px-4 shadow-inner"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col gap-3 bg-card p-2 rounded-xl border border-white/5">
+                                                <MapContainer
+                                                    className="w-full relative z-0"
+                                                    center={selectedQuestion.optionsData?.correctLatitude ? [selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude] : [10.7904, 106.69285]}
+                                                    zoom={10}
+                                                    style={{ height: "300px", borderRadius: "8px" }}
+                                                >
+                                                    <TileLayer
+                                                        attribution={selectedQuestion.optionsData?.mapType === 'SATELLITE' ? "Tiles &copy; Esri" : "&copy; OpenStreetMap &copy; CARTO"}
+                                                        url={selectedQuestion.optionsData?.mapType === 'SATELLITE'
+                                                            ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                                            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                                        }
+                                                    />
+                                                    {selectedQuestion.optionsData?.correctLatitude && (
+                                                        <>
+                                                            <Marker position={[selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude]} />
+                                                            <Circle
+                                                                center={[selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude]}
+                                                                radius={selectedQuestion.optionsData.radius500 || 30000}
+                                                                pathOptions={{ color: "red", fillColor: "red", fillOpacity: 0.1, weight: 1 }}
+                                                            />
+                                                            <Circle
+                                                                center={[selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude]}
+                                                                radius={selectedQuestion.optionsData.radius750 || 15000}
+                                                                pathOptions={{ color: "orange", fillColor: "orange", fillOpacity: 0.15, weight: 1 }}
+                                                            />
+                                                            <Circle
+                                                                center={[selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude]}
+                                                                radius={selectedQuestion.optionsData.radius1000 || 5000}
+                                                                pathOptions={{ color: "green", fillColor: "green", fillOpacity: 0.2, weight: 1 }}
+                                                            />
+                                                        </>
+                                                    )}
+                                                </MapContainer>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                 <Badge variant="outline" className="text-muted-foreground border-white/10 uppercase tracking-widest text-[9px] font-black">
+                                                     Map: {selectedQuestion.optionsData?.mapType === 'SATELLITE' ? 'Vệ tinh' : 'Tiêu chuẩn'}
+                                                 </Badge>
+                                                 <Badge variant="outline" className="text-green-500 border-green-500/20 uppercase tracking-widest text-[9px] font-black">
+                                                     1000đ: {selectedQuestion.optionsData?.radius1000 || 5000}m
+                                                 </Badge>
+                                                 <Badge variant="outline" className="text-orange-500 border-orange-500/20 uppercase tracking-widest text-[9px] font-black">
+                                                     750đ: {selectedQuestion.optionsData?.radius750 || 15000}m
+                                                 </Badge>
+                                                 <Badge variant="outline" className="text-red-500 border-red-500/20 uppercase tracking-widest text-[9px] font-black">
+                                                     500đ: {selectedQuestion.optionsData?.radius500 || 30000}m
+                                                 </Badge>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

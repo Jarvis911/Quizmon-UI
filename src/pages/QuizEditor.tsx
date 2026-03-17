@@ -189,6 +189,22 @@ const QuizEditor = () => {
                     <Settings className="w-6 h-6 text-primary/80 mb-1 group-hover:rotate-90 transition-transform duration-500" />
                     <span className="text-[10px] font-bold text-foreground/80 leading-none">Cài đặt</span>
                 </div>
+                
+                {/* Save and Exit */}
+                <div
+                    className="min-w-20 h-20 relative rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-green-500/30 hover:border-green-500/50 bg-green-500/5 group shrink-0"
+                    onClick={() => {
+                        window.location.href = `/library`; // Use redirect to bypass unsaved changes logic if needed, or normal navigation
+                    }}
+                    title="Lưu và Thoát"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-green-500/80 mb-1 group-hover:scale-110 transition-transform duration-300">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Lưu & Thoát</span>
+                </div>
 
                 {questions.map((q, i) => (
                     <div

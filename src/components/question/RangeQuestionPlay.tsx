@@ -25,8 +25,7 @@ const RangeQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onH
       try {
         await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: [],
-          numberAnswer: answer
+          answerData: answer
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

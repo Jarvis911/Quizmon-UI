@@ -38,6 +38,8 @@ interface Endpoints {
 
     // User
     user_stats: string;
+    user_profile_update: string;
+    user_avatar_upload: string;
 
     // AI Generation
     ai_create_job: string;
@@ -122,6 +124,8 @@ const endpoints: Endpoints = {
 
     // User
     user_stats: `${BASE_URL}/user/statistics`,
+    user_profile_update: `${BASE_URL}/user/profile`,
+    user_avatar_upload: `${BASE_URL}/user/avatar/upload`,
 
     // AI Generation
     ai_create_job: `${BASE_URL}/ai/jobs`,
@@ -165,6 +169,12 @@ const endpoints: Endpoints = {
     subscription_current: `${BASE_URL}/subscriptions/current`,
     subscriptions: `${BASE_URL}/subscriptions`,
     subscription_usage: `${BASE_URL}/subscriptions/usage`,
+};
+
+export const getAvatarUrl = (url: string | null | undefined): string => {
+    if (!url) return "https://github.com/shadcn.png";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
 };
 
 export default endpoints;

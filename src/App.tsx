@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import MatchLobby from "./pages/MatchLobby.tsx";
 import MatchPlay from "./pages/MatchPlay";
 import CreateQuizForm from "./components/quiz/CreateQuizForm";
-import UserStats from "./pages/UserStatistic";
+import UserStats from "./pages/UserStatistics";
 import AIQuizGenerator from "./pages/AIQuizGenerator";
 import AIQuizReview from "./pages/AIQuizReview";
 import Classrooms from "./pages/Classrooms";
@@ -17,6 +17,7 @@ import OrganizationSettings from "./pages/OrganizationSettings";
 import BillingPage from "./pages/BillingPage";
 import BillingSuccess from "./pages/BillingSuccess";
 import BillingCancel from "./pages/BillingCancel";
+import ProfileSettings from "./pages/ProfileSettings";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { OrganizationProvider } from "./context/OrganizationContext";
@@ -86,6 +87,7 @@ const router = createBrowserRouter([
             { path: "/billing", element: <ProtectedRoute><BillingPage /></ProtectedRoute> },
             { path: "/billing/success", element: <ProtectedRoute><BillingSuccess /></ProtectedRoute> },
             { path: "/billing/cancel", element: <ProtectedRoute><BillingCancel /></ProtectedRoute> },
+            { path: "/profile/settings", element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
         ]
     }
 ]);

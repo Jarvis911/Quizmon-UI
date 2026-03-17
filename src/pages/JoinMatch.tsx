@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Sparkles, AlertCircle } from "lucide-react";
 import apiClient from "@/api/client";
 import endpoints from "../api/api";
@@ -10,10 +10,16 @@ export default function JoinMatch() {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Focus input on mount
+    const [searchParams] = useSearchParams();
+
+    // Focus input on mount & handle query param
     useEffect(() => {
+        const codeParam = searchParams.get("code");
+        if (codeParam) {
+            setCode(codeParam);
+        }
         document.getElementById("join-code-input")?.focus();
-    }, []);
+    }, [searchParams]);
 
     const handleJoin = async (e: FormEvent) => {
         e.preventDefault();
@@ -27,8 +33,14 @@ export default function JoinMatch() {
         setIsLoading(true);
         try {
             // Check if the match exists before navigating
-            await apiClient.get(`${endpoints.matches}/${code.trim()}`);
-            navigate(`/match/${code.trim()}/lobby`);
+            const res = await apiClient.get(`${endpoints.matches}/${code.trim()}`);
+            const matchId = res.data.id;
+            
+            if (matchId) {
+                navigate(`/match/${matchId}/lobby`);
+            } else {
+                setError("Mã phòng không hợp lệ.");
+            }
         } catch (err: any) {
             console.error(err);
             if (err.response?.status === 404) {
@@ -42,24 +54,15 @@ export default function JoinMatch() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Playful Background Shapes */}
-            <div className="absolute top-20 left-20 w-32 h-32 bg-yellow-400 rounded-full opacity-50 animate-bounce cursor-default" style={{ animationDuration: '4s' }} />
-            <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-400 rounded-3xl rotate-12 opacity-50 animate-bounce cursor-default" style={{ animationDuration: '5s', animationDelay: '1s' }} />
-            <div className="absolute top-1/4 right-1/4 w-24 h-24 bg-emerald-400 rounded-2xl -rotate-12 opacity-50 animate-bounce cursor-default" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
-            <div className="absolute bottom-1/4 left-1/4 w-20 h-20 bg-orange-400 rounded-full opacity-50 animate-bounce cursor-default" style={{ animationDuration: '4.5s', animationDelay: '2s' }} />
-
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Main Interactive Card */}
-            <div className="bg-card p-8 md:p-12 rounded-[2.5rem] shadow-[0_12px_40px_rgba(0,0,0,0.2)] border-8 border-white/10 max-w-sm w-full text-center relative z-10 mx-auto mt-[-80px] transform transition-transform hover:scale-[1.02] duration-300 backdrop-blur-xl">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-primary border-8 border-card rounded-full flex items-center justify-center shadow-lg cursor-default">
-                    <Sparkles className="w-8 h-8 text-primary-foreground fill-primary-foreground" />
-                </div>
+            <div className="bg-card p-6 md:p-8 rounded-4xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] border-4 border-white/10 max-w-[320px] w-full text-center relative z-10 transform transition-transform hover:scale-[1.01] duration-300 backdrop-blur-xl">
 
-                <h1 className="text-3xl md:text-4xl font-black text-foreground mb-6 mt-4 tracking-tight">
+                <h1 className="text-2xl md:text-3xl font-black text-foreground mb-4 mt-2 tracking-tight">
                     Tham gia!
                 </h1>
 
-                <form onSubmit={handleJoin} className="flex flex-col gap-4">
+                <form onSubmit={handleJoin} className="flex flex-col gap-3">
                     <div className="relative">
                         <input
                             id="join-code-input"
@@ -70,15 +73,15 @@ export default function JoinMatch() {
                                 setCode(e.target.value);
                                 if (error) setError("");
                             }}
-                            className={`w-full text-center text-2xl md:text-3xl font-black text-foreground bg-white/5 border-4 rounded-2xl py-4 px-4 placeholder:text-muted-foreground/30 placeholder:font-black focus:outline-none focus:bg-white/10 transition-colors
-                                ${error ? 'border-destructive focus:border-destructive' : 'border-white/10 focus:border-primary'}
+                            className={`w-full text-center text-xl md:text-2xl font-black text-foreground bg-slate-50/50 border-4 rounded-xl py-3 px-4 placeholder:text-muted-foreground/30 placeholder:font-black focus:outline-none focus:bg-white focus:shadow-inner transition-colors
+                                ${error ? 'border-destructive focus:border-destructive' : 'border-primary/30 focus:border-primary'}
                             `}
                         />
                     </div>
 
                     {error && (
-                        <div className="flex items-center justify-center gap-1.5 text-destructive font-bold text-sm bg-destructive/10 p-2 rounded-lg border border-destructive/20">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
+                        <div className="flex items-center justify-center gap-1.5 text-destructive font-bold text-xs bg-destructive/10 p-2 rounded-lg border border-destructive/20">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                             <span>{error}</span>
                         </div>
                     )}
@@ -86,15 +89,29 @@ export default function JoinMatch() {
                     <button
                         type="submit"
                         disabled={!code.trim() || isLoading}
-                        className="w-full flex items-center justify-center gap-2 text-xl font-black text-primary-foreground bg-primary rounded-2xl py-4 border-4 border-black/10 shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-2"
+                        className="w-full h-14 flex items-center justify-center gap-2 text-lg font-black text-primary-foreground bg-primary rounded-xl border-b-4 border-black/10 shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
                     >
-                        {isLoading ? "Đang kiểm tra..." : "Tham gia"} <ArrowRight className="w-6 h-6" strokeWidth={3} />
+                        {isLoading ? "Đang kiểm tra..." : "Tham gia"} <ArrowRight className="w-5 h-5" strokeWidth={3} />
                     </button>
 
-                    <div className="mt-4 text-muted-foreground font-bold text-sm">
+                    <div className="mt-2 text-muted-foreground/60 font-bold text-[13px]">
                         Bạn là giáo viên? <Link to="/login" className="text-primary hover:underline decoration-2 underline-offset-2">Đăng nhập</Link>
                     </div>
                 </form>
+            </div>
+
+            {/* Footer Information */}
+            <div className="absolute bottom-6 left-0 w-full text-center px-4 space-y-2">
+                <p className="text-muted-foreground/50 text-[10px] md:text-xs font-bold uppercase tracking-widest">
+                    Tạo bộ câu hỏi và trận đấu của riêng bạn miễn phí tại <span className="text-primary/70">Quizmon</span>
+                </p>
+                <div className="flex items-center justify-center gap-4 text-[9px] md:text-[10px] font-black text-muted-foreground/30 uppercase tracking-tighter">
+                    <a href="#" className="hover:text-primary transition-colors">Điều khoản</a>
+                    <span className="opacity-20">|</span>
+                    <a href="#" className="hover:text-primary transition-colors">Quyền riêng tư</a>
+                    <span className="opacity-20">|</span>
+                    <a href="#" className="hover:text-primary transition-colors">Thông báo Cookie</a>
+                </div>
             </div>
         </div>
     );

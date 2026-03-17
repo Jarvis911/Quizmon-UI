@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
     Sparkles, Upload, FileText, Loader2, Wand2, X, AlertCircle
 } from "lucide-react";
@@ -21,6 +23,8 @@ const QUESTION_TYPES = [
     { value: "CHECKBOXES", label: "Nhiều đáp án", description: "Chọn nhiều đáp án đúng" },
     { value: "TYPEANSWER", label: "Tự nhập câu trả lời", description: "Người chơi gõ đáp án" },
     { value: "REORDER", label: "Sắp xếp thứ tự", description: "Sắp xếp các mục đúng thứ tự" },
+    { value: "RANGE", label: "Thanh phạm vi", description: "Chọn giá trị trong khoảng số" },
+    { value: "LOCATION", label: "Địa điểm", description: "Đánh dấu vị trí trên bản đồ" },
 ];
 
 const AIQuizGenerator = () => {
@@ -104,7 +108,10 @@ const AIQuizGenerator = () => {
 
         try {
             const formData = new FormData();
-            if (instruction) formData.append("instruction", instruction);
+            
+            let finalInstruction = instruction;
+            
+            if (finalInstruction) formData.append("instruction", finalInstruction);
             if (pdfFile) formData.append("pdfFile", pdfFile);
             formData.append("questionCount", String(questionCount));
             formData.append("questionTypes", JSON.stringify(selectedTypes));
@@ -295,6 +302,8 @@ const AIQuizGenerator = () => {
                                     ))}
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
 

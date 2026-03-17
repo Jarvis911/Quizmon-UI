@@ -4,10 +4,10 @@ import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
-import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2 } from "lucide-react"
+import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import apiClient from "../../api/client";
-import endpoints from "../../api/api";
+import endpoints, { getAvatarUrl } from "../../api/api";
 import { SiGoogleclassroom } from "react-icons/si";
 import { FaHistory } from "react-icons/fa";
 import { GrMoney } from "react-icons/gr";
@@ -274,7 +274,7 @@ export default function Navbar() {
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer ring-2 ring-white/50 hover:ring-white transition-all shadow-md">
-                  <AvatarImage className={undefined} src={user?.avatar || "https://github.com/shadcn.png"} alt="@user" />
+                  <AvatarImage className="object-cover" src={getAvatarUrl(user?.avatarUrl)} alt="@user" />
                   <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -282,6 +282,11 @@ export default function Navbar() {
                 <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
                   <FaHistory className="w-4 h-4 mr-2 text-primary" />
                   Lịch sử đấu
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={() => navigate('/profile/settings')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
+                  <User className="w-4 h-4 mr-2 text-primary" />
+                  Cài đặt
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator className="bg-white/10" />

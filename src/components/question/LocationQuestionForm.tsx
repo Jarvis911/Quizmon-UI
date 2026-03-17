@@ -19,20 +19,33 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 const questionSchema = z.object({
   text: z.string().min(3, "Câu hỏi ít nhất 3 ký tự"),
   latitude: z.number().min(-90, "Chọn vị trí trên bản đồ").max(90),
   longitude: z.number().min(-180, "Chọn vị trí trên bản đồ").max(180),
+  mapType: z.enum(["SIMPLE", "SATELLITE"]).default("SIMPLE"),
+  radius1000: z.number().min(1, "Bán kính > 0").default(5000),
+  radius750: z.number().min(1, "Bán kính > 0").default(15000),
+  radius500: z.number().min(1, "Bán kính > 0").default(30000),
 });
 
 function LocationPicker({ setLocation }) {
-  useMapEvents({
+  const map = useMapEvents({
     click(e) {
       setLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
+      map.flyTo(e.latlng, map.getZoom());
     },
   });
   return null;
@@ -50,6 +63,10 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       text: "",
       latitude: undefined,
       longitude: undefined,
+      mapType: "SIMPLE",
+      radius1000: 5000,
+      radius750: 15000,
+      radius500: 30000,
     },
   });
 
@@ -63,6 +80,12 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
         type: "LOCATION",
         correctLatitude: values.latitude,
         correctLongitude: values.longitude,
+        optionsData: {
+          mapType: values.mapType,
+          radius1000: values.radius1000,
+          radius750: values.radius750,
+          radius500: values.radius500,
+        }
       };
 
       if (question?.id) {
@@ -82,9 +105,6 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
         });
         if (onSaved) onSaved(res.data);
       }
-
-      // form.reset();
-      // setLocation(null);
     } catch (err) {
       console.error(err);
       showAlert({
@@ -98,16 +118,22 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
   };
 
   // đồng bộ form khi chọn điểm
-  if (location) {
-    form.setValue("latitude", location.lat);
-    form.setValue("longitude", location.lng);
-  }
+  useEffect(() => {
+    if (location) {
+      form.setValue("latitude", location.lat, { shouldValidate: true });
+      form.setValue("longitude", location.lng, { shouldValidate: true });
+    }
+  }, [location, form]);
 
   // Centering the data from backend
   useEffect(() => {
     if (question) {
       form.reset({
-        text: question.text || ""
+        text: question.text || "",
+        mapType: question.optionsData?.mapType || "SIMPLE",
+        radius1000: question.optionsData?.radius1000 || 5000,
+        radius750: question.optionsData?.radius750 || 15000,
+        radius500: question.optionsData?.radius500 || 30000,
       });
 
       if (question.data?.correctLatitude && question.data?.correctLongitude) {
@@ -131,34 +157,10 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6"
+          className="space-y-4 flex flex-col xl:flex-row gap-4 xl:gap-6"
         >
-          {/* Map chọn vị trí */}
-          <div className="flex flex-col gap-3">
-            <MapContainer
-              className="min-w-lg"
-              key={location ? `${location.lat}-${location.lng}` : "default"}
-              // Location was updated after useEffect -> center will not update until map remount -> Key have to change
-              center={location ? [location.lat, location.lng] : [10.7904, 106.69285]}
-              zoom={10}
-              style={{ height: "300px", borderRadius: "12px" }}
-            >
-              <TileLayer
-                attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-              />
-              <LocationPicker setLocation={setLocation} />
-              {location && <Marker position={[location.lat, location.lng]} />}
-            </MapContainer>
-            {location && (
-              <p className="text-sm text-gray-600">
-                Đã chọn: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
-              </p>
-            )}
-          </div>
-
-          {/* Text câu hỏi */}
-          <div className="flex flex-col gap-4 min-w-[280px] flex-1">
+          {/* Text câu hỏi & Cấu hình */}
+          <div className="flex flex-col gap-4 min-w-[320px] flex-1">
             <FormField
               control={form.control}
               name="text"
@@ -176,9 +178,104 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
               )}
             />
 
-            <Button type="submit" className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="mapType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Loại bản đồ hiển thị</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn loại bản đồ" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="SIMPLE">Bản đồ tiêu chuẩn</SelectItem>
+                        <SelectItem value="SATELLITE">Bản đồ vệ tinh</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4">
+               {/* 3 Radii inputs */}
+               <FormField control={form.control} name="radius1000" render={({field}) => (
+                  <FormItem>
+                    <FormLabel className="text-green-600 font-bold">1000đ (m)</FormLabel>
+                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+               )}/>
+               <FormField control={form.control} name="radius750" render={({field}) => (
+                  <FormItem>
+                    <FormLabel className="text-orange-500 font-bold">750đ (m)</FormLabel>
+                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+               )}/>
+               <FormField control={form.control} name="radius500" render={({field}) => (
+                  <FormItem>
+                    <FormLabel className="text-red-500 font-bold">500đ (m)</FormLabel>
+                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+               )}/>
+            </div>
+
+            <Button type="submit" className="w-full mt-auto">
               {question ? "Cập nhật câu hỏi" : "Lưu câu hỏi"}
             </Button>
+          </div>
+
+          {/* Map chọn vị trí */}
+          <div className="flex flex-col gap-3 flex-[2] bg-white p-2 rounded-xl border">
+            <MapContainer
+              className="w-full relative z-0"
+              center={question?.data?.correctLatitude ? [question.data.correctLatitude, question.data.correctLongitude] : [10.7904, 106.69285]}
+              zoom={10}
+              style={{ minHeight: "400px", borderRadius: "8px" }}
+            >
+              <TileLayer
+                attribution={form.watch("mapType") === "SATELLITE" ? "Tiles &copy; Esri" : "&copy; OpenStreetMap &copy; CARTO"}
+                url={form.watch("mapType") === "SATELLITE"
+                  ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                  : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                }
+              />
+              <LocationPicker setLocation={setLocation} />
+              {location && (
+                <>
+                  <Marker position={[location.lat, location.lng]} />
+                  <Circle
+                    center={[location.lat, location.lng]}
+                    radius={form.watch("radius500") || 30000}
+                    pathOptions={{ color: "red", fillColor: "red", fillOpacity: 0.1, weight: 1 }}
+                  />
+                  <Circle
+                    center={[location.lat, location.lng]}
+                    radius={form.watch("radius750") || 15000}
+                    pathOptions={{ color: "orange", fillColor: "orange", fillOpacity: 0.15, weight: 1 }}
+                  />
+                  <Circle
+                    center={[location.lat, location.lng]}
+                    radius={form.watch("radius1000") || 5000}
+                    pathOptions={{ color: "green", fillColor: "green", fillOpacity: 0.2, weight: 1 }}
+                  />
+                </>
+              )}
+            </MapContainer>
+            {location ? (
+              <p className="text-sm text-gray-600 px-2 font-medium">
+                Vị trí đã chọn: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+              </p>
+            ) : (
+               <p className="text-sm text-red-500 px-2 font-medium">Riêng câu hỏi địa điểm: Vui lòng click vào bản đồ để chọn định vị (Có thể không cập nhật câu hỏi mới được)</p>
+            )}
           </div>
         </form>
       </Form>
@@ -187,3 +284,4 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
 };
 
 export default LocationQuestionForm;
+

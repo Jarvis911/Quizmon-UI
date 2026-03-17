@@ -11,7 +11,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
 // Call api
 import apiClient from "@/api/client";
-import endpoints from "@/api/api"
+import endpoints, { getAvatarUrl } from "@/api/api"
 import { Download } from "lucide-react";
 
 // ─── Podium Place Component ───────────────────────────────────
@@ -63,7 +63,7 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
       {/* Avatar */}
       <div className="relative">
         <Avatar className={`w-16 h-16 ring-4 ${config.ringColor} shadow-lg`}>
-          {player.avatarUrl && <AvatarImage src={player.avatarUrl} />}
+          {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
           <AvatarFallback className="bg-linear-to-br from-purple-500 to-pink-500 text-white text-xl font-bold">
             {(player.displayName || player.username || "?")[0].toUpperCase()}
           </AvatarFallback>
@@ -252,7 +252,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
                   <div className="flex items-center gap-4">
                     <span className="text-muted-foreground font-black w-8 text-center text-lg">#{index + 4}</span>
                     <Avatar className="w-10 h-10 border-2 border-white/10 shadow-md">
-                      {player.avatarUrl && <AvatarImage src={player.avatarUrl} />}
+                      {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
                       <AvatarFallback className="bg-linear-to-br from-primary to-primary/60 text-primary-foreground text-sm font-bold">
                         {(player.displayName || player.username || "?")[0].toUpperCase()}
                       </AvatarFallback>

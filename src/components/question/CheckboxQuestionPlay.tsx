@@ -35,7 +35,7 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
       try {
         await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: selectedIds
+          answerData: selectedIds
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

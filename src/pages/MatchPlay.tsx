@@ -4,10 +4,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
 import socket from "@/services/socket";
 import apiClient from "@/api/client";
-import endpoints from "@/api/api";
+import endpoints, { getAvatarUrl } from "@/api/api";
 import { Howl } from "howler";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+import ReactPlayer from "react-player";
 
 // Types
 import type { Question, LeaderboardEntry, Quiz } from "../types";
@@ -45,6 +46,7 @@ interface MatchResponse {
     id: number;
     hostId: number;
     mode: "REALTIME" | "HOMEWORK";
+    musicUrl?: string;
     quiz?: Quiz;
     participants?: {
         user: {
@@ -125,7 +127,7 @@ const PlayerScoreCard = ({ player, rank, isCurrentUser }: PlayerScoreCardProps) 
                 {rank < 3 ? rankEmojis[rank] : `#${rank + 1}`}
             </span>
             <Avatar className="w-7 h-7">
-                {player.avatarUrl && <AvatarImage src={player.avatarUrl} />}
+                {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
                 <AvatarFallback className="bg-linear-to-br from-purple-500 to-pink-500 text-white text-xs font-bold">
                     {(player.displayName || player.username || "?")[0].toUpperCase()}
                 </AvatarFallback>
@@ -160,6 +162,7 @@ const MatchPlay = () => {
     const [isHost, setIsHost] = useState(false);
     const [confirmEndMatch, setConfirmEndMatch] = useState(false);
     const [confirmSurrender, setConfirmSurrender] = useState(false);
+    const [musicUrl, setMusicUrl] = useState<string>("/audio/background.mp3");
 
     // Homework mode integration
     const [matchMode, setMatchMode] = useState<MatchMode>("REALTIME");
@@ -167,22 +170,7 @@ const MatchPlay = () => {
     const [homeworkScore, setHomeworkScore] = useState(0);
 
     const questionRef = useRef<Question | null>(null);
-    const backgroundMusicRef = useRef<Howl | null>(null);
     const { width, height } = useWindowSize();
-
-    // Background music
-    useEffect(() => {
-        backgroundMusicRef.current = new Howl({
-            src: ["/audio/background.mp3"],
-            loop: true,
-            volume: 0.03,
-            autoplay: true,
-        });
-        return () => {
-            backgroundMusicRef.current?.stop();
-            backgroundMusicRef.current?.unload();
-        };
-    }, []);
 
     // Fetch match to determine host and mode
     useEffect(() => {
@@ -192,6 +180,9 @@ const MatchPlay = () => {
                 const res = await apiClient.get<MatchResponse>(endpoints.match(Number(matchId)));
                 setIsHost(res.data.hostId === user?.id);
                 setMatchMode(res.data.mode || "REALTIME");
+                if (res.data.musicUrl) {
+                    setMusicUrl(res.data.musicUrl);
+                }
 
                 if (res.data.mode === "HOMEWORK") {
                     const qList = res.data.quiz?.questions || [];
@@ -290,7 +281,6 @@ const MatchPlay = () => {
         };
 
         const handleGameOver = ({ leaderboard }: { leaderboard: LeaderboardEntry[] }) => {
-            backgroundMusicRef.current?.stop();
             setLeaderboard(leaderboard);
             setGameOver(true);
             setNotification("Trận đấu đã kết thúc!");
@@ -305,7 +295,6 @@ const MatchPlay = () => {
         };
 
         const handleSurrendered = () => {
-            backgroundMusicRef.current?.stop();
             navigate('/');
         };
 
@@ -314,6 +303,12 @@ const MatchPlay = () => {
             const name = surrenderedPlayer?.displayName || surrenderedPlayer?.username || `Người chơi ${surrenderedId}`;
             setNotification(`${name} đã đầu hàng!`);
             setTimeout(() => setNotification(null), 4000);
+        };
+
+        const handleSettingsUpdated = (settings: { musicUrl?: string }) => {
+            if (settings.musicUrl !== undefined) {
+                setMusicUrl(settings.musicUrl || "/audio/background.mp3");
+            }
         };
 
         socket.on("nextQuestion", handleNextQuestion);
@@ -325,6 +320,7 @@ const MatchPlay = () => {
         socket.on("notification", handleNotification);
         socket.on("surrendered", handleSurrendered);
         socket.on("playerSurrendered", handlePlayerSurrendered);
+        socket.on("matchSettingsUpdated", handleSettingsUpdated);
 
         return () => {
             socket.off("nextQuestion", handleNextQuestion);
@@ -336,6 +332,7 @@ const MatchPlay = () => {
             socket.off("notification", handleNotification);
             socket.off("surrendered", handleSurrendered);
             socket.off("playerSurrendered", handlePlayerSurrendered);
+            socket.off("matchSettingsUpdated", handleSettingsUpdated);
         };
     }, [matchId, user, matchMode, scores, navigate]);
 
@@ -444,6 +441,18 @@ const MatchPlay = () => {
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
+            </div>
+
+            {/* Hidden Background Music Player */}
+            <div className="hidden">
+                <ReactPlayer
+                    url={musicUrl}
+                    playing={!gameOver}
+                    loop={true}
+                    volume={0.03}
+                    width={0}
+                    height={0}
+                />
             </div>
 
             {/* ── Top Bar ── */}

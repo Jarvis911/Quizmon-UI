@@ -61,7 +61,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
       try {
         await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: answerIds
+          answerData: answerIds
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

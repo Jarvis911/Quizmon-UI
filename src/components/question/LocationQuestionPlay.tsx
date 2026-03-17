@@ -100,8 +100,7 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
       try {
         await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: [],
-          textAnswer: `${location.lat},${location.lon}`
+          answerData: location
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
@@ -128,13 +127,16 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
   return (
     <div className="relative w-[90vw] h-screen">
       <MapContainer
-        center={[10.7904, 106.69285]}
-        zoom={10}
+        center={[question.data?.initialCenter?.lat || 10.7904, question.data?.initialCenter?.lon || 106.69285]}
+        zoom={question.data?.initialZoom || 10}
         className="w-full h-full z-0"
       >
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution={question.optionsData?.mapType === 'SATELLITE' ? 'Tiles &copy; Esri' : '&copy; OpenStreetMap contributors &copy; CARTO'}
+          url={question.optionsData?.mapType === 'SATELLITE' 
+            ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          }
         />
         <LocationPicker setLocation={setLocation} />
         {location && <Marker position={[location.lat, location.lon]} />}
@@ -143,17 +145,17 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
             <Marker position={[correctLocation.lat, correctLocation.lon]} icon={arrowIcon} />
             <Circle
               center={[correctLocation.lat, correctLocation.lon]}
-              radius={30000}
+              radius={question.optionsData?.radius500 || 30000}
               pathOptions={{ color: "red", fillColor: "red", fillOpacity: 0.1 }}
             />
             <Circle
               center={[correctLocation.lat, correctLocation.lon]}
-              radius={20000}
+              radius={question.optionsData?.radius750 || 15000}
               pathOptions={{ color: "orange", fillColor: "orange", fillOpacity: 0.15 }}
             />
             <Circle
               center={[correctLocation.lat, correctLocation.lon]}
-              radius={10000}
+              radius={question.optionsData?.radius1000 || 5000}
               pathOptions={{ color: "green", fillColor: "green", fillOpacity: 0.2 }}
             />
             <FlyToLocation location={correctLocation} />

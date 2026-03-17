@@ -248,6 +248,17 @@ export interface AIGeneratedQuestion {
     optionsData: {
         options?: Array<{ text: string; isCorrect?: boolean; order?: number }>;
         correctAnswer?: string;
+        // RANGE
+        minValue?: number;
+        maxValue?: number;
+        correctValue?: number;
+        // LOCATION
+        correctLatitude?: number;
+        correctLongitude?: number;
+        radius1000?: number;
+        radius750?: number;
+        radius500?: number;
+        mapType?: 'SIMPLE' | 'SATELLITE';
     };
     status: AIQuestionStatus;
     userFeedback?: string | null;

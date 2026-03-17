@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { useAuth } from "../../context/AuthContext"
 import { useModal } from "@/context/ModalContext";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Smile } from "lucide-react";
+
 
 // schema validate 
 const signUpSchema = z.object({
@@ -188,19 +188,7 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
           ))}
         </div>
 
-        {/* Decorative Center "Mascot" Block - Sparkly Pink Mascot */}
-        <div className="group relative z-10 transition-transform duration-500 hover:scale-110">
-          <div className="w-56 h-56 bg-[#FF758F] rounded-[3rem] -rotate-15 shadow-[20px_20px_0_#C9184A] flex items-center justify-center relative animate-bounce" style={{ animationDuration: '4s' }}>
-            <Sparkles className="w-32 h-32 text-white drop-shadow-lg rotate-15" />
-            
-            {/* Shapes */}
-            <div className="absolute -bottom-6 right-6 w-12 h-12 bg-[#FF4D6D] rounded-2xl rotate-12 shadow-md"></div>
-            <div className="absolute -top-8 left-8 w-10 h-10 bg-white/40 rounded-full blur-sm"></div>
-            
-            {/* Special accents */}
-            <div className="absolute top-1/4 right-1/4 w-3 h-3 bg-white rounded-full animate-ping"></div>
-          </div>
-        </div>
+
 
         {/* Tagline Box */}
         <div className="absolute bottom-16 text-center z-20 w-full px-12">

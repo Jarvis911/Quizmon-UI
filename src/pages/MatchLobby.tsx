@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 import { useParams, useNavigate } from "react-router-dom";
 import socket from "@/services/socket";
 import { useAuth } from "@/context/AuthContext";
 import apiClient from "@/api/client";
 import { useModal } from "@/context/ModalContext";
-import endpoints from "@/api/api";
+import endpoints, { getAvatarUrl } from "@/api/api";
 import type { Quiz, LobbyPlayer } from "../types";
+import MusicSearchModal from "@/components/music/MusicSearchModal";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,6 +28,7 @@ import {
 
 interface MatchResponse {
     id: number;
+    pin?: string;
     quiz: Quiz;
     hostId: number;
     timePerQuestion?: number;
@@ -37,18 +40,31 @@ interface MatchResponse {
 }
 
 const PREDEFINED_AVATARS = [
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Felix",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Jasper",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Luna",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Leo",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Ginger",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Bear",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Tigger",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Coco",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Mimi",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Oliver",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Willow",
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Charlie",
+    "https://projectpokemon.org/images/normal-sprite/bulbasaur.gif",
+    "https://projectpokemon.org/images/normal-sprite/charmander.gif",
+    "https://projectpokemon.org/images/normal-sprite/squirtle.gif",
+    "https://projectpokemon.org/images/normal-sprite/caterpie.gif",
+    "https://projectpokemon.org/images/normal-sprite/pikachu.gif",
+    "https://projectpokemon.org/images/normal-sprite/ninetales.gif",
+    "https://projectpokemon.org/images/normal-sprite/jigglypuff.gif",
+    "https://projectpokemon.org/images/normal-sprite/meowth.gif",
+    "https://projectpokemon.org/images/normal-sprite/psyduck.gif",
+    "https://projectpokemon.org/images/normal-sprite/abra.gif",
+    "https://projectpokemon.org/images/normal-sprite/machop.gif",
+    "https://projectpokemon.org/images/normal-sprite/slowpoke.gif",
+    "https://projectpokemon.org/images/normal-sprite/gastly.gif",
+    "https://projectpokemon.org/images/normal-sprite/exeggcute.gif",
+    "https://projectpokemon.org/images/normal-sprite/cubone.gif",
+    "https://projectpokemon.org/images/normal-sprite/horsea.gif",
+    "https://projectpokemon.org/images/normal-sprite/staryu.gif",
+    "https://projectpokemon.org/images/normal-sprite/magikarp.gif",
+    "https://projectpokemon.org/images/normal-sprite/lapras.gif",
+    "https://projectpokemon.org/images/normal-sprite/ditto.gif",
+    "https://projectpokemon.org/images/normal-sprite/eevee.gif",
+    "https://projectpokemon.org/images/normal-sprite/porygon.gif",
+    "https://projectpokemon.org/images/normal-sprite/snorlax.gif",
+    "https://projectpokemon.org/images/normal-sprite/dratini.gif",
+    "https://projectpokemon.org/images/normal-sprite/mew.gif",
 ];
 
 const MatchLobby = () => {
@@ -57,6 +73,8 @@ const MatchLobby = () => {
     const { showAlert, showConfirm } = useModal();
     const navigate = useNavigate();
     const isNavigationHandled = useRef(false);
+    const hasReceivedSocketPlayers = useRef(false);
+
 
     // Match / lobby state
     const [players, setPlayers] = useState<LobbyPlayer[]>([]);
@@ -75,6 +93,7 @@ const MatchLobby = () => {
     const [timePerQuestion, setTimePerQuestion] = useState(30);
     const [musicUrl, setMusicUrl] = useState("");
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     // Copy room code
     const [copied, setCopied] = useState(false);
@@ -102,7 +121,10 @@ const MatchLobby = () => {
                         isReady: false,
                         isHost: p.user.id === res.data.hostId,
                     }));
-                    setPlayers(lobbyPlayers);
+                    // Prevent overwriting if socket has already provided a fresher list
+                    if (!hasReceivedSocketPlayers.current) {
+                        setPlayers(lobbyPlayers);
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -138,6 +160,7 @@ const MatchLobby = () => {
 
         const updatePlayers = (value: LobbyPlayer[]) => {
             console.log("👥 [Socket] Player list updated:", value);
+            hasReceivedSocketPlayers.current = true;
             setPlayers(value);
         };
 
@@ -271,12 +294,19 @@ const MatchLobby = () => {
     };
 
     const copyRoomCode = useCallback(() => {
-        if (matchId) {
-            navigator.clipboard.writeText(String(matchId));
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    }, [matchId]);
+        const code = match?.pin || String(matchId);
+        navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }, [matchId, match]);
+
+    const copyJoinLink = () => {
+        const link = `${window.location.origin}/join?code=${match?.pin || matchId}`;
+        navigator.clipboard.writeText(link);
+        showAlert({ title: "Đã sao chép", message: "Link tham gia đã được sao chép vào bộ nhớ tạm!", type: "info" });
+    };
+
+    const joinLink = `${window.location.origin}/join?code=${match?.pin || matchId}`;
 
     if (!user) return null;
 
@@ -287,25 +317,63 @@ const MatchLobby = () => {
                 <h1 className="text-4xl md:text-5xl font-extrabold text-foreground drop-shadow-lg tracking-tight">
                     Phòng Thi Đấu
                 </h1>
-                <p className="text-foreground/70 mt-2 text-lg">
+                <p className="text-foreground/90 mt-2 text-lg font-medium">
                     {quiz?.title || "Đang tải..."}
                 </p>
             </div>
 
-            {/* ── Room Code Banner ── */}
-            <div className="flex justify-center mb-8">
+            {/* ── Room Code & Invite Banner ── */}
+            <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 mb-12">
+                {/* Visual PIN Display */}
                 <button
                     onClick={copyRoomCode}
-                    className="group flex items-center gap-3 bg-card/40 hover:bg-card/60 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 shadow-xl"
+                    className="flex-1 group flex flex-col items-center justify-center gap-2 bg-card/70 hover:bg-card/90 backdrop-blur-xl border-2 border-white/20 rounded-4xl p-8 transition-all duration-300 hover:scale-[1.02] shadow-2xl relative overflow-hidden"
                 >
-                    <span className="text-foreground/60 text-sm font-medium">Mã phòng</span>
-                    <span className="text-3xl font-black text-primary tracking-widest font-mono">
-                        {matchId}
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <span className="text-6xl font-black">#</span>
+                    </div>
+                    <span className="text-foreground/80 text-sm font-black uppercase tracking-widest">Mã phòng</span>
+                    <span className="text-6xl md:text-7xl font-black text-primary tracking-[0.2em] font-mono drop-shadow-sm filter">
+                        {match?.pin || matchId}
                     </span>
-                    <span className="text-xs text-foreground/50 group-hover:text-primary transition-colors">
-                        {copied ? "✓ Đã sao chép!" : "Nhấn để sao chép"}
+                    <span className="text-sm text-foreground/70 font-bold mt-2">
+                        {copied ? "✓ ĐÃ SAO CHÉP MÃ" : "NHẤN ĐỂ SAO CHÉP MÃ"}
                     </span>
                 </button>
+
+                {/* QR Code & Share Link Section */}
+                <div className="flex-1 flex flex-col gap-4 bg-card/70 backdrop-blur-xl border-2 border-white/20 rounded-4xl p-6 shadow-2xl">
+                    <div className="flex flex-row items-center gap-6 h-full">
+                        {/* QR Code Canvas */}
+                        <div className="relative group p-3 bg-white rounded-2xl shrink-0 shadow-lg flex items-center justify-center">
+                            <QRCodeCanvas
+                                value={joinLink}
+                                size={144}
+                                level="H"
+                                includeMargin={false}
+                                className="w-32 h-32 md:w-36 md:h-36 rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center pointer-events-none">
+                                <span className="text-[10px] font-black text-primary uppercase bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm">Scan to Join</span>
+                            </div>
+                        </div>
+
+                        {/* Link & Instructions */}
+                        <div className="flex-1 flex flex-col justify-center gap-4 text-left">
+                            <div>
+                                <h3 className="text-lg font-black text-foreground">Tham gia nhanh</h3>
+                                <p className="text-sm text-foreground/60 font-medium">Quét mã QR hoặc nhấn nút bên dưới để chia sẻ đường link tham gia trực tiếp.</p>
+                            </div>
+
+                            <Button
+                                onClick={copyJoinLink}
+                                className="w-full h-12 bg-primary/20 hover:bg-primary/30 text-primary border-2 border-primary/30 font-black rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+                            >
+                                🔗 SAO CHÉP LINK THAM GIA
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {error && (
@@ -321,7 +389,7 @@ const MatchLobby = () => {
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl font-black text-foreground flex items-center gap-3">
                             👥 Người chơi
-                            <span className="text-sm font-bold bg-primary/20 text-primary backdrop-blur-sm rounded-full px-4 py-1">
+                            <span className="text-sm font-black bg-primary/30 text-primary-foreground backdrop-blur-md rounded-full px-4 py-1 ring-2 ring-primary/20">
                                 {players.length}/20
                             </span>
                         </h2>
@@ -332,7 +400,7 @@ const MatchLobby = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="bg-card/40 border-white/10 text-foreground hover:bg-card/60 backdrop-blur-sm font-bold shadow-lg"
+                                    className="bg-card/70 border-white/20 text-foreground hover:bg-card/90 backdrop-blur-md font-bold shadow-lg"
                                 >
                                     Tuỳ chỉnh hồ sơ
                                 </Button>
@@ -354,23 +422,25 @@ const MatchLobby = () => {
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-foreground/80 font-bold block">Chọn Avatar</Label>
-                                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                                            {PREDEFINED_AVATARS.map((url, idx) => (
-                                                <button
-                                                    key={idx}
-                                                    onClick={() => setAvatarUrl(url)}
-                                                    className={`rounded-2xl p-1 transition-all duration-300 ${avatarUrl === url
-                                                        ? "ring-4 ring-primary bg-primary/20 scale-110 shadow-lg shadow-primary/20"
-                                                        : "hover:bg-white/5 hover:scale-105"
-                                                        }`}
-                                                >
-                                                    <img
-                                                        src={url}
-                                                        alt={`Avatar ${idx + 1}`}
-                                                        className="w-full h-auto rounded-xl"
-                                                    />
-                                                </button>
-                                            ))}
+                                        <div className="max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40 transition-colors">
+                                            <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 p-1">
+                                                {PREDEFINED_AVATARS.map((url, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => setAvatarUrl(url)}
+                                                        className={`aspect-square rounded-2xl overflow-hidden transition-all duration-300 ${avatarUrl === url
+                                                            ? "ring-4 ring-primary bg-primary/20 scale-110 shadow-lg shadow-primary/20"
+                                                            : "bg-transparent hover:bg-white/10 hover:scale-105"
+                                                            }`}
+                                                    >
+                                                        <img
+                                                            src={getAvatarUrl(url)}
+                                                            alt={`Avatar ${idx + 1}`}
+                                                            className="w-full h-full object-contain p-1"
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -388,15 +458,15 @@ const MatchLobby = () => {
                         {players.map((p, idx) => (
                             <div
                                 key={p.userId}
-                                className="group relative bg-card/40 hover:bg-card/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.05] hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in slide-in-from-bottom-2"
+                                className="group relative bg-card/70 hover:bg-card/90 backdrop-blur-xl border border-white/20 rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 animate-in fade-in slide-in-from-bottom-2"
                                 style={{ animationDelay: `${idx * 0.05}s` }}
                             >
                                 {match && p.userId === match.hostId && (
                                     <span className="absolute -top-3 -right-3 text-3xl animate-bounce drop-shadow-md">👑</span>
                                 )}
-                                <Avatar className="w-16 h-16 ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all shadow-lg">
+                                <Avatar className="w-16 h-16 ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all shadow-lg overflow-hidden">
                                     {p.avatarUrl ? (
-                                        <AvatarImage src={p.avatarUrl} alt={p.displayName || p.username} />
+                                        <AvatarImage src={getAvatarUrl(p.avatarUrl)} alt={p.displayName || p.username} className="object-contain p-1" />
                                     ) : null}
                                     <AvatarFallback className="bg-primary text-primary-foreground text-xl font-black">
                                         {(p.displayName || p.username || "?")[0].toUpperCase()}
@@ -417,12 +487,12 @@ const MatchLobby = () => {
                         {[...Array(Math.max(0, 4 - players.length))].map((_, i) => (
                             <div
                                 key={`empty-${i}`}
-                                className="bg-card/10 border-2 border-dashed border-white/5 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[140px] opacity-50"
+                                className="bg-card/30 border-2 border-dashed border-white/20 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[140px]"
                             >
-                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5">
-                                    <span className="text-foreground/20 text-3xl">?</span>
+                                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+                                    <span className="text-foreground/50 text-3xl font-black">?</span>
                                 </div>
-                                <span className="text-foreground/30 text-xs font-bold uppercase tracking-widest">Đang chờ...</span>
+                                <span className="text-foreground/60 text-xs font-black uppercase tracking-widest">Đang chờ...</span>
                             </div>
                         ))}
                     </div>
@@ -432,7 +502,7 @@ const MatchLobby = () => {
                 <div className="space-y-6">
                     {/* Quiz Info Card */}
                     {quiz && (
-                        <Card className="bg-card/40 backdrop-blur-xl border-white/10 text-foreground overflow-hidden shadow-2xl transition-all hover:shadow-primary/5">
+                        <Card className="bg-card/70 backdrop-blur-xl border-white/20 text-foreground overflow-hidden shadow-2xl transition-all hover:shadow-primary/10">
                             {quiz.image && (
                                 <div className="relative h-44 overflow-hidden group">
                                     <img
@@ -465,20 +535,20 @@ const MatchLobby = () => {
                     )}
 
                     {/* Match Settings Summary */}
-                    <Card className="bg-card/40 backdrop-blur-xl border-white/10 text-foreground shadow-2xl">
+                    <Card className="bg-card/70 backdrop-blur-xl border-white/20 text-foreground shadow-2xl">
                         <CardHeader className="pb-3 border-b border-white/5">
                             <CardTitle className="text-lg font-black flex items-center gap-2">
                                 Thiết lập trận đấu
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-3 py-4 text-sm">
+                        <CardContent className="space-y-3 py-4 text-sm font-medium">
                             <div className="flex justify-between items-center group">
-                                <span className="text-foreground/60 font-bold">⏱ Thời gian/câu</span>
-                                <span className="text-primary font-black bg-primary/10 px-3 py-1 rounded-lg group-hover:scale-110 transition-transform">{timePerQuestion}s</span>
+                                <span className="text-foreground/80 font-bold">⏱ Thời gian/câu</span>
+                                <span className="text-primary font-black bg-primary/20 px-3 py-1 rounded-lg group-hover:scale-110 transition-transform ring-1 ring-primary/30">{timePerQuestion}s</span>
                             </div>
                             <div className="flex justify-between items-center group">
-                                <span className="text-foreground/60 font-bold">🎵 Nhạc nền</span>
-                                <span className={`font-black px-3 py-1 rounded-lg transition-all ${musicUrl ? "text-green-400 bg-green-400/10" : "text-foreground/40 bg-white/5"}`}>
+                                <span className="text-foreground/80 font-bold">🎵 Nhạc nền</span>
+                                <span className={`font-black px-3 py-1 rounded-lg transition-all ${musicUrl ? "text-green-400 bg-green-400/20 ring-1 ring-green-400/30" : "text-foreground/50 bg-white/10 ring-1 ring-white/10"}`}>
                                     {musicUrl ? "BẬT" : "TẮT"}
                                 </span>
                             </div>
@@ -493,7 +563,7 @@ const MatchLobby = () => {
                                 <DialogTrigger asChild>
                                     <Button
                                         variant="outline"
-                                        className="w-full h-12 bg-card/40 border-white/10 text-foreground hover:bg-card/60 backdrop-blur-sm font-black shadow-lg shadow-white/5"
+                                        className="w-full h-12 bg-card/70 border-white/20 text-foreground hover:bg-card/90 backdrop-blur-md font-black shadow-lg shadow-black/10"
                                     >
                                         Thay đổi cài đặt
                                     </Button>
@@ -522,14 +592,36 @@ const MatchLobby = () => {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <Label className="text-foreground/80 font-bold">🎵 URL nhạc nền (Mp3, Youtube...)</Label>
-                                            <Input
-                                                value={musicUrl}
-                                                onChange={(e) => setMusicUrl(e.target.value)}
-                                                placeholder="https://example.com/music.mp3"
-                                                className="bg-background/50 border-white/10 h-12"
-                                            />
+                                        <div className="space-y-4">
+                                            <Label className="text-foreground/80 font-bold">🎵 Nhạc nền (Mp3, Youtube...)</Label>
+                                            <div className="flex gap-2">
+                                                <div className="relative flex-1">
+                                                    <Input
+                                                        value={musicUrl}
+                                                        onChange={(e) => setMusicUrl(e.target.value)}
+                                                        placeholder="https://example.com/music.mp3"
+                                                        className="bg-background/50 border-white/10 h-12 pr-10"
+                                                    />
+                                                    {musicUrl && (
+                                                        <button
+                                                            onClick={() => setMusicUrl("")}
+                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground text-xs font-black"
+                                                        >
+                                                            XÓA
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => setIsSearchOpen(true)}
+                                                    className="h-12 px-4 bg-primary/20 hover:bg-primary/30 text-primary border-2 border-primary/30 font-black"
+                                                >
+                                                    🔍 TÌM KIẾM
+                                                </Button>
+                                            </div>
+                                            <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider">
+                                                Bạn có thể dán link trực tiếp hoặc sử dụng công cụ tìm kiếm bên cạnh.
+                                            </p>
                                         </div>
                                     </div>
                                     <DialogFooter>
@@ -570,12 +662,12 @@ const MatchLobby = () => {
                             >
                                 Thoát phòng
                             </Button>
-                            <div className="flex items-center justify-center gap-3 bg-primary/10 backdrop-blur-sm rounded-2xl p-6 border border-primary/20 shadow-inner">
+                            <div className="flex items-center justify-center gap-3 bg-primary/20 backdrop-blur-md rounded-2xl p-6 border-2 border-primary/40 shadow-inner">
                                 <div className="relative">
-                                    <div className="w-3 h-3 rounded-full bg-green-500 animate-ping absolute" />
-                                    <div className="w-3 h-3 rounded-full bg-green-500 relative" />
+                                    <div className="w-3.5 h-3.5 rounded-full bg-green-500 animate-ping absolute" />
+                                    <div className="w-3.5 h-3.5 rounded-full bg-green-500 relative" />
                                 </div>
-                                <span className="text-sm font-black text-primary tracking-wide uppercase">Đang chờ Host bắt đầu...</span>
+                                <span className="text-sm font-black text-primary tracking-wide uppercase drop-shadow-sm">Đang chờ Host bắt đầu...</span>
                             </div>
                         </div>
                     )}
@@ -614,6 +706,13 @@ const MatchLobby = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Music Search Modal */}
+            <MusicSearchModal
+                open={isSearchOpen}
+                onOpenChange={setIsSearchOpen}
+                onSelect={(url) => setMusicUrl(url)}
+            />
         </div>
     );
 };

@@ -37,7 +37,7 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
       try {
         await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: [index]
+          answerData: index
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {

@@ -2,7 +2,6 @@ import { useState, FormEvent, HTMLAttributes } from "react";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useEffect } from "react";
-import { Sparkles, Smile } from "lucide-react";
 
 interface LoginFormProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -112,7 +111,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               />
             </div>
 
-            {error && <p className="text-rose-500 text-sm font-bold text-center animate-bounce">{error}</p>}
+            {error && <p className="text-rose-500 text-sm font-bold text-center">{error}</p>}
 
             <button
               type="submit"
@@ -161,24 +160,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
           ))}
         </div>
 
-        {/* Decorative Center "Mascot" Block - Enhanced Pink Mascot */}
-        <div className="group relative z-10 transition-transform duration-500 hover:scale-110">
-          <div className="w-56 h-56 bg-[#FF758F] rounded-[3rem] rotate-15 shadow-[20px_20px_0_#C9184A] flex items-center justify-center relative animate-bounce" style={{ animationDuration: '3.5s' }}>
-            <Smile className="w-32 h-32 text-white drop-shadow-lg -rotate-15" />
-            
-            {/* Mascot "ears/nubs" */}
-            <div className="absolute -top-4 left-6 w-8 h-12 bg-[#FF4D6D] rounded-full rotate-45 shadow-sm"></div>
-            <div className="absolute -top-4 right-6 w-8 h-12 bg-[#FF4D6D] rounded-full -rotate-45 shadow-sm"></div>
-            
-            {/* Mascot cheeks */}
-            <div className="absolute bottom-10 left-10 w-6 h-6 bg-pink-300/60 rounded-full blur-[2px]"></div>
-            <div className="absolute bottom-10 right-10 w-6 h-6 bg-pink-300/60 rounded-full blur-[2px]"></div>
-            
-            {/* Sparkles around mascot */}
-            <Sparkles className="absolute -top-8 -right-8 w-12 h-12 text-yellow-300 animate-pulse" />
-            <Sparkles className="absolute -bottom-4 -left-12 w-8 h-8 text-white opacity-50" />
-          </div>
-        </div>
+
 
         {/* Tagline Box */}
         <div className="absolute bottom-16 text-center z-20 w-full px-12">

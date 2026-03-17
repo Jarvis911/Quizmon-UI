@@ -1,12 +1,26 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Trophy, Medal, Clock, Calendar } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+    Trophy,
+    Medal,
+    Clock,
+    Calendar,
+    Download,
+    Search,
+    TrendingUp,
+    LayoutDashboard,
+    History,
+    FileSpreadsheet,
+    ArrowUpRight,
+    Target
+} from "lucide-react";
 import { FaHistory } from "react-icons/fa";
 import {
     Table,
@@ -23,6 +37,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
 import type { UserStats as UserStatsType, RecentMatch } from "@/types";
 
 const UserStats = () => {
@@ -37,6 +57,8 @@ const UserStats = () => {
     const [period, setPeriod] = useState("all");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeTab, setActiveTab] = useState("overview");
 
     const fetchStats = async (selectedPeriod: string) => {
         try {
@@ -49,7 +71,6 @@ const UserStats = () => {
                     : `${endpoints.user_stats}?period=${selectedPeriod}`;
 
             const res = await apiClient.get<UserStatsType>(url);
-
             setStats(res.data);
         } catch (err) {
             console.error(`[UserStats] Error fetching stats for ${selectedPeriod}:`, err);
@@ -63,6 +84,13 @@ const UserStats = () => {
         fetchStats(period);
     }, [period, token]);
 
+    const filteredMatches = useMemo(() => {
+        if (!stats?.recentMatches) return [];
+        return stats.recentMatches.filter(match =>
+            match.quizName.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [stats?.recentMatches, searchQuery]);
+
     const getRankCount = (rank: string): number => {
         try {
             return stats?.rankCounts?.[rank] || 0;
@@ -72,10 +100,10 @@ const UserStats = () => {
     };
 
     const getRankBadge = (rank: number): ReactNode => {
-        if (rank === 1) return <Badge className="bg-yellow-400 text-black border-none">Top 1</Badge>;
-        if (rank === 2) return <Badge variant="secondary" className="bg-slate-300 text-slate-900 border-none">Top 2</Badge>;
-        if (rank === 3) return <Badge variant="outline" className="border-amber-500 text-amber-500 bg-amber-500/10">Top 3</Badge>;
-        return <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30">{`#${rank}`}</Badge>;
+        if (rank === 1) return <Badge className="bg-yellow-400 text-black border-none shadow-sm shadow-yellow-400/50">Quán Quân</Badge>;
+        if (rank === 2) return <Badge variant="secondary" className="bg-slate-300 text-slate-900 border-none shadow-sm shadow-slate-400/50">Á Quân 1</Badge>;
+        if (rank === 3) return <Badge variant="outline" className="border-amber-500 text-amber-500 bg-amber-500/10 shadow-sm shadow-amber-500/30">Á Quân 2</Badge>;
+        return <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30">{`Hạng #${rank}`}</Badge>;
     };
 
     const formatDate = (dateString: string): string => {
@@ -92,12 +120,101 @@ const UserStats = () => {
         }
     };
 
-    if (loading) {
+    const handleDownloadExcel = (matchId: number | string) => {
+        const url = endpoints.report_excel(Number(matchId));
+        window.open(url, "_blank");
+    };
+
+    // Performance Chart Component (Inline SVG)
+    const PerformanceChart = () => {
+        if (!stats.recentMatches || stats.recentMatches.length < 2) return (
+            <div className="h-48 flex items-center justify-center border border-dashed rounded-lg bg-white/5">
+                <p className="text-muted-foreground text-sm">Cần ít nhất 2 trận đấu để hiển thị xu hướng</p>
+            </div>
+        );
+
+        const data = [...stats.recentMatches].reverse().map(m => m.score);
+        const maxScore = Math.max(...data, 100);
+        const width = 800;
+        const height = 200;
+        const padding = 40;
+
+        const points = data.map((d, i) => {
+            const x = padding + (i * (width - 2 * padding)) / (data.length - 1);
+            const y = height - padding - (d / maxScore) * (height - 2 * padding);
+            return `${x},${y}`;
+        }).join(" ");
+
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Đang tải thống kê...</p>
+            <div className="w-full overflow-hidden">
+                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto drop-shadow-lg">
+                    {/* Gradients */}
+                    <defs>
+                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#a855f7" />
+                            <stop offset="100%" stopColor="#ec4899" />
+                        </linearGradient>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#a855f7" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* Grid lines */}
+                    <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="currentColor" strokeOpacity="0.1" />
+                    <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="currentColor" strokeOpacity="0.05" />
+
+                    {/* Area under line */}
+                    <path
+                        d={`M${padding},${height - padding} L${points} L${width - padding},${height - padding} Z`}
+                        fill="url(#areaGradient)"
+                    />
+
+                    {/* Line */}
+                    <polyline
+                        points={points}
+                        fill="none"
+                        stroke="url(#lineGradient)"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+
+                    {/* Data Points */}
+                    {data.map((d, i) => {
+                        const x = padding + (i * (width - 2 * padding)) / (data.length - 1);
+                        const y = height - padding - (d / maxScore) * (height - 2 * padding);
+                        return (
+                            <g key={i} className="group cursor-help">
+                                <circle
+                                    cx={x}
+                                    cy={y}
+                                    r="6"
+                                    fill="#fff"
+                                    stroke="#a855f7"
+                                    strokeWidth="3"
+                                    className="transition-all duration-300 group-hover:r-8"
+                                />
+                                <text x={x} y={y - 12} fontSize="10" fontWeight="bold" textAnchor="middle" fill="#a855f7" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {d}
+                                </text>
+                            </g>
+                        );
+                    })}
+                </svg>
+            </div>
+        );
+    };
+
+    if (loading && !stats.totalMatches) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                <div className="text-center relative">
+                    <div className="w-24 h-24 border-8 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin-slow"></div>
+                    </div>
+                    <p className="mt-8 text-lg font-medium animate-pulse text-foreground/70">Đang chuẩn bị báo cáo...</p>
                 </div>
             </div>
         );
@@ -106,190 +223,271 @@ const UserStats = () => {
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-destructive mb-4 font-bold">{error}</p>
-                    <Button onClick={() => fetchStats(period)}>Thử lại</Button>
-                </div>
-            </div>
-        );
-    }
-
-    if (!stats || !user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-muted-foreground">Không có dữ liệu thống kê</p>
-            </div>
-        );
-    }
-
-    const { totalMatches, totalQuizzes, rankCounts, winRate, recentMatches } = stats;
-
-    return (
-        <div className="min-h-screen p-4 sm:p-6">
-            <div className="max-w-7xl mx-auto space-y-8">
-                {/* Header */}
-                <Card className="bg-card/90 backdrop-blur-md shadow-xl border-white/10">
-                    <CardHeader>
-                        <CardTitle className="text-2xl sm:text-3xl font-bold flex items-center justify-center gap-3 text-foreground">
-                            <FaHistory className="text-primary" />
-                            Thống Kê Lịch Sử Đấu Của {user.username}
-                        </CardTitle>
+                <Card className="max-w-md w-full border-destructive/20 bg-destructive/5">
+                    <CardHeader className="text-center">
+                        <CardTitle className="text-destructive font-bold">Lỗi Kết Nối</CardTitle>
+                        <CardDescription>{error}</CardDescription>
                     </CardHeader>
-                </Card>
-
-                {/* Period Selector */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-semibold">
-                        <Clock className="w-4 h-4" />
-                        <span>Thống kê theo thời gian:</span>
-                    </div>
-                    <Select value={period} onValueChange={setPeriod}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Chọn khoảng thời gian" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="week">Tuần gần nhất</SelectItem>
-                            <SelectItem value="month">Tháng gần nhất</SelectItem>
-                            <SelectItem value="all">Tất cả thời gian</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* Overview Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <Card className="bg-card/90 backdrop-blur-md shadow-md border-white/10">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold text-muted-foreground uppercase opacity-80">Tổng Số Trận Đấu</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-bold text-foreground">{totalMatches}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/90 backdrop-blur-md shadow-md border-white/10">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold text-muted-foreground uppercase opacity-80">Tỷ Lệ Thắng</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-bold text-green-400">{(winRate * 100).toFixed(1)}%</p>
-                            <Progress value={winRate * 100} className="mt-2 h-2 bg-white/10" />
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/90 backdrop-blur-md shadow-md border-white/10">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold text-muted-foreground uppercase opacity-80">Số Quiz Đã Chơi</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-bold text-foreground">{totalQuizzes}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/90 backdrop-blur-md shadow-md border-white/10">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold text-muted-foreground uppercase opacity-80">Xếp Hạng Nổi Bật</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-1">
-                            <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-                                <Trophy className="w-4 h-4 text-yellow-400" />
-                                <span>Top 1: {getRankCount("1")}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-                                <Medal className="w-4 h-4 text-slate-400" />
-                                <span>Top 2: {getRankCount("2")}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-                                <Medal className="w-4 h-4 text-amber-500" />
-                                <span>Top 3: {getRankCount("3")}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Recent Matches Table */}
-                <Card className="bg-card/90 backdrop-blur-md shadow-xl border-white/10">
-                    <CardHeader>
-                        <CardTitle className="text-2xl font-bold flex items-center gap-2 text-foreground">
-                            <FaHistory className="w-6 h-6 text-primary" />
-                            Trận Đấu Gần Đây ({recentMatches.length})
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {recentMatches.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                                <p className="text-muted-foreground">Chưa có trận đấu gần đây</p>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="border-b-2 border-gray-200">
-                                            <TableHead className="w-16 text-center">Xếp Hạng</TableHead>
-                                            <TableHead className="w-32">Quiz</TableHead>
-                                            <TableHead className="w-24 text-center">Điểm Số</TableHead>
-                                            <TableHead className="w-32 text-center">Thời Gian</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {recentMatches.map((match: RecentMatch) => (
-                                            <TableRow key={match.id} className="hover:bg-white/5 border-b border-foreground/5">
-                                                <TableCell className="text-center">
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        {getRankBadge(match.rank)}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-foreground truncate">{match.quizName}</span>
-                                                        <span className="text-xs text-muted-foreground/70 font-mono">ID: {match.quizId}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-center font-black text-lg text-primary">
-                                                    {match.score}
-                                                </TableCell>
-                                                <TableCell className="text-center text-sm text-foreground/80 font-medium">
-                                                    {formatDate(match.createdAt)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        )}
+                    <CardContent className="flex justify-center">
+                        <Button variant="outline" onClick={() => fetchStats(period)}>Thử lại ngay</Button>
                     </CardContent>
                 </Card>
+            </div>
+        );
+    }
 
-                {/* Rank Distribution */}
-                {Object.keys(rankCounts || {}).length > 0 && (
-                    <Card className="bg-card/90 backdrop-blur-md shadow-xl border-white/10">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-foreground">Phân Bố Xếp Hạng</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {[1, 2, 3].map((rank) => {
-                                    const count = getRankCount(rank.toString());
-                                    const percentage = totalMatches > 0 ? (count / totalMatches) * 100 : 0;
-                                    return (
-                                        <div key={rank} className="flex items-center gap-4">
-                                            <div className="flex items-center gap-2 min-w-[100px]">
-                                                {getRankBadge(rank)}
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1 text-sm">
-                                                    <span className="font-bold text-foreground">Top {rank}: {count} trận</span>
-                                                    <span className="text-muted-foreground/70">({percentage.toFixed(1)}%)</span>
-                                                </div>
-                                                <Progress value={percentage} className="h-3 bg-white/10" />
+    const { totalMatches, totalQuizzes, winRate, recentMatches } = stats;
+    const averageScore = recentMatches.length > 0
+        ? Math.round(recentMatches.reduce((acc, m) => acc + m.score, 0) / recentMatches.length)
+        : 0;
+
+    return (
+        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50 p-4 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+                {/* Dashboard Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white/50 dark:bg-slate-900/50 p-8 rounded-3xl border border-white dark:border-white/10 shadow-2xl backdrop-blur-xl">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-primary/10 rounded-2xl">
+                                <LayoutDashboard className="w-8 h-8 text-primary" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-black tracking-tight text-foreground">Bảng Điều Khiển Học Tập</h1>
+                                <p className="text-muted-foreground font-medium italic">Chào mừng trở lại, {user?.username}! Đây là tiến trình của bạn.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-slate-100 dark:bg-white/5 p-2 rounded-2xl border border-white/20">
+                        <Calendar className="w-5 h-5 text-muted-foreground ml-2" />
+                        <Select value={period} onValueChange={setPeriod}>
+                            <SelectTrigger className="w-[180px] border-none bg-transparent shadow-none focus:ring-0 font-bold">
+                                <SelectValue placeholder="Khoảng thời gian" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-white/20 backdrop-blur-lg">
+                                <SelectItem value="week" className="rounded-lg">7 Ngày Qua</SelectItem>
+                                <SelectItem value="month" className="rounded-lg">30 Ngày Qua</SelectItem>
+                                <SelectItem value="all" className="rounded-lg">Tất Cả Thời Gian</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+                    <TabsList className="bg-white/50 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-white dark:border-white/10 w-fit">
+                        <TabsTrigger value="overview" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" />
+                            Tổng Quan
+                        </TabsTrigger>
+                        <TabsTrigger value="history" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
+                            <History className="w-4 h-4" />
+                            Lịch Sử Đấu
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-8 mt-0 focus-visible:ring-0">
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {[
+                                { label: "Tổng Trận Đấu", value: totalMatches, icon: FaHistory, color: "text-blue-500", bg: "bg-blue-500/10", suffix: "trận" },
+                                { label: "Tỷ Lệ Thắng", value: `${(winRate * 100).toFixed(1)}%`, icon: Target, color: "text-green-500", bg: "bg-green-500/10", progress: winRate * 100 },
+                                { label: "Điểm Trung Bình", value: averageScore, icon: ArrowUpRight, color: "text-purple-500", bg: "bg-purple-500/10", suffix: "điểm" },
+                                { label: "Quiz Tham Gia", value: totalQuizzes, icon: Medal, color: "text-orange-500", bg: "bg-orange-500/10", suffix: "bộ" },
+                            ].map((item, idx) => (
+                                <Card key={idx} className="bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
+                                    <CardHeader className="pb-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono">{item.label}</span>
+                                            <div className={`p-2 rounded-xl ${item.bg}`}>
+                                                <item.icon className={`w-4 h-4 ${item.color}`} />
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-4xl font-black text-foreground">{item.value}</span>
+                                            {item.suffix && <span className="text-xs font-bold text-muted-foreground">{item.suffix}</span>}
+                                        </div>
+                                        {item.progress !== undefined && (
+                                            <div className="mt-4 space-y-1.5">
+                                                <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
+                                                    <span>Chi số hiệu quả</span>
+                                                    <span>{item.progress.toFixed(0)}%</span>
+                                                </div>
+                                                <Progress value={item.progress} className="h-2 bg-slate-100 dark:bg-white/5" />
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Performance Trend */}
+                            <Card className="lg:col-span-2 bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl">
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <div>
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <TrendingUp className="w-5 h-5 text-primary" />
+                                            Biểu Đồ Xu Hướng Hiệu Suất
+                                        </CardTitle>
+                                        <CardDescription>Biến thiên điểm số qua các trận đấu gần nhất</CardDescription>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <PerformanceChart />
+                                </CardContent>
+                            </Card>
+
+                            {/* Rank Distribution */}
+                            <Card className="bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl">
+                                <CardHeader>
+                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                        <Trophy className="w-5 h-5 text-yellow-500" />
+                                        Các Thành Tích Cao
+                                    </CardTitle>
+                                    <CardDescription>Phân bố các thứ hạng bục vinh quang</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    {[1, 2, 3].map((rank) => {
+                                        const count = getRankCount(rank.toString());
+                                        const percentage = totalMatches > 0 ? (count / totalMatches) * 100 : 0;
+                                        const colors = rank === 1 ? "bg-yellow-400" : rank === 2 ? "bg-slate-400" : "bg-orange-500";
+                                        return (
+                                            <div key={rank} className="group">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-xl ${colors}/20 flex items-center justify-center font-black text-lg ${colors.replace("bg-", "text-")}`}>
+                                                            {rank}
+                                                        </div>
+                                                        <div className="font-bold">Hạng {rank === 1 ? "Quán Quân" : rank === 2 ? "Á Quân 1" : "Á Quân 2"}</div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="font-black text-foreground">{count} trận</div>
+                                                        <div className="text-[10px] text-muted-foreground/70 font-mono tracking-tighter">{percentage.toFixed(1)}%</div>
+                                                    </div>
+                                                </div>
+                                                <div className="h-6 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden p-1">
+                                                    <div
+                                                        className={`h-full ${colors} rounded-full transition-all duration-1000 group-hover:opacity-80`}
+                                                        style={{ width: `${percentage}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="history" className="mt-0 focus-visible:ring-0">
+                        <Card className="bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl overflow-hidden">
+                            <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-foreground/5 bg-slate-50/50 dark:bg-white/5 pb-6">
+                                <div>
+                                    <CardTitle className="text-2xl font-black flex items-center gap-3">
+                                        <History className="w-7 h-7 text-primary" />
+                                        Nhật Ký Thi Đấu
+                                    </CardTitle>
+                                    <CardDescription>Tổng cộng {recentMatches.length} trận đấu đã tham gia</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative group">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                        <Input
+                                            placeholder="Tìm kiếm quiz..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="pl-10 w-full sm:w-[300px] rounded-2xl border-white/20 bg-white/80 dark:bg-slate-950/80 focus:ring-primary focus:border-primary"
+                                        />
+                                    </div>
+                                    <Button variant="outline" className="rounded-2xl gap-2 font-bold border-white/20 hover:bg-white/20">
+                                        <Download className="w-4 h-4" />
+                                        Xuất Tất Cả
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                {filteredMatches.length === 0 ? (
+                                    <div className="text-center py-24">
+                                        <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <Calendar className="w-10 h-10 text-muted-foreground/30" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-foreground">Không tìm thấy dữ liệu</h3>
+                                        <p className="text-muted-foreground max-w-xs mx-auto mt-2">Hãy thử thay đổi từ khóa tìm kiếm hoặc khoảng thời gian thống kê.</p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader className="bg-slate-100/50 dark:bg-white/5">
+                                                <TableRow className="border-b border-foreground/5 hover:bg-transparent">
+                                                    <TableHead className="w-40 font-black uppercase text-[10px] tracking-widest pl-8">Xếp Hạng</TableHead>
+                                                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Thông Tin Trận Đấu</TableHead>
+                                                    <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Điểm Số</TableHead>
+                                                    <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Thời Gian</TableHead>
+                                                    <TableHead className="w-20 text-right pr-8 font-black uppercase text-[10px] tracking-widest">Báo Cáo</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {filteredMatches.map((match: RecentMatch) => (
+                                                    <TableRow key={match.id} className="group hover:bg-white/40 dark:hover:bg-white/5 border-b border-foreground/5 transition-colors">
+                                                        <TableCell className="pl-8 py-6">
+                                                            {getRankBadge(match.rank)}
+                                                        </TableCell>
+                                                        <TableCell className="py-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-12 h-12 bg-linear-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center font-black text-primary border border-primary/20">
+                                                                    {match.quizName.charAt(0)}
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-black text-foreground group-hover:text-primary transition-colors text-base">{match.quizName}</span>
+                                                                    <span className="text-[10px] text-muted-foreground/70 font-mono flex items-center gap-1.5 uppercase font-bold tracking-tighter">
+                                                                        <Target className="w-3 h-3" />
+                                                                        ID: {match.quizId}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-center py-6">
+                                                            <div className="inline-flex flex-col items-center">
+                                                                <span className="font-black text-2xl bg-linear-to-r from-primary to-accent bg-clip-text text-transparent drop-shadow-sm">
+                                                                    {match.score}
+                                                                </span>
+                                                                <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Points</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-center py-6">
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <div className="flex items-center gap-1.5 text-xs font-bold text-foreground/80">
+                                                                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                    {formatDate(match.createdAt).split(" ")[1]}
+                                                                </div>
+                                                                <div className="text-[10px] text-muted-foreground/60 font-mono">
+                                                                    {formatDate(match.createdAt).split(" ")[0]}
+                                                                </div>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-right pr-8 py-6">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="rounded-xl hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
+                                                                onClick={() => handleDownloadExcel(match.id)}
+                                                                title="Tải báo cáo chi tiết (.xlsx)"
+                                                            >
+                                                                <FileSpreadsheet className="w-5 h-5" />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );

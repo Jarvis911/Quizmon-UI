@@ -4,7 +4,8 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  avatar?: string;
+  avatarUrl?: string;
+  bio?: string;
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   signup: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   setAuthData: (token: string, user: User) => void;
+  updateUserData: (userData: Partial<User>) => void;
 }
 
 interface AuthProviderProps {
@@ -99,8 +101,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem("user", JSON.stringify(user));
   }, []);
 
+  const updateUserData = useCallback((userData: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const newUser = { ...prev, ...userData };
+      localStorage.setItem("user", JSON.stringify(newUser));
+      return newUser;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ token, user, login, signup, logout, setAuthData }}>
+    <AuthContext.Provider value={{ token, user, login, signup, logout, setAuthData, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );

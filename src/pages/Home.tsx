@@ -6,7 +6,7 @@ import { Quiz, Category } from "@/types";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Gamepad2, Plus, Sparkles } from "lucide-react";
+import { BookOpen, Gamepad2, Plus, Sparkles, Settings } from "lucide-react";
 import { SiGoogleclassroom } from "react-icons/si";
 
 import QuizCard from "@/components/quiz/QuizCard";
@@ -191,6 +191,7 @@ const Home = () => {
                                 <h3 className="font-black text-xl text-foreground mb-1">Lớp học</h3>
                                 <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Quản lý bài tập & học sinh</p>
                             </div>
+
                         </div>
                     </div>
                 )}

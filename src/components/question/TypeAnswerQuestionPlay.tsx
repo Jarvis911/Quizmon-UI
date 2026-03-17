@@ -25,8 +25,7 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
       try {
         await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
-          answerIds: [],
-          textAnswer: finalAnswer
+          answerData: finalAnswer
         });
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
