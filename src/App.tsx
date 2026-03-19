@@ -19,6 +19,15 @@ import BillingPage from "./pages/BillingPage";
 import BillingSuccess from "./pages/BillingSuccess";
 import BillingCancel from "./pages/BillingCancel";
 import ProfileSettings from "./pages/ProfileSettings";
+
+// Admin Imports
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminQuizzes from "./pages/admin/AdminQuizzes";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAI from "./pages/admin/AdminAI";
+
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { OrganizationProvider } from "./context/OrganizationContext";
@@ -40,11 +49,12 @@ function RootLayout() {
     const location = useLocation();
 
     // Hide navbar and standard bg on match, join, login, sign-up, and agentic workspace routes
-    const isNoNavbarRoute = /^\/(match\/\d+\/(lobby|play)|join|login|sign-up|ai\/agentic-workspace)/.test(location.pathname);
+    const isNoNavbarRoute = /^\/(match\/\d+\/(lobby|play)|join|login|sign-up|ai\/agentic-workspace|admin)/.test(location.pathname);
 
     // Compact navbar padding on quiz routes
     const isQuizRoute = location.pathname.startsWith('/quiz');
-    const paddingTopClass = isNoNavbarRoute ? "" : isQuizRoute ? "pt-[48px]" : "pt-[64px]";
+    const isAdminRoute = location.pathname.startsWith('/admin');
+    const paddingTopClass = isAdminRoute ? "pt-[64px]" /* if navbar is used, but wait, admin has its own layout? We will show navbar above AdminLayout */ : isNoNavbarRoute ? "" : isQuizRoute ? "pt-[48px]" : "pt-[64px]";
 
     return (
         <div className={`w-full h-full min-h-screen ${paddingTopClass}`}>
@@ -52,7 +62,7 @@ function RootLayout() {
                 <ModalProvider>
                     <OrganizationProvider>
                         <FeatureProvider>
-                            {!isNoNavbarRoute && <Navbar />}
+                            {(!isNoNavbarRoute || isAdminRoute) && <Navbar />}
                             <GlobalModal />
                             <Outlet />
                         </FeatureProvider>
@@ -90,6 +100,19 @@ const router = createBrowserRouter([
             { path: "/billing/success", element: <ProtectedRoute><BillingSuccess /></ProtectedRoute> },
             { path: "/billing/cancel", element: <ProtectedRoute><BillingCancel /></ProtectedRoute> },
             { path: "/profile/settings", element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
+
+            // Admin Routes
+            {
+                path: "/admin",
+                element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
+                children: [
+                    { index: true, element: <AdminDashboard /> },
+                    { path: "quizzes", element: <AdminQuizzes /> },
+                    { path: "reports", element: <AdminReports /> },
+                    { path: "users", element: <AdminUsers /> },
+                    { path: "ai", element: <AdminAI /> },
+                ]
+            }
         ]
     }
 ]);
