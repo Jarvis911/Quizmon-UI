@@ -23,7 +23,7 @@ const QUESTION_TYPES = [
     { value: "CHECKBOXES", label: "Nhiều đáp án", description: "Chọn nhiều đáp án đúng" },
     { value: "TYPEANSWER", label: "Tự nhập câu trả lời", description: "Người chơi gõ đáp án" },
     { value: "REORDER", label: "Sắp xếp thứ tự", description: "Sắp xếp các mục đúng thứ tự" },
-    { value: "RANGE", label: "Thanh phạm vi", description: "Chọn giá trị trong khoảng số" },
+    // { value: "RANGE", label: "Thanh phạm vi", description: "Chọn giá trị trong khoảng số" },
     { value: "LOCATION", label: "Địa điểm", description: "Đánh dấu vị trí trên bản đồ" },
 ];
 
@@ -169,6 +169,16 @@ const AIQuizGenerator = () => {
                     <p className="text-muted-foreground font-bold max-w-lg mx-auto leading-relaxed text-sm">
                         Nhập yêu cầu hoặc tải lên tài liệu PDF để AI tự động tạo câu hỏi
                     </p>
+                    <div className="mt-6 flex justify-center">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate("/ai/agentic-workspace")}
+                            className="h-12 px-8 rounded-2xl border-2 border-primary/20 bg-primary/5 text-primary font-black hover:bg-primary/10 hover:border-primary/40 transition-all flex items-center gap-2 group shadow-xl shadow-primary/5"
+                        >
+                            <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
+                            Trải nghiệm Agent Workspace (Beta)
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Subscription Info */}

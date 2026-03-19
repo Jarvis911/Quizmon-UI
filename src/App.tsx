@@ -9,6 +9,7 @@ import CreateQuizForm from "./components/quiz/CreateQuizForm";
 import UserStats from "./pages/UserStatistics";
 import AIQuizGenerator from "./pages/AIQuizGenerator";
 import AIQuizReview from "./pages/AIQuizReview";
+import AgenticQuizWorkspace from "./pages/AgenticQuizWorkspace";
 import Classrooms from "./pages/Classrooms";
 import ClassroomDetails from "./pages/ClassroomDetails";
 import HomeworkStart from "./pages/HomeworkStart";
@@ -38,8 +39,8 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 function RootLayout() {
     const location = useLocation();
 
-    // Hide navbar and standard bg on match, join, login, and sign-up routes
-    const isNoNavbarRoute = /^\/(match\/\d+\/(lobby|play)|join|login|sign-up)/.test(location.pathname);
+    // Hide navbar and standard bg on match, join, login, sign-up, and agentic workspace routes
+    const isNoNavbarRoute = /^\/(match\/\d+\/(lobby|play)|join|login|sign-up|ai\/agentic-workspace)/.test(location.pathname);
 
     // Compact navbar padding on quiz routes
     const isQuizRoute = location.pathname.startsWith('/quiz');
@@ -71,7 +72,7 @@ const router = createBrowserRouter([
             { path: "/sign-up", element: <SignUpForm /> },
             { path: "/", element: <Home /> },
             { path: "/home", element: <Navigate to="/" replace /> },
-            
+
             // Protected Routes
             { path: "/quiz/:id/editor", element: <ProtectedRoute><QuizEditor /></ProtectedRoute> },
             { path: "/match/:id/lobby", element: <ProtectedRoute><MatchLobby /></ProtectedRoute> },
@@ -80,6 +81,7 @@ const router = createBrowserRouter([
             { path: "/statistics", element: <ProtectedRoute><UserStats /></ProtectedRoute> },
             { path: "/ai/generate", element: <ProtectedRoute><AIQuizGenerator /></ProtectedRoute> },
             { path: "/ai/review/:jobId", element: <ProtectedRoute><AIQuizReview /></ProtectedRoute> },
+            { path: "/ai/agentic-workspace", element: <ProtectedRoute><AgenticQuizWorkspace /></ProtectedRoute> },
             { path: "/classrooms", element: <ProtectedRoute><Classrooms /></ProtectedRoute> },
             { path: "/classrooms/:id", element: <ProtectedRoute><ClassroomDetails /></ProtectedRoute> },
             { path: "/homework/:id/start", element: <ProtectedRoute><HomeworkStart /></ProtectedRoute> },

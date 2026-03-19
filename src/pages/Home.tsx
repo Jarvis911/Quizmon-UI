@@ -93,10 +93,10 @@ const Home = () => {
         } catch (err: any) {
             console.error(err);
             const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";
-            showAlert({ 
-                title: "Lỗi", 
-                message: errorMessage, 
-                type: "error" 
+            showAlert({
+                title: "Lỗi",
+                message: errorMessage,
+                type: "error"
             });
         }
     };
@@ -121,16 +121,16 @@ const Home = () => {
             });
             setIsHomeworkModalOpen(false);
             setHomeworkForm({ classroomId: "", deadline: "", strictMode: false });
-            showAlert({ 
-                title: "Thành công!", 
-                message: "Đã giao bài tập thành công.", 
-                type: "success" 
+            showAlert({
+                title: "Thành công!",
+                message: "Đã giao bài tập thành công.",
+                type: "success"
             });
         } catch (err: any) {
-            showAlert({ 
-                title: "Thất bại", 
-                message: err.response?.data?.message || "Không thể giao bài tập", 
-                type: "error" 
+            showAlert({
+                title: "Thất bại",
+                message: err.response?.data?.message || "Không thể giao bài tập",
+                type: "error"
             });
         }
     };

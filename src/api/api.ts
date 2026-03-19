@@ -52,6 +52,7 @@ interface Endpoints {
     ai_job_question_regenerate: (jobId: number, questionId: number) => string;
     ai_job_question_delete: (jobId: number, questionId: number) => string;
     ai_job_approve_all: (id: number) => string;
+    ai_agentic_save: string;
 
     // Classrooms
     classrooms: string;
@@ -138,6 +139,7 @@ const endpoints: Endpoints = {
     ai_job_question_regenerate: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}/regenerate`,
     ai_job_question_delete: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}`,
     ai_job_approve_all: (id: number) => `${BASE_URL}/ai/jobs/${id}/approve-all`,
+    ai_agentic_save: `${BASE_URL}/ai/agentic/save`,
 
     // Classrooms
     classrooms: `${BASE_URL}/classrooms`,

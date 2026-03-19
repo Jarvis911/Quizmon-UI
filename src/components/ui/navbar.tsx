@@ -66,9 +66,9 @@ export default function Navbar() {
       try {
         const categoriesRes = await apiClient.get(endpoints.category);
         const categories = categoriesRes.data;
-        
+
         let allQuizzes: Quiz[] = [];
-        
+
         // Fetch my quizzes
         if (token) {
           const myQuizzesRes = await apiClient.get(endpoints.quizzes);
@@ -76,7 +76,7 @@ export default function Navbar() {
         }
 
         // Fetch category quizzes
-        const categoryPromises = categories.map((cat: any) => 
+        const categoryPromises = categories.map((cat: any) =>
           apiClient.get(endpoints.getQuizByCategory(cat.id))
         );
         const categoryResponses = await Promise.all(categoryPromises);
@@ -197,7 +197,7 @@ export default function Navbar() {
 
           {/* Search Bar Integration */}
           <div className={`flex items-center transition-all duration-300 ${isSearchExpanded ? 'flex-1 justify-center' : 'w-auto'}`}>
-            <QuizSearch 
+            <QuizSearch
               quizzes={quizzes}
               variant="navbar"
               onExpandChange={setIsSearchExpanded}
@@ -288,22 +288,22 @@ export default function Navbar() {
                   <User className="w-4 h-4 mr-2 text-primary" />
                   Cài đặt
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuLabel className="text-[10px] uppercase font-black text-muted-foreground px-2 py-1">Không gian làm việc</DropdownMenuLabel>
-                
+
                 <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
                   <Building2 className="w-4 h-4 mr-2 text-primary" />
                   Quản lý tổ chức
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuItem onClick={() => navigate('/billing')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
                   <GrMoney className="w-4 h-4 mr-2 text-primary" />
                   Gói dịch vụ & Thanh toán
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator className="bg-white/10" />
-                
+
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive font-bold focus:bg-destructive/10 focus:text-destructive" inset={undefined}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Đăng xuất

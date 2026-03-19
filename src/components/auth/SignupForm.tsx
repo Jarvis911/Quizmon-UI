@@ -45,10 +45,10 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
   const onSubmit = async (data: any) => {
     const ok = await signup(data.username, data.email, data.password);
     if (!ok) {
-      showAlert({ 
-        title: "Đăng ký thất bại", 
-        message: "Vui lòng kiểm tra lại thông tin và thử lại!", 
-        type: "error" 
+      showAlert({
+        title: "Đăng ký thất bại",
+        message: "Vui lòng kiểm tra lại thông tin và thử lại!",
+        type: "error"
       });
     }
     else {
@@ -176,13 +176,13 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
       <div className="hidden md:flex flex-1 h-full bg-[#FFB3C1] relative items-center justify-center border-l-8 border-pink-50 shadow-[inset_10px_0_30px_-10px_rgba(0,0,0,0.05)] overflow-hidden">
         {/* Subtle pattern overlays */}
         <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #fff 20%, transparent 20%)', backgroundSize: '60px 60px' }}></div>
-        
+
         {/* Animated background elements */}
         <div className="absolute w-[200%] h-[200%] rotate-12 flex flex-wrap gap-12 p-12 z-0 opacity-20">
           {Array.from({ length: 48 }).map((_, i) => (
-            <div 
-              key={i} 
-              className="w-32 h-32 rounded-[2.5rem] bg-white opacity-40 shrink-0 shadow-xl animate-pulse" 
+            <div
+              key={i}
+              className="w-32 h-32 rounded-[2.5rem] bg-white opacity-40 shrink-0 shadow-xl animate-pulse"
               style={{ animationDelay: `${i * 0.1}s`, animationDuration: '4s' }}
             ></div>
           ))}

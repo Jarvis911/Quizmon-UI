@@ -4,7 +4,7 @@ const types = [
   { key: "BUTTONS", label: "Trắc nghiệm", desc: "Chọn một đáp án đúng" },
   { key: "CHECKBOXES", label: "Hộp kiểm", desc: "Chọn nhiều đáp án đúng" },
   { key: "REORDER", label: "Sắp xếp", desc: "Sắp xếp các đáp án theo thứ tự đúng" },
-  { key: "RANGE", label: "Thanh phạm vi", desc: "Chọn đáp án trên thanh phạm vi" },
+  // { key: "RANGE", label: "Thanh phạm vi", desc: "Chọn đáp án trên thanh phạm vi" },
   { key: "LOCATION", label: "Địa điểm", desc: "Đánh dấu đáp án trên bản đồ" },
   { key: "TYPEANSWER", label: "Nhập câu trả lời", desc: "Nhập đáp án đúng vào ô trả lời" },
   { key: "AI", label: "Tạo với AI", desc: "Tạo câu hỏi từ file PDF" },
