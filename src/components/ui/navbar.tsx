@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
-import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User } from "lucide-react"
+import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User, ShieldCheck } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import apiClient from "../../api/client";
 import endpoints, { getAvatarUrl } from "../../api/api";
@@ -291,6 +291,13 @@ export default function Navbar() {
 
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuLabel className="text-[10px] uppercase font-black text-muted-foreground px-2 py-1">Không gian làm việc</DropdownMenuLabel>
+                
+                {user?.isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    Bảng điều khiển Admin
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
                   <Building2 className="w-4 h-4 mr-2 text-primary" />

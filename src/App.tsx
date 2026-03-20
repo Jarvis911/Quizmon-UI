@@ -45,6 +45,13 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
 };
 
+const AdminRoute = ({ children }: { children: ReactNode }) => {
+  const { token, user } = useAuth();
+  if (!token) return <Navigate to="/login" replace />;
+  if (!user?.isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+};
+
 function RootLayout() {
     const location = useLocation();
 
@@ -104,7 +111,7 @@ const router = createBrowserRouter([
             // Admin Routes
             {
                 path: "/admin",
-                element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
+                element: <AdminRoute><AdminLayout /></AdminRoute>,
                 children: [
                     { index: true, element: <AdminDashboard /> },
                     { path: "quizzes", element: <AdminQuizzes /> },
