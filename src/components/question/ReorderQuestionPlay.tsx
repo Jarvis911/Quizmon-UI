@@ -17,9 +17,15 @@ const ITEM_COLORS = [
   "bg-gradient-to-r from-pink-500/60 to-pink-600/60",
 ];
 
-const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
+const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult }) => {
   const [submitted, setSubmitted] = useState(false);
-  const { isCorrect, isWrong } = useQuestionSocket(socket, userId, question.id);
+  const { isCorrect, isWrong } = useQuestionSocket(
+    socket,
+    userId,
+    question.id,
+    () => onResult?.(true),
+    () => onResult?.(false)
+  );
 
   const [items, setItems] = useState(
     question.options.map((opt, idx) => ({
@@ -59,10 +65,11 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
 
     if (mode === "HOMEWORK") {
       try {
-        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
+        const res = await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerData: answerIds
         });
+        if (onResult) onResult(res.data.isCorrect);
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
         console.error("Failed to submit homework answer", err);

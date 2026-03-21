@@ -7,10 +7,16 @@ import useQuestionSocket from "@/hooks/useQuestionSocket";
 import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
-const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
+const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { isCorrect, isWrong } = useQuestionSocket(socket, userId, question.id);
+  const { isCorrect, isWrong } = useQuestionSocket(
+    socket,
+    userId,
+    question.id,
+    () => onResult?.(true),
+    () => onResult?.(false)
+  );
 
   useEffect(() => {
     setSelectedIds([]);
@@ -33,10 +39,11 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
 
     if (mode === "HOMEWORK") {
       try {
-        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
+        const res = await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerData: selectedIds
         });
+        if (onResult) onResult(res.data.isCorrect);
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
         console.error("Failed to submit homework answer", err);

@@ -41,7 +41,7 @@ function FlyToLocation({ location }) {
 import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
-const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
+const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult }) => {
   const [location, setLocation] = useState(null);
   const [correctLocation, setCorrectLocation] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
@@ -70,6 +70,7 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
       }) => {
         if (resUserId === userId && questionId === question.id) {
           setIsCorrect(resCorrect);
+          if (onResult) onResult(resCorrect);
           if (correctLatLon) {
             setCorrectLocation({
               lat: correctLatLon.latitude,
@@ -98,10 +99,11 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
 
     if (mode === "HOMEWORK") {
       try {
-        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
+        const res = await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerData: location
         });
+        if (onResult) onResult(res.data.isCorrect);
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
         console.error("Failed to submit homework answer", err);

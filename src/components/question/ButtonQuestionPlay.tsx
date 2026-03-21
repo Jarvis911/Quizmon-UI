@@ -17,10 +17,16 @@ const OPTION_COLORS = [
 
 const OPTION_ICONS = ["🔴", "🔵", "🟢", "🟡", "🟣", "🩷"];
 
-const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit }) => {
+const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult }) => {
   const [selectedAnswerId, setSelectedAnswerId] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { isCorrect, isWrong } = useQuestionSocket(socket, userId, question.id);
+  const { isCorrect, isWrong } = useQuestionSocket(
+    socket,
+    userId,
+    question.id,
+    () => onResult?.(true),
+    () => onResult?.(false)
+  );
 
   useEffect(() => {
     setSelectedAnswerId(null);
@@ -35,10 +41,11 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
     // Auto-submit immediately for BUTTONS (single-choice)
     if (mode === "HOMEWORK") {
       try {
-        await apiClient.post(endpoints.homework_answer(Number(matchId)), {
+        const res = await apiClient.post(endpoints.homework_answer(Number(matchId)), {
           questionId: question.id,
           answerData: index
         });
+        if (onResult) onResult(res.data.isCorrect);
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
         console.error("Failed to submit homework answer", err);

@@ -6,7 +6,6 @@ import socket from "@/services/socket";
 import apiClient from "@/api/client";
 import endpoints, { getAvatarUrl } from "@/api/api";
 import { Howl } from "howler";
-import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import ReactPlayer from "react-player";
 
@@ -152,7 +151,7 @@ const MatchPlay = () => {
     const [maxTimer, setMaxTimer] = useState(30);
     const [scores, setScores] = useState<PlayerScore[]>([]);
     const [notification, setNotification] = useState<string | null>(null);
-    const [explode, setExplode] = useState(false);
+    const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [gameOver, setGameOver] = useState(false);
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -269,10 +268,7 @@ const MatchPlay = () => {
 
         const handleAnswerResult = ({ userId, isCorrect, questionId }: { userId: number, isCorrect: boolean, questionId: number }) => {
             if (userId === user.id && questionRef.current?.id === questionId) {
-                if (isCorrect) {
-                    setExplode(true);
-                    setTimeout(() => setExplode(false), 5000);
-                }
+                triggerFeedback(isCorrect);
             }
         };
 
@@ -364,6 +360,11 @@ const MatchPlay = () => {
         window.speechSynthesis.speak(utterance);
     };
 
+    const triggerFeedback = (isCorrect: boolean) => {
+        setFeedback(isCorrect ? 'correct' : 'wrong');
+        setTimeout(() => setFeedback(null), 1000);
+    };
+
     // Game Over → Leaderboard or Homework Results
     if (gameOver) {
         if (matchMode === "HOMEWORK") {
@@ -411,7 +412,8 @@ const MatchPlay = () => {
             userId: user?.id || 0,
             timer,
             mode: matchMode,
-            onHomeworkSubmit: matchMode === "HOMEWORK" ? handleNextHomeworkQuestion : undefined
+            onHomeworkSubmit: matchMode === "HOMEWORK" ? handleNextHomeworkQuestion : undefined,
+            onResult: triggerFeedback
         };
 
         // Casting to any for component props to avoid complex discriminative union issues in this view
@@ -442,6 +444,16 @@ const MatchPlay = () => {
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
             </div>
+
+            {/* Feedback Overlay */}
+            <div
+                className={`absolute inset-0 pointer-events-none z-0 transition-opacity duration-300 ${feedback === 'correct'
+                    ? 'bg-green-500/20 opacity-100'
+                    : feedback === 'wrong'
+                        ? 'bg-red-500/20 opacity-100'
+                        : 'opacity-0'
+                    }`}
+            />
 
             {/* Hidden Background Music Player */}
             <div className="hidden">
@@ -558,19 +570,6 @@ const MatchPlay = () => {
                 )}
             </div>
 
-            {/* ── Confetti ── */}
-            {explode && (
-                <div className="fixed inset-0 z-50 pointer-events-none">
-                    <Confetti
-                        width={width}
-                        height={height}
-                        gravity={0.4}
-                        recycle={false}
-                        numberOfPieces={500}
-                        run={explode}
-                    />
-                </div>
-            )}
 
             {/* ── End Match Confirmation (Host) ── */}
             <Dialog open={confirmEndMatch} onOpenChange={setConfirmEndMatch}>
