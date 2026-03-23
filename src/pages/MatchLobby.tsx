@@ -241,8 +241,11 @@ const MatchLobby = () => {
     };
 
     const handleResign = () => {
-        if (alreadyInMatchId) {
-            socket.emit("leaveMatch", { matchId: alreadyInMatchId });
+        if (alreadyInMatchId && user) {
+            socket.emit("leaveMatch", { 
+                matchId: alreadyInMatchId,
+                userId: user.id 
+            });
         }
     };
 

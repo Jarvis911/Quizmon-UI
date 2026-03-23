@@ -40,7 +40,7 @@ const ImagePicker = ({
     };
 
     return (
-        <div className="relative w-[500px] h-[300px] border rounded-lg overflow-hidden">
+        <div className="relative w-[300px] h-[300px] border rounded-lg overflow-hidden mx-auto">
             {!imageSrc ? (
                 <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
                     <MdImageNotSupported className="w-12 h-12 text-gray-400 mb-2" />
@@ -58,7 +58,7 @@ const ImagePicker = ({
                         image={imageSrc}
                         crop={crop}
                         zoom={zoom}
-                        aspect={4 / 3}
+                        aspect={1}
                         restrictPosition={true}
                         onCropChange={setCrop}
                         onZoomChange={setZoom}

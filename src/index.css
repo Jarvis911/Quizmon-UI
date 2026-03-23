@@ -366,3 +366,21 @@
 .animate-scroll:hover {
   animation-play-state: paused;
 }
+
+@keyframes blur-to-clear {
+  0% { filter: blur(40px); opacity: 0; }
+  100% { filter: blur(0); opacity: 1; }
+}
+
+@keyframes zoom-out-5x {
+  0% { transform: scale(5); }
+  100% { transform: scale(1); }
+}
+
+.animate-blur-to-clear {
+  animation: blur-to-clear 15s ease-out forwards;
+}
+
+.animate-zoom-out-5x {
+  animation: zoom-out-5x 15s ease-out forwards;
+}

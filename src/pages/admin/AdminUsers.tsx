@@ -1,20 +1,28 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminUsers() {
     const { token } = useAuth();
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [isAdmin, setIsAdmin] = useState("");
 
-    useEffect(() => {
-        axios.get("http://localhost:5000/admin/users", {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+    const loadUsers = () => {
+        apiClient.get("/admin/users", { params: { search, isAdmin: isAdmin === "" ? undefined : isAdmin } })
         .then(res => setUsers(res.data))
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [token]);
+    };
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            loadUsers();
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [token, search, isAdmin]);
 
     const getSubscriptionStatus = (user: any) => {
         const orgMember = user.organizationMembers?.[0];
@@ -35,6 +43,30 @@ export default function AdminUsers() {
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Users & Revenue</h1>
                 <p className="text-slate-500 dark:text-slate-400">View user accounts, subscription plans, and trial status.</p>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+                <div className="flex-1">
+                    <input 
+                        type="text" 
+                        placeholder="Search by username or email..." 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+                <div className="w-full md:w-64">
+                    <select 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={isAdmin}
+                        onChange={(e) => setIsAdmin(e.target.value)}
+                    >
+                        <option value="">All Account Types</option>
+                        <option value="true">Admins Only</option>
+                        <option value="false">Regular Users Only</option>
+                    </select>
+                </div>
             </div>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">

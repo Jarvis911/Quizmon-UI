@@ -12,9 +12,9 @@ const navItems = [
 
 export default function AdminLayout() {
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950">
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-transparent">
             {/* Sidebar */}
-            <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0">
+            <aside className="w-64 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-r border-slate-200 dark:border-slate-800 flex-shrink-0">
                 <div className="p-6">
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Admin Panel</h2>
                     <nav className="space-y-1 text-sm font-medium">

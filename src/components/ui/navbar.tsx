@@ -192,6 +192,9 @@ export default function Navbar() {
               <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
                 <SiGoogleclassroom className="w-4 h-4 mr-2" /> Lớp học
               </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/library")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
+                <Library className="w-4 h-4 mr-2" /> Thư viện
+              </Button>
             </div>
           )}
 

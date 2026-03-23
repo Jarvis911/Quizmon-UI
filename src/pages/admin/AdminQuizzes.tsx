@@ -1,33 +1,44 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { Trash2 } from "lucide-react";
 
 export default function AdminQuizzes() {
     const { token } = useAuth();
     const [quizzes, setQuizzes] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [categoryId, setCategoryId] = useState("");
 
-    const loadQuizzes = () => {
-        axios.get("http://localhost:5000/admin/quizzes", {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(res => setQuizzes(res.data))
-        .catch(console.error)
-        .finally(() => setLoading(false));
+    const loadData = async () => {
+        try {
+            const [quizzesRes, categoriesRes] = await Promise.all([
+                apiClient.get("/admin/quizzes", { params: { search, categoryId } }),
+                apiClient.get("/category")
+            ]);
+            setQuizzes(quizzesRes.data);
+            setCategories(categoriesRes.data);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        loadQuizzes();
-    }, [token]);
+        const delayDebounceFn = setTimeout(() => {
+            loadData();
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [token, search, categoryId]);
 
     const handleDelete = async (id: number) => {
         if (!confirm("Are you sure you want to delete this quiz?")) return;
         try {
-            await axios.delete(`http://localhost:5000/admin/quizzes/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            loadQuizzes();
+            await apiClient.delete(`/admin/quizzes/${id}`);
+            loadData();
         } catch (e) {
             console.error(e);
             alert("Failed to delete quiz");
@@ -41,6 +52,31 @@ export default function AdminQuizzes() {
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Quiz Moderation</h1>
                 <p className="text-slate-500 dark:text-slate-400">Manage and remove inappropriate quizzes.</p>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+                <div className="flex-1">
+                    <input 
+                        type="text" 
+                        placeholder="Search by title or creator..." 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+                <div className="w-full md:w-64">
+                    <select 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                    >
+                        <option value="">All Categories</option>
+                        {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">

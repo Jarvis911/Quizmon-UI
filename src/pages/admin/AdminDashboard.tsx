@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { Users, FileQuestion, CreditCard, Cpu } from "lucide-react";
 
@@ -9,9 +9,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/admin/stats", {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        apiClient.get("/admin/stats")
         .then(res => setStats(res.data))
         .catch(console.error)
         .finally(() => setLoading(false));

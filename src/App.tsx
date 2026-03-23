@@ -19,6 +19,7 @@ import BillingPage from "./pages/BillingPage";
 import BillingSuccess from "./pages/BillingSuccess";
 import BillingCancel from "./pages/BillingCancel";
 import ProfileSettings from "./pages/ProfileSettings";
+import Library from "./pages/Library";
 
 // Admin Imports
 import AdminLayout from "./components/admin/AdminLayout";
@@ -107,6 +108,7 @@ const router = createBrowserRouter([
             { path: "/billing/success", element: <ProtectedRoute><BillingSuccess /></ProtectedRoute> },
             { path: "/billing/cancel", element: <ProtectedRoute><BillingCancel /></ProtectedRoute> },
             { path: "/profile/settings", element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
+            { path: "/library", element: <ProtectedRoute><Library /></ProtectedRoute> },
 
             // Admin Routes
             {

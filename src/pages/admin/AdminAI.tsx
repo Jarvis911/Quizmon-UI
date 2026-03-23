@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { Save } from "lucide-react";
 
@@ -7,18 +7,24 @@ export default function AdminAI() {
     const { token } = useAuth();
     const [configs, setConfigs] = useState<any[]>([]);
     const [jobs, setJobs] = useState<any[]>([]);
+    const [features, setFeatures] = useState<string[]>([]);
+    const [models, setModels] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [jobStatus, setJobStatus] = useState("");
 
-    const [editConfig, setEditConfig] = useState<{ featureName: string; modelName: string; isActive: boolean }>({ featureName: '', modelName: '', isActive: true });
+    const [editConfig, setEditConfig] = useState<{ featureName: string; modelName: string; isActive: boolean }>({ featureName: '', modelName: 'gemini-2.5-flash', isActive: true });
 
     const loadData = async () => {
         try {
-            const [cfgRes, jobsRes] = await Promise.all([
-                axios.get("http://localhost:5000/admin/ai-config", { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get("http://localhost:5000/admin/ai-jobs", { headers: { Authorization: `Bearer ${token}` } })
+            const [cfgRes, jobsRes, optsRes] = await Promise.all([
+                apiClient.get("/admin/ai-config"),
+                apiClient.get("/admin/ai-jobs", { params: { status: jobStatus || undefined } }),
+                apiClient.get("/admin/ai-config-options")
             ]);
             setConfigs(cfgRes.data);
             setJobs(jobsRes.data);
+            setFeatures(optsRes.data.features);
+            setModels(optsRes.data.models);
         } catch (e) {
             console.error(e);
         } finally {
@@ -28,15 +34,13 @@ export default function AdminAI() {
 
     useEffect(() => {
         loadData();
-    }, [token]);
+    }, [token, jobStatus]);
 
     const handleSaveConfig = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await axios.put("http://localhost:5000/admin/ai-config", editConfig, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setEditConfig({ featureName: '', modelName: '', isActive: true });
+            await apiClient.put("/admin/ai-config", editConfig);
+            setEditConfig({ featureName: '', modelName: 'gemini-2.5-flash', isActive: true });
             loadData();
         } catch (e) {
             console.error(e);
@@ -80,11 +84,15 @@ export default function AdminAI() {
                     <form onSubmit={handleSaveConfig} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Feature Name</label>
-                            <input 
-                                required type="text" placeholder="e.g. QUIZ_GENERATION, AGENT_CHAT" 
-                                className="w-full px-3 py-2 border border-slate-300 rounded-md dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                                value={editConfig.featureName} onChange={e => setEditConfig({...editConfig, featureName: e.target.value.toUpperCase()})}
-                            />
+                            <select 
+                                required className="w-full px-3 py-2 border border-slate-300 rounded-md dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                value={editConfig.featureName} onChange={e => setEditConfig({...editConfig, featureName: e.target.value})}
+                            >
+                                <option value="" disabled>Select a feature...</option>
+                                {features.map(f => (
+                                    <option key={f} value={f}>{f.replace(/_/g, ' ')}</option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Gemini Model Name</label>
@@ -93,11 +101,9 @@ export default function AdminAI() {
                                 value={editConfig.modelName} onChange={e => setEditConfig({...editConfig, modelName: e.target.value})}
                             >
                                 <option value="" disabled>Select a model...</option>
-                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                {models.map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="flex items-center gap-2">
@@ -114,7 +120,19 @@ export default function AdminAI() {
 
             {/* AI Jobs History */}
             <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Recent AI Generation Jobs</h3>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Recent AI Generation Jobs</h3>
+                    <select 
+                        className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={jobStatus}
+                        onChange={(e) => setJobStatus(e.target.value)}
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="FAILED">Failed</option>
+                    </select>
+                </div>
                 <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">

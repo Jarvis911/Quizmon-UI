@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { Check, X } from "lucide-react";
 
@@ -7,11 +7,11 @@ export default function AdminReports() {
     const { token } = useAuth();
     const [reports, setReports] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [status, setStatus] = useState("");
+    const [type, setType] = useState("");
 
     const loadReports = () => {
-        axios.get("http://localhost:5000/admin/reports", {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        apiClient.get("/admin/reports", { params: { status, reportType: type } })
         .then(res => setReports(res.data))
         .catch(console.error)
         .finally(() => setLoading(false));
@@ -19,13 +19,11 @@ export default function AdminReports() {
 
     useEffect(() => {
         loadReports();
-    }, [token]);
+    }, [token, status, type]);
 
     const handleResolve = async (id: number, status: 'RESOLVED' | 'DISMISSED') => {
         try {
-            await axios.put(`http://localhost:5000/admin/reports/${id}/resolve`, { status }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await apiClient.put(`/admin/reports/${id}/resolve`, { status });
             loadReports();
         } catch (e) {
             console.error(e);
@@ -40,6 +38,34 @@ export default function AdminReports() {
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Moderation Reports</h1>
                 <p className="text-slate-500 dark:text-slate-400">Handle user submitted complaints for content and behavior.</p>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+                <div className="flex-1">
+                    <select 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="RESOLVED">Resolved</option>
+                        <option value="DISMISSED">Dismissed</option>
+                    </select>
+                </div>
+                <div className="flex-1">
+                    <select 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                    >
+                        <option value="">All Report Types</option>
+                        <option value="QUIZ_CONTENT">Quiz Content</option>
+                        <option value="USER_BEHAVIOR">User Behavior</option>
+                        <option value="SYSTEM_BUG">System Bug</option>
+                    </select>
+                </div>
             </div>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">

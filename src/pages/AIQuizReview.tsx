@@ -44,7 +44,7 @@ import type {
     AIQuestionStatus,
     Category,
 } from "@/types";
-import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -83,6 +83,16 @@ const TYPE_LABELS: Record<string, string> = {
     RANGE: "Khoảng giá trị",
     LOCATION: "Vị trí",
 };
+
+function RecenterMap({ center }: { center: [number, number] | null }) {
+    const map = useMap();
+    useEffect(() => {
+        if (center && center[0] !== 0) {
+            map.setView(center, map.getZoom());
+        }
+    }, [center, map]);
+    return null;
+}
 
 function LocationPickerHelper({ setLocation }: { setLocation: (lat: number, lon: number) => void }) {
     const map = useMapEvents({
@@ -865,6 +875,7 @@ const AIQuizReview = () => {
                                                     zoom={10}
                                                     style={{ height: "300px", borderRadius: "8px" }}
                                                 >
+                                                    <RecenterMap center={editLocation.lat ? [editLocation.lat, editLocation.lon] : null} />
                                                     <TileLayer
                                                         attribution={editLocation.mapType === 'SATELLITE' ? "Tiles &copy; Esri" : "&copy; OpenStreetMap &copy; CARTO"}
                                                         url={editLocation.mapType === 'SATELLITE'
@@ -953,6 +964,7 @@ const AIQuizReview = () => {
                                                     zoom={10}
                                                     style={{ height: "300px", borderRadius: "8px" }}
                                                 >
+                                                    <RecenterMap center={selectedQuestion.optionsData?.correctLatitude ? [selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude] : null} />
                                                     <TileLayer
                                                         attribution={selectedQuestion.optionsData?.mapType === 'SATELLITE' ? "Tiles &copy; Esri" : "&copy; OpenStreetMap &copy; CARTO"}
                                                         url={selectedQuestion.optionsData?.mapType === 'SATELLITE'

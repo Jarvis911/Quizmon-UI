@@ -3,16 +3,7 @@ import ReactPlayer from "react-player";
 import { MdImageNotSupported } from "react-icons/md";
 
 const QuestionMedia = ({ media }) => {
-  if (!media) {
-    return (
-      <div className="flex-1 min-w-[300px] shrink-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-lg aspect-4/3">
-        <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
-          <MdImageNotSupported className="w-16 h-16 mb-2" />
-          <span className="text-xs font-black uppercase tracking-widest">No Media</span>
-        </div>
-      </div>
-    );
-  }
+  if (!media) return null;
   const isVideo = media.type === "VIDEO";
 
   return (
@@ -37,11 +28,17 @@ const QuestionMedia = ({ media }) => {
           />
         </div>
       ) : (
-        <div className="w-full aspect-4/3 overflow-hidden rounded-lg">
+        <div className="w-full aspect-square overflow-hidden rounded-lg bg-black/5 flex items-center justify-center">
           <img
             src={media.url}
             alt="Question media"
-            className="w-full h-full object-cover max-w-full"
+            className={`w-full h-full object-cover max-w-full ${
+              media.effect === "BLUR_TO_CLEAR" ? "animate-blur-to-clear" :
+              media.effect === "ZOOM_OUT" ? "animate-zoom-out-5x" : ""
+            }`}
+            style={media.effect === "ZOOM_OUT" ? {
+              transformOrigin: `${(media.zoomX ?? 0.5) * 100}% ${(media.zoomY ?? 0.5) * 100}%`
+            } : {}}
           />
         </div>
       )}

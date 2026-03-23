@@ -34,6 +34,8 @@ const questionSchema = z.object({
     .or(z.literal("")),
   startTime: z.number().optional(),
   duration: z.number().optional(),
+  zoomX: z.number().optional(),
+  zoomY: z.number().optional(),
 });
 
 const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
@@ -55,6 +57,8 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) =>
       videoUrl: "",
       startTime: 0,
       duration: 30,
+      zoomX: 0.5,
+      zoomY: 0.5,
     },
   });
 
@@ -117,6 +121,8 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) =>
           question.media?.[0]?.type === "VIDEO" ? question.media[0].url : "",
         startTime: question.media?.[0]?.startTime || 0,
         duration: question.media?.[0]?.duration || 30,
+        zoomX: question.media?.[0]?.zoomX || 0.5,
+        zoomY: question.media?.[0]?.zoomY || 0.5,
       });
 
       // Set preview if it is IMAGE
@@ -141,6 +147,8 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) =>
         if (croppedBlob) {
           formData.append("files", croppedBlob, "image.jpg");
           formData.append("imageEffect", values.imageEffect || "NONE");
+          formData.append("zoomX", (values.zoomX ?? 0.5).toString());
+          formData.append("zoomY", (values.zoomY ?? 0.5).toString());
         }
       } else if (values.mediaType === "YOUTUBE") {
         const videoData = {
@@ -250,13 +258,38 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) =>
                           >
                             <option value="NONE">Không có</option>
                             <option value="BLUR_TO_CLEAR">Mờ dần sang Rõ</option>
-                            <option value="ZOOM_IN">Thu phóng (Lớn lên)</option>
-                            <option value="ZOOM_OUT">Thu phóng (Nhỏ lại)</option>
+                            <option value="ZOOM_OUT">Thu phóng (Phóng to rồi Nhỏ lại)</option>
                           </select>
                         </FormControl>
                       </FormItem>
                     )}
                   />
+                )}
+                {imageSrc && form.watch("imageEffect") === "ZOOM_OUT" && (
+                  <div className="flex flex-col gap-2">
+                    <FormLabel>Chọn điểm bắt đầu phóng (Click vào ảnh)</FormLabel>
+                    <div 
+                      className="relative w-full aspect-square border rounded-lg overflow-hidden cursor-crosshair bg-black/5"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / rect.width;
+                        const y = (e.clientY - rect.top) / rect.height;
+                        form.setValue("zoomX", x, { shouldDirty: true });
+                        form.setValue("zoomY", y, { shouldDirty: true });
+                      }}
+                    >
+                      <img src={imageSrc} className="w-full h-full object-cover" alt="Point picker" />
+                      <div 
+                        className="absolute w-6 h-6 border-2 border-primary rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+                        style={{ 
+                          left: `${form.watch("zoomX") * 100}%`, 
+                          top: `${form.watch("zoomY") * 100}%` 
+                        }}
+                      >
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-primary rounded-full" />
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             )}

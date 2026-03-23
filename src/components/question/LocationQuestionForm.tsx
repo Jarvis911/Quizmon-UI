@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 const questionSchema = z.object({
@@ -40,6 +40,16 @@ const questionSchema = z.object({
   radius750: z.number().min(1, "Bán kính > 0").default(15000),
   radius500: z.number().min(1, "Bán kính > 0").default(30000),
 });
+
+function ChangeView({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+}
 
 function LocationPicker({ setLocation }) {
   const map = useMapEvents({
@@ -240,6 +250,7 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
               zoom={10}
               style={{ minHeight: "400px", borderRadius: "8px" }}
             >
+              <ChangeView center={location ? [location.lat, location.lng] : null} />
               <TileLayer
                 attribution={form.watch("mapType") === "SATELLITE" ? "Tiles &copy; Esri" : "&copy; OpenStreetMap &copy; CARTO"}
                 url={form.watch("mapType") === "SATELLITE"
