@@ -33,7 +33,7 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
         <div className="p-6 flex items-center justify-between border-b border-white/10 bg-white/5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/20 rounded-xl">
-              <Building2 className="w-6 h-6 text-primary" />
+              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-6 h-6 object-contain" />
             </div>
             <h2 className="text-xl font-black tracking-tight text-foreground">Không gian</h2>
           </div>
@@ -72,7 +72,7 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
               >
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className={`p-2 rounded-lg shrink-0 ${isActive ? "bg-white/20" : "bg-white/5 group-hover:bg-primary/20 transition-colors"}`}>
-                    <Building2 className={`w-4 h-4 ${isActive ? "text-white" : "text-muted-foreground group-hover:text-primary"}`} />
+                    <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Org" className="w-4 h-4 object-contain" />
                   </div>
                   <span className="font-bold truncate text-left">{org.name}</span>
                 </div>
@@ -100,7 +100,7 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
               onClose();
             }}
           >
-            <Settings className="w-5 h-5 mr-3 text-muted-foreground" />
+            <img src="https://cdn-icons-png.flaticon.com/512/738/738853.png" alt="Settings" className="w-5 h-5 mr-3 object-contain" />
             Cài đặt tổ chức
           </Button>
         </div>

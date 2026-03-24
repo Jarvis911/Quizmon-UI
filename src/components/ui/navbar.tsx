@@ -296,7 +296,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                 </DropdownMenuItem>
 
                 <DropdownMenuItem onClick={() => navigate('/profile/settings')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
-                  <User className="w-5 h-5 mr-2 text-primary" />
+                  <img src="https://cdn-icons-png.flaticon.com/512/738/738853.png" alt="Settings" className="w-5 h-5 mr-2 object-contain" />
                   Cài đặt
                 </DropdownMenuItem>
 
@@ -311,7 +311,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                 )}
 
                 <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
-                  <Building2 className="w-5 h-5 mr-2 text-primary" />
+                  <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-5 h-5 mr-2 object-contain" />
                   Quản lý tổ chức
                 </DropdownMenuItem>
 

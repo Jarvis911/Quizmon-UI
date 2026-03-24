@@ -157,7 +157,7 @@ export default function OrganizationSettings() {
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-10">
       <header>
         <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-4">
-          <Building2 className="w-10 h-10 text-primary" /> Cài đặt
+          <img src="https://cdn-icons-png.flaticon.com/512/738/738853.png" alt="Settings" className="w-10 h-10 object-contain drop-shadow-md" /> Cài đặt
         </h1>
         <p className="text-muted-foreground font-bold mt-2">Quản lý thành viên và tùy chọn không gian làm việc của bạn.</p>
       </header>

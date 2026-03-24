@@ -6,7 +6,7 @@ import { Quiz, Category } from "@/types";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Gamepad2, Plus, Sparkles, Settings } from "lucide-react";
+import { BookOpen, Gamepad2, Plus, Sparkles, Settings, Wand2 } from "lucide-react";
 import { SiGoogleclassroom } from "react-icons/si";
 
 import QuizCard from "@/components/quiz/QuizCard";
@@ -164,25 +164,16 @@ const Home = () => {
                             className="group flex gap-4 justify-between items-center p-6 bg-[#264653] hover:bg-[#1a3039] rounded-2xl shadow-[0_8px_0_#1a3039] hover:shadow-[0_4px_0_#1a3039] hover:translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden relative"
                         >
                             <div className="flex-1 flex flex-col items-center text-center z-10">
-                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">Create a quiz</h3>
-                                <p className="text-sm text-gray-200 font-semibold mb-6">Play for free with<br />300 participants</p>
+                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">Tạo quiz</h3>
+                                <p className="text-sm text-gray-200 font-semibold mb-6">Chơi miễn phí cho tối đa<br />300 người tham gia</p>
                                 <button className="bg-[#2a9d8f] text-white font-bold py-3 px-8 rounded-full shadow-[0_4px_0_#1d7066] group-hover:shadow-[0_2px_0_#1d7066] group-hover:translate-y-0.5 transition-all w-fit">
-                                    Quiz editor
+                                    Bắt đầu tạo
                                 </button>
                             </div>
                             <div className="hidden sm:flex flex-1 justify-center z-10 relative">
                                 <div className="absolute inset-0 bg-white/10 rounded-full blur-2xl scale-150" />
                                 <div className="text-white relative z-10">
-                                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full flex items-center justify-center p-4 shadow-xl">
-                                        <div className="w-full h-full border-4 border-[#264653] rounded-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-100">
-                                            {/* Minimal Avatar */}
-                                            <div className="w-10 h-10 bg-[#264653] rounded-full mb-1"></div>
-                                            <div className="w-16 h-12 bg-[#264653] rounded-t-4xl"></div>
-                                            <div className="absolute top-4 right-4 text-yellow-500 scale-75">
-                                                <Sparkles className="fill-yellow-500" />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <img src="/quiz.png" alt="Quiz" className="w-24 h-24 sm:w-36 sm:h-36 object-contain" />
                                 </div>
                             </div>
                         </div>
@@ -193,24 +184,17 @@ const Home = () => {
                             className="group flex gap-4 justify-between items-center p-6 bg-[#264653] hover:bg-[#1a3039] rounded-2xl shadow-[0_8px_0_#1a3039] hover:shadow-[0_4px_0_#1a3039] hover:translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden relative"
                         >
                             <div className="flex-1 flex flex-col items-center text-center z-10">
-                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">A.I.</h3>
-                                <p className="text-sm text-gray-200 font-semibold mb-6">Generate a quiz from<br />any subject or pdf</p>
+                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">Tạo với AI</h3>
+                                <p className="text-sm text-gray-200 font-semibold mb-6">Tự động tạo quiz từ<br />file PDF hoặc văn bản</p>
                                 <button className="bg-[#a8dadc] text-[#1d3557] font-bold py-3 px-8 rounded-full shadow-[0_4px_0_#457b9d] group-hover:shadow-[0_2px_0_#457b9d] group-hover:translate-y-0.5 transition-all w-fit">
-                                    Quiz generator
+                                    Thử ngay
                                 </button>
                             </div>
                             <div className="hidden sm:flex flex-1 justify-center z-10 relative">
                                 <div className="absolute inset-0 bg-white/10 rounded-full blur-2xl scale-150" />
-                                <div className="text-white relative z-10">
-                                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full flex items-center justify-center p-4 shadow-xl">
-                                        <div className="w-full h-full border-4 border-[#264653] rounded-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-100">
-                                            {/* Minimal Avatar */}
-                                            <div className="w-10 h-10 bg-[#264653] rounded-full mb-1"></div>
-                                            <div className="w-16 h-12 bg-[#264653] rounded-t-4xl"></div>
-                                            <div className="absolute top-2 left-2 text-[#457b9d] scale-100">
-                                                <Sparkles className="fill-[#457b9d]" />
-                                            </div>
-                                        </div>
+                                <div className="text-white relative z-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                                    <div className="w-24 h-24 sm:w-36 sm:h-36 flex items-center justify-center p-4">
+                                        <img src="/magic-wand.png" alt="Magic Wand" className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(168,218,220,0.6)]" />
                                     </div>
                                 </div>
                             </div>
