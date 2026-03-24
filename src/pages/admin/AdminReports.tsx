@@ -27,17 +27,17 @@ export default function AdminReports() {
             loadReports();
         } catch (e) {
             console.error(e);
-            alert("Failed to update report");
+            alert("Lỗi khi cập nhật báo cáo");
         }
     };
 
-    if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
+    if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Moderation Reports</h1>
-                <p className="text-slate-500 dark:text-slate-400">Handle user submitted complaints for content and behavior.</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Báo cáo kiểm duyệt</h1>
+                <p className="text-slate-500 dark:text-slate-400">Xử lý các khiếu nại của người dùng về nội dung và hành vi.</p>
             </div>
 
             {/* Filters */}
@@ -48,10 +48,10 @@ export default function AdminReports() {
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
                     >
-                        <option value="">All Statuses</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="RESOLVED">Resolved</option>
-                        <option value="DISMISSED">Dismissed</option>
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING">Chờ xử lý</option>
+                        <option value="RESOLVED">Đã giải quyết</option>
+                        <option value="DISMISSED">Đã bỏ qua</option>
                     </select>
                 </div>
                 <div className="flex-1">
@@ -60,10 +60,10 @@ export default function AdminReports() {
                         value={type}
                         onChange={(e) => setType(e.target.value)}
                     >
-                        <option value="">All Report Types</option>
-                        <option value="QUIZ_CONTENT">Quiz Content</option>
-                        <option value="USER_BEHAVIOR">User Behavior</option>
-                        <option value="SYSTEM_BUG">System Bug</option>
+                        <option value="">Tất cả loại báo cáo</option>
+                        <option value="QUIZ_CONTENT">Nội dung Quiz</option>
+                        <option value="USER_BEHAVIOR">Hành vi người dùng</option>
+                        <option value="SYSTEM_BUG">Lỗi hệ thống</option>
                     </select>
                 </div>
             </div>
@@ -73,18 +73,20 @@ export default function AdminReports() {
                     <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                         <tr>
                             <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">ID</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Type</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Target ID</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Reason</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Status</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400 text-right">Actions</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Loại</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">ID Mục tiêu</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Lý do</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Trạng thái</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400 text-right">Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                         {reports.map((report) => (
                             <tr key={report.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td className="px-6 py-4">{report.id}</td>
-                                <td className="px-6 py-4 font-medium"><span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-xs rounded-full">{report.reportType}</span></td>
+                                <td className="px-6 py-4 font-medium"><span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-xs rounded-full">
+                                    {report.reportType === 'QUIZ_CONTENT' ? 'NỘI DUNG QUIZ' : report.reportType === 'USER_BEHAVIOR' ? 'HÀNH VI' : report.reportType}
+                                </span></td>
                                 <td className="px-6 py-4 text-indigo-600 dark:text-indigo-400 font-mono">{report.targetId}</td>
                                 <td className="px-6 py-4 max-w-xs truncate">{report.reason}</td>
                                 <td className="px-6 py-4">
@@ -93,7 +95,7 @@ export default function AdminReports() {
                                         report.status === 'RESOLVED' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
                                         'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                                     }`}>
-                                        {report.status}
+                                        {report.status === 'PENDING' ? 'CHỜ XỬ LÝ' : report.status === 'RESOLVED' ? 'ĐÃ GIẢI QUYẾT' : report.status === 'DISMISSED' ? 'ĐA BỎ QUA' : report.status}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right space-x-2">
@@ -101,14 +103,14 @@ export default function AdminReports() {
                                         <>
                                             <button 
                                                 onClick={() => handleResolve(report.id, 'RESOLVED')}
-                                                title="Mark Resolved"
+                                                title="Đánh dấu đã giải quyết"
                                                 className="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 dark:hover:bg-green-500/10"
                                             >
                                                 <Check className="w-4 h-4" />
                                             </button>
                                             <button 
                                                 onClick={() => handleResolve(report.id, 'DISMISSED')}
-                                                title="Dismiss"
+                                                title="Bỏ qua"
                                                 className="text-slate-500 hover:text-slate-700 p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
                                             >
                                                 <X className="w-4 h-4" />
@@ -120,7 +122,7 @@ export default function AdminReports() {
                         ))}
                         {reports.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No reports requiring review.</td>
+                                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Không có báo cáo nào cần xem xét.</td>
                             </tr>
                         )}
                     </tbody>

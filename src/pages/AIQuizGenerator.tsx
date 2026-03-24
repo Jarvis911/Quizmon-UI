@@ -161,7 +161,7 @@ const AIQuizGenerator = () => {
                 <div className="text-center mb-6">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-3 border border-primary/20 shadow-sm">
                         <Sparkles className="w-3 h-3 animate-pulse" />
-                        Powered by AI
+                        Cung cấp bởi AI
                     </div>
                     <h1 className="text-4xl font-black text-foreground tracking-tighter mb-2 drop-shadow-md">
                         Tạo Quiz với AI
@@ -281,8 +281,8 @@ const AIQuizGenerator = () => {
                                     className="py-2"
                                 />
                                 <div className="flex justify-between text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.2em]">
-                                    <span>Min: 1</span>
-                                    <span>Max: 30</span>
+                                    <span>Tối thiểu: 1</span>
+                                    <span>Tối đa: 30</span>
                                 </div>
                             </div>
 

@@ -11,6 +11,8 @@ import { SiGoogleclassroom } from "react-icons/si";
 
 import QuizCard from "@/components/quiz/QuizCard";
 import QuizSection from "@/components/quiz/QuizSection";
+import KnowledgeGlobeSVG from "@/components/ui/KnowledgeGlobeSVG";
+import CategoryNav from "@/components/ui/CategoryNav";
 
 
 interface Classroom {
@@ -138,60 +140,80 @@ const Home = () => {
 
     return (
         <div className="min-h-screen relative overflow-x-hidden">
-            <div className="p-6 md:p-10 space-y-12 max-w-7xl mx-auto">
+            {/* Global Background SVG Globe */}
+            <div className="fixed -top-[10%] -left-[10%] md:-top-[20%] md:-left-[15%] w-[600px] md:w-[900px] h-[600px] md:h-[900px] text-primary pointer-events-none opacity-20 md:opacity-30 z-[-1]">
+                <KnowledgeGlobeSVG />
+            </div>
+
+            {/* Category Navigation Bar */}
+            {user && (
+                <div className="w-full relative z-20 pt-24 lg:pt-8">
+                    <CategoryNav categories={categories} />
+                </div>
+            )}
+
+            <div className="p-4 md:p-8 space-y-12 max-w-7xl mx-auto relative z-10">
                 {!user && <LandingHero navigate={navigate} />}
 
-                {/* Quick Actions Hub / Welcome Section */}
+                {/* Blooket Style Hero Cards */}
                 {user && (
-                    <div className="relative mb-12 flex flex-col lg:flex-row gap-8 lg:items-center justify-between w-full">
-                        {/* Welcome Message */}
-                        <div className="lg:max-w-[40%]">
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground mb-4">
-                                Chào mừng, {user.username}!
-                            </h1>
-                            <p className="text-xl text-muted-foreground font-bold max-w-xl leading-relaxed opacity-80">
-                                Sẵn sàng khám phá và tạo nên những bài trắc nghiệm thú vị hôm nay?
-                            </p>
+                    <div className="mb-8 w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        {/* Action 1: Create Manually */}
+                        <div
+                            onClick={() => navigate('/quiz')}
+                            className="group flex gap-4 justify-between items-center p-6 bg-[#264653] hover:bg-[#1a3039] rounded-2xl shadow-[0_8px_0_#1a3039] hover:shadow-[0_4px_0_#1a3039] hover:translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden relative"
+                        >
+                            <div className="flex-1 flex flex-col items-center text-center z-10">
+                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">Create a quiz</h3>
+                                <p className="text-sm text-gray-200 font-semibold mb-6">Play for free with<br />300 participants</p>
+                                <button className="bg-[#2a9d8f] text-white font-bold py-3 px-8 rounded-full shadow-[0_4px_0_#1d7066] group-hover:shadow-[0_2px_0_#1d7066] group-hover:translate-y-0.5 transition-all w-fit">
+                                    Quiz editor
+                                </button>
+                            </div>
+                            <div className="hidden sm:flex flex-1 justify-center z-10 relative">
+                                <div className="absolute inset-0 bg-white/10 rounded-full blur-2xl scale-150" />
+                                <div className="text-white relative z-10">
+                                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full flex items-center justify-center p-4 shadow-xl">
+                                        <div className="w-full h-full border-4 border-[#264653] rounded-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-100">
+                                            {/* Minimal Avatar */}
+                                            <div className="w-10 h-10 bg-[#264653] rounded-full mb-1"></div>
+                                            <div className="w-16 h-12 bg-[#264653] rounded-t-4xl"></div>
+                                            <div className="absolute top-4 right-4 text-yellow-500 scale-75">
+                                                <Sparkles className="fill-yellow-500" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Quick Actions Grid */}
-                        <div className="w-full lg:w-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {/* Action 1: Create Manually */}
-                            <div
-                                onClick={() => navigate('/quiz')}
-                                className="group flex flex-col items-start p-6 bg-card/60 hover:bg-card/90 backdrop-blur-xl border-2 border-white/5 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                            >
-                                <div className="w-12 h-12 rounded-2xl bg-primary/20 text-primary flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-inner">
-                                    <Plus className="w-6 h-6" />
-                                </div>
-                                <h3 className="font-black text-xl text-foreground mb-1">Tạo Quiz mới</h3>
-                                <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Biên soạn thủ công</p>
+                        {/* Action 2: Create with AI */}
+                        <div
+                            onClick={() => navigate('/ai/generate')}
+                            className="group flex gap-4 justify-between items-center p-6 bg-[#264653] hover:bg-[#1a3039] rounded-2xl shadow-[0_8px_0_#1a3039] hover:shadow-[0_4px_0_#1a3039] hover:translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden relative"
+                        >
+                            <div className="flex-1 flex flex-col items-center text-center z-10">
+                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">A.I.</h3>
+                                <p className="text-sm text-gray-200 font-semibold mb-6">Generate a quiz from<br />any subject or pdf</p>
+                                <button className="bg-[#a8dadc] text-[#1d3557] font-bold py-3 px-8 rounded-full shadow-[0_4px_0_#457b9d] group-hover:shadow-[0_2px_0_#457b9d] group-hover:translate-y-0.5 transition-all w-fit">
+                                    Quiz generator
+                                </button>
                             </div>
-
-                            {/* Action 2: Create with AI */}
-                            <div
-                                onClick={() => navigate('/ai/generate')}
-                                className="group flex flex-col items-start p-6 bg-primary/10 hover:bg-primary/20 backdrop-blur-xl border-2 border-primary/30 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full"
-                            >
-                                <div className="w-12 h-12 rounded-2xl bg-primary/30 text-primary flex items-center justify-center mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform shadow-inner">
-                                    <Sparkles className="w-6 h-6 fill-primary/40" />
+                            <div className="hidden sm:flex flex-1 justify-center z-10 relative">
+                                <div className="absolute inset-0 bg-white/10 rounded-full blur-2xl scale-150" />
+                                <div className="text-white relative z-10">
+                                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full flex items-center justify-center p-4 shadow-xl">
+                                        <div className="w-full h-full border-4 border-[#264653] rounded-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-100">
+                                            {/* Minimal Avatar */}
+                                            <div className="w-10 h-10 bg-[#264653] rounded-full mb-1"></div>
+                                            <div className="w-16 h-12 bg-[#264653] rounded-t-4xl"></div>
+                                            <div className="absolute top-2 left-2 text-[#457b9d] scale-100">
+                                                <Sparkles className="fill-[#457b9d]" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 className="font-black text-xl text-foreground mb-1">Tạo bằng AI</h3>
-                                <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Tiết kiệm 90% thời gian</p>
                             </div>
-
-                            {/* Action 3: Classrooms */}
-                            <div
-                                onClick={() => navigate('/classrooms')}
-                                className="group flex flex-col items-start p-6 bg-card/60 hover:bg-card/90 backdrop-blur-xl border-2 border-white/5 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer sm:col-span-2 md:col-span-1"
-                            >
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-inner">
-                                    <SiGoogleclassroom className="w-6 h-6" />
-                                </div>
-                                <h3 className="font-black text-xl text-foreground mb-1">Lớp học</h3>
-                                <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Quản lý bài tập & học sinh</p>
-                            </div>
-
                         </div>
                     </div>
                 )}

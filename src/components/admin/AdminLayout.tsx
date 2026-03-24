@@ -24,10 +24,9 @@ export default function AdminLayout() {
                                 to={item.path}
                                 end={item.path === "/admin"}
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                                        isActive
-                                            ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                                    `flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isActive
+                                        ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white"
                                     }`
                                 }
                             >

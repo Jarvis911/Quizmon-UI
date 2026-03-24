@@ -26,23 +26,23 @@ export default function AdminUsers() {
 
     const getSubscriptionStatus = (user: any) => {
         const orgMember = user.organizationMembers?.[0];
-        if (!orgMember) return { status: 'Free', plan: 'N/A' };
+        if (!orgMember) return { status: 'Miễn phí', plan: 'N/A' };
         const sub = orgMember.organization?.subscriptions?.[0];
-        if (!sub) return { status: 'Free', plan: 'N/A' };
+        if (!sub) return { status: 'Miễn phí', plan: 'N/A' };
         
         return { 
-            status: sub.status, 
-            plan: sub.plan?.name || "Unknown"
+            status: sub.status === 'ACTIVE' ? 'HOẠT ĐỘNG' : sub.status === 'TRIALING' ? 'DÙNG THỬ' : sub.status, 
+            plan: sub.plan?.name || "Không rõ"
         };
     };
 
-    if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
+    if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Users & Revenue</h1>
-                <p className="text-slate-500 dark:text-slate-400">View user accounts, subscription plans, and trial status.</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Người dùng & Doanh thu</h1>
+                <p className="text-slate-500 dark:text-slate-400">Xem tài khoản người dùng, gói đăng ký và trạng thái dùng thử.</p>
             </div>
 
             {/* Filters */}
@@ -50,7 +50,7 @@ export default function AdminUsers() {
                 <div className="flex-1">
                     <input 
                         type="text" 
-                        placeholder="Search by username or email..." 
+                        placeholder="Tìm theo tên hoặc email..." 
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -62,9 +62,9 @@ export default function AdminUsers() {
                         value={isAdmin}
                         onChange={(e) => setIsAdmin(e.target.value)}
                     >
-                        <option value="">All Account Types</option>
-                        <option value="true">Admins Only</option>
-                        <option value="false">Regular Users Only</option>
+                        <option value="">Tất cả loại tài khoản</option>
+                        <option value="true">Chỉ Admin</option>
+                        <option value="false">Chỉ người dùng thường</option>
                     </select>
                 </div>
             </div>
@@ -74,11 +74,11 @@ export default function AdminUsers() {
                     <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                         <tr>
                             <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">ID</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Username</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Tên người dùng</th>
                             <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Email</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Plan</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Status</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Joined</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Gói</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Trạng thái</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Ngày tham gia</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -95,8 +95,8 @@ export default function AdminUsers() {
                                     <td className="px-6 py-4">{subInfo.plan}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                                            subInfo.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-                                            subInfo.status === 'TRIALING' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
+                                            subInfo.status === 'HOẠT ĐỘNG' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                                            subInfo.status === 'DÙNG THỬ' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
                                             'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                                         }`}>
                                             {subInfo.status}

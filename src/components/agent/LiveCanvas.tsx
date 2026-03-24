@@ -21,12 +21,12 @@ interface LiveCanvasProps {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-    BUTTONS: "Multiple Choice",
-    CHECKBOXES: "Checkboxes",
-    TYPEANSWER: "Type Answer",
-    REORDER: "Reorder",
-    RANGE: "Range",
-    LOCATION: "Location",
+    BUTTONS: "Trắc nghiệm",
+    CHECKBOXES: "Nhiều đáp án",
+    TYPEANSWER: "Điền đáp án",
+    REORDER: "Sắp xếp",
+    RANGE: "Khoảng giá trị",
+    LOCATION: "Vị trí",
 };
 
 const LiveCanvas = ({ quizData, isGenerating }: LiveCanvasProps) => {
@@ -39,7 +39,7 @@ const LiveCanvas = ({ quizData, isGenerating }: LiveCanvasProps) => {
                 </h2>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
                     <Sparkles className="w-3 h-3" />
-                    Live Canvas Preview
+                    Xem trước bản vẽ trực tiếp
                 </div>
             </div>
 
@@ -104,7 +104,7 @@ const LiveCanvas = ({ quizData, isGenerating }: LiveCanvasProps) => {
                             {q.questionType === "TYPEANSWER" && (
                                 <div className="col-span-2 bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl p-4 shadow-sm">
                                     <p className="font-black text-emerald-500 text-sm tracking-tight">
-                                        Correct Answer: {q.optionsData?.correctAnswer}
+                                        Đáp án đúng: {q.optionsData?.correctAnswer}
                                     </p>
                                 </div>
                             )}

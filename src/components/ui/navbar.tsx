@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
-import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User, ShieldCheck } from "lucide-react"
+import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User, ShieldCheck, Menu } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import apiClient from "../../api/client";
 import endpoints, { getAvatarUrl } from "../../api/api";
@@ -29,7 +29,7 @@ import {
 import OrgSwitcher from "../OrgSwitcher";
 import { useOrganization } from "../../context/OrganizationContext";
 
-export default function Navbar() {
+export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const { token, user, logout } = useAuth();
   const { currentOrg } = useOrganization();
@@ -159,13 +159,22 @@ export default function Navbar() {
   }
   return (
     <nav
-      className={`fixed top-0 left-0 w-full flex items-center justify-between px-3 md:px-6 z-50 transition-all duration-300
-        ${selectedTheme.className} border-b border-white/20 
-        ${scrolled ? "shadow-lg backdrop-blur-md" : "shadow-sm backdrop-blur-sm"}
-        ${isCompactVariant ? "h-12 bg-background/90" : "h-16"}`}
+      className={`fixed top-0 left-0 w-full flex justify-center z-50 transition-all duration-300
+        ${scrolled ? "shadow-md backdrop-blur-2xl bg-background/80 border-b border-foreground/5 py-1" : "bg-transparent py-2"}`}
     >
-      {/* Left - Logo */}
-      <div className="flex items-center gap-4">
+      <div className={`w-full max-w-7xl flex items-center justify-between px-4 md:px-8 transition-all duration-300 ${isCompactVariant ? "h-12" : scrolled ? "h-14 lg:h-16" : "h-20 lg:h-24"}`}>
+        {/* Left - Logo */}
+        <div className="flex items-center gap-2 md:gap-4">
+        {token && !isCompactVariant && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onToggleSidebar} 
+            className="rounded-full hover:bg-white/10 text-primary"
+          >
+            <Menu className="w-6 h-6" />
+          </Button>
+        )}
         {isCompactVariant && (
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full mr-2 hover:bg-black/10 text-primary">
             <ArrowLeft className="w-5 h-5" />
@@ -177,7 +186,6 @@ export default function Navbar() {
         >
           Quizmon
         </div>
-        {token && !isSearchExpanded && <OrgSwitcher />}
       </div>
 
       {/* Middle - Search & Navigation (Hidden in compact variant) */}
@@ -186,14 +194,14 @@ export default function Navbar() {
           {/* Main Navigation Links */}
           {token && (
             <div className={`hidden lg:flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-inner transition-opacity duration-300 ${isSearchExpanded ? 'opacity-0 pointer-events-none w-0' : 'opacity-100'}`}>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
-                <HomeIcon className="w-4 h-4 mr-2" /> Trang chủ
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+                <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Home" className="w-5 h-5 mr-2 object-contain" /> Trang chủ
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
-                <SiGoogleclassroom className="w-4 h-4 mr-2" /> Lớp học
+              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+                <img src="https://cdn-icons-png.flaticon.com/512/8388/8388104.png" alt="Classroom" className="w-5 h-5 mr-2 object-contain" /> Lớp học
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/library")} className="rounded-full text-primary-foreground hover:bg-white/20 font-bold px-4 whitespace-nowrap">
-                <Library className="w-4 h-4 mr-2" /> Thư viện
+              <Button variant="ghost" size="sm" onClick={() => navigate("/library")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+                <img src="https://cdn-icons-png.flaticon.com/512/3038/3038168.png" alt="Library" className="w-5 h-5 mr-2 object-contain" /> Thư viện
               </Button>
             </div>
           )}
@@ -229,7 +237,7 @@ export default function Navbar() {
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <div className="relative cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors">
-                  <Bell className="w-5 h-5 text-primary-foreground" />
+                  <Bell className={`w-6 h-6 transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`} />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-background">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -283,12 +291,12 @@ export default function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10">
                 <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
-                  <FaHistory className="w-4 h-4 mr-2 text-primary" />
+                  <FaHistory className="w-5 h-5 mr-2 text-primary" />
                   Lịch sử đấu
                 </DropdownMenuItem>
 
                 <DropdownMenuItem onClick={() => navigate('/profile/settings')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
-                  <User className="w-4 h-4 mr-2 text-primary" />
+                  <User className="w-5 h-5 mr-2 text-primary" />
                   Cài đặt
                 </DropdownMenuItem>
 
@@ -297,25 +305,25 @@ export default function Navbar() {
                 
                 {user?.isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
-                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    <ShieldCheck className="w-5 h-5 mr-2" />
                     Bảng điều khiển Admin
                   </DropdownMenuItem>
                 )}
 
                 <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
-                  <Building2 className="w-4 h-4 mr-2 text-primary" />
+                  <Building2 className="w-5 h-5 mr-2 text-primary" />
                   Quản lý tổ chức
                 </DropdownMenuItem>
 
                 <DropdownMenuItem onClick={() => navigate('/billing')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
-                  <GrMoney className="w-4 h-4 mr-2 text-primary" />
+                  <GrMoney className="w-5 h-5 mr-2 text-primary" />
                   Gói dịch vụ & Thanh toán
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator className="bg-white/10" />
 
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive font-bold focus:bg-destructive/10 focus:text-destructive" inset={undefined}>
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-5 h-5 mr-2" />
                   Đăng xuất
                 </DropdownMenuItem>
 
@@ -323,7 +331,7 @@ export default function Navbar() {
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="cursor-pointer font-bold text-foreground">
-                    <Palette className="w-4 h-4 mr-2 text-primary" />
+                    <Palette className="w-5 h-5 mr-2 text-primary" />
                     Đổi Giao Diện
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
@@ -355,6 +363,7 @@ export default function Navbar() {
             Đăng nhập
           </Button>
         )}
+      </div>
       </div>
     </nav>
   )

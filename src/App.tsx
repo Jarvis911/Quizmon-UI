@@ -35,8 +35,9 @@ import { OrganizationProvider } from "./context/OrganizationContext";
 import { FeatureProvider } from "./context/FeatureContext";
 import { ModalProvider } from "./context/ModalContext";
 import GlobalModal from "./components/ui/GlobalModal";
+import WorkspaceSidebar from "./components/WorkspaceSidebar";
 import { createBrowserRouter, RouterProvider, Navigate, useLocation, Outlet } from "react-router-dom";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     const { token } = useAuth();
@@ -47,14 +48,15 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 };
 
 const AdminRoute = ({ children }: { children: ReactNode }) => {
-  const { token, user } = useAuth();
-  if (!token) return <Navigate to="/login" replace />;
-  if (!user?.isAdmin) return <Navigate to="/" replace />;
-  return <>{children}</>;
+    const { token, user } = useAuth();
+    if (!token) return <Navigate to="/login" replace />;
+    if (!user?.isAdmin) return <Navigate to="/" replace />;
+    return <>{children}</>;
 };
 
 function RootLayout() {
     const location = useLocation();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Hide navbar and standard bg on match, join, login, sign-up, and agentic workspace routes
     const isNoNavbarRoute = /^\/(match\/\d+\/(lobby|play)|join|login|sign-up|ai\/agentic-workspace|admin)/.test(location.pathname);
@@ -70,7 +72,8 @@ function RootLayout() {
                 <ModalProvider>
                     <OrganizationProvider>
                         <FeatureProvider>
-                            {(!isNoNavbarRoute || isAdminRoute) && <Navbar />}
+                            {(!isNoNavbarRoute || isAdminRoute) && <Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />}
+                            <WorkspaceSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
                             <GlobalModal />
                             <Outlet />
                         </FeatureProvider>

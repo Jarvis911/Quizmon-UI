@@ -17,7 +17,7 @@ const AgenticQuizWorkspace = () => {
     const { showAlert, showConfirm } = useModal();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [quizData, setQuizData] = useState<any>({
-        title: "New Brilliant Quiz",
+        title: "Quiz Mới Tuyệt Vời",
         questions: []
     });
     const [isGenerating, setIsGenerating] = useState(false);
@@ -54,7 +54,7 @@ const AgenticQuizWorkspace = () => {
         });
 
         newSocket.on("error", (err) => {
-            showAlert({ title: "Error", message: err.message, type: "error" });
+            showAlert({ title: "Lỗi", message: err.message, type: "error" });
             setIsGenerating(false);
         });
 
@@ -123,10 +123,10 @@ const AgenticQuizWorkspace = () => {
                     <div>
                         <h1 className="text-lg font-black tracking-tight flex items-center gap-2">
                             <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                            Agent Workspace
+                            Không gian làm việc Agent
                         </h1>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
-                            Live Canvas & AI Mentor
+                            Bản vẽ Trực tiếp & Cố vấn AI
                         </p>
                     </div>
                 </div>

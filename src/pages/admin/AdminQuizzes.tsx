@@ -35,23 +35,23 @@ export default function AdminQuizzes() {
     }, [token, search, categoryId]);
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure you want to delete this quiz?")) return;
+        if (!confirm("Bạn có chắc chắn muốn xoá quiz này không?")) return;
         try {
             await apiClient.delete(`/admin/quizzes/${id}`);
             loadData();
         } catch (e) {
             console.error(e);
-            alert("Failed to delete quiz");
+            alert("Lỗi khi xoá quiz");
         }
     };
 
-    if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
+    if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Quiz Moderation</h1>
-                <p className="text-slate-500 dark:text-slate-400">Manage and remove inappropriate quizzes.</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kiểm duyệt Quiz</h1>
+                <p className="text-slate-500 dark:text-slate-400">Quản lý và loại bỏ các quiz không phù hợp.</p>
             </div>
 
             {/* Filters */}
@@ -59,7 +59,7 @@ export default function AdminQuizzes() {
                 <div className="flex-1">
                     <input 
                         type="text" 
-                        placeholder="Search by title or creator..." 
+                        placeholder="Tìm theo tiêu đề hoặc người tạo..." 
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -71,7 +71,7 @@ export default function AdminQuizzes() {
                         value={categoryId}
                         onChange={(e) => setCategoryId(e.target.value)}
                     >
-                        <option value="">All Categories</option>
+                        <option value="">Tất cả danh mục</option>
                         {categories.map(cat => (
                             <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
@@ -84,10 +84,10 @@ export default function AdminQuizzes() {
                     <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                         <tr>
                             <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">ID</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Title</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Creator</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Created At</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400 text-right">Actions</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Tiêu đề</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Người tạo</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Ngày tạo</th>
+                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400 text-right">Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -109,7 +109,7 @@ export default function AdminQuizzes() {
                         ))}
                         {quizzes.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">No quizzes found.</td>
+                                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Không tìm thấy quiz nào.</td>
                             </tr>
                         )}
                     </tbody>

@@ -15,23 +15,23 @@ export default function AdminDashboard() {
         .finally(() => setLoading(false));
     }, [token]);
 
-    if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
-    if (!stats) return <div className="p-8 text-red-500">Failed to load stats</div>;
+    if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
+    if (!stats) return <div className="p-8 text-red-500">Lỗi tải số liệu</div>;
 
     const cards = [
-        { label: "Total Users", value: stats.users, icon: Users, color: "text-blue-500" },
-        { label: "Total Quizzes", value: stats.quizzes, icon: FileQuestion, color: "text-emerald-500" },
-        { label: "Active Subscriptions", value: stats.activeSubscriptions, icon: CreditCard, color: "text-purple-500" },
-        { label: "Total Revenue", value: `$${stats.revenue.toFixed(2)}`, icon: CreditCard, color: "text-green-600" },
-        { label: "AI Jobs Processed", value: stats.aiJobs, icon: Cpu, color: "text-amber-500" },
-        { label: "Gemini Tokens Used", value: stats.totalTokens.toLocaleString(), icon: Cpu, color: "text-indigo-500" },
+        { label: "Tổng người dùng", value: stats.users, icon: Users, color: "text-blue-500" },
+        { label: "Tổng số Quiz", value: stats.quizzes, icon: FileQuestion, color: "text-emerald-500" },
+        { label: "Gói đăng ký hoạt động", value: stats.activeSubscriptions, icon: CreditCard, color: "text-purple-500" },
+        { label: "Tổng doanh thu", value: `$${stats.revenue.toFixed(2)}`, icon: CreditCard, color: "text-green-600" },
+        { label: "Yêu cầu AI đã xử lý", value: stats.aiJobs, icon: Cpu, color: "text-amber-500" },
+        { label: "Token Gemini đã dùng", value: stats.totalTokens.toLocaleString(), icon: Cpu, color: "text-indigo-500" },
     ];
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard Overview</h1>
-                <p className="text-slate-500 dark:text-slate-400">Welcome to your metrics dashboard.</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Tổng quan Dashboard</h1>
+                <p className="text-slate-500 dark:text-slate-400">Chào mừng bạn đến với trang quản trị số liệu.</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
