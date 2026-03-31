@@ -93,7 +93,11 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
             >
                 <div className={`absolute left-0 w-10 h-10 flex items-center justify-center text-muted-foreground group-focus-within:text-primary transition-colors ${isNavbar && !isExpanded ? "hover:bg-white/10 rounded-full" : "pl-1"
                     }`}>
-                    <Search className="w-5 h-5" />
+                    <img 
+                        src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png" 
+                        alt="Search" 
+                        className="w-5 h-5 object-contain" 
+                    />
                 </div>
                 <Input
                     ref={inputRef}
@@ -195,7 +199,11 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
                         ) : query.trim() ? (
                             <div className="p-8 text-center">
                                 <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-3 border-2 border-dashed border-white/10">
-                                    <Search className="w-6 h-6 text-muted-foreground/40" />
+                                    <img 
+                                        src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png" 
+                                        alt="Search" 
+                                        className="w-6 h-6 object-contain opacity-40 grayscale" 
+                                    />
                                 </div>
                                 <h4 className="font-black text-sm text-foreground mb-0.5">Không tìm thấy kết quả</h4>
                                 <p className="text-[11px] text-muted-foreground font-medium">Thử với từ khóa khác xem sao!</p>

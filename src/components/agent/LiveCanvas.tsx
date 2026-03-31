@@ -25,7 +25,6 @@ const TYPE_LABELS: Record<string, string> = {
     CHECKBOXES: "Nhiều đáp án",
     TYPEANSWER: "Điền đáp án",
     REORDER: "Sắp xếp",
-    RANGE: "Khoảng giá trị",
     LOCATION: "Vị trí",
 };
 

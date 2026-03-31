@@ -74,7 +74,11 @@ const MusicSearchModal = ({ open, onOpenChange, onSelect }: MusicSearchModalProp
 
                 <div className="flex gap-2 mb-6">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png" 
+                            alt="Search" 
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-40 grayscale" 
+                        />
                         <Input
                             placeholder="Nhập tên bài hát, ca sĩ, thể loại..."
                             value={query}
@@ -147,7 +151,11 @@ const MusicSearchModal = ({ open, onOpenChange, onSelect }: MusicSearchModalProp
                     ) : (
                         <div className="flex flex-col items-center justify-center py-20 text-foreground/40 gap-4">
                             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-dashed border-white/10">
-                                <Search className="w-8 h-8 opacity-20" />
+                                <img 
+                                    src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png" 
+                                    alt="Search" 
+                                    className="w-8 h-8 object-contain opacity-20 grayscale" 
+                                />
                             </div>
                             <p className="text-sm font-bold uppercase tracking-widest opacity-60">Khám phá âm nhạc cho trận đấu của bạn</p>
                         </div>

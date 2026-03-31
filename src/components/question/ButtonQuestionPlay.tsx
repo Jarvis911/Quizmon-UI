@@ -4,7 +4,6 @@ import useQuestionSocket from "@/hooks/useQuestionSocket"
 import QuestionMedia from "./QuestionMedia";
 import apiClient from "@/api/client";
 import endpoints from "../../api/api";
-import { CheckCircle2, XCircle } from "lucide-react";
 
 const OPTION_COLORS = [
   "from-red-500/80 to-red-600/80",
@@ -67,7 +66,7 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
       <QuestionMedia media={question.media?.[0]} />
       <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] max-w-full break-words text-2xl font-black mb-6 text-foreground drop-shadow-sm">
+          <h2 className="min-w-[250px] max-w-full wrap-break-word text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
           <div className="grid grid-cols-2 gap-3">
@@ -102,16 +101,6 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
                     {opt.text}
                   </span>
 
-                  {/* Status Icon Indicator */}
-                  {isAnswered && isSelected && (
-                    <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-xl animate-bounce">
-                      {isCorrect ? (
-                        <CheckCircle2 className="w-7 h-7 text-green-500" />
-                      ) : (
-                        <XCircle className="w-7 h-7 text-red-500" />
-                      )}
-                    </div>
-                  )}
                 </button>
               );
             })}

@@ -23,7 +23,6 @@ const QUESTION_TYPES = [
     { value: "CHECKBOXES", label: "Nhiều đáp án", description: "Chọn nhiều đáp án đúng" },
     { value: "TYPEANSWER", label: "Tự nhập câu trả lời", description: "Người chơi gõ đáp án" },
     { value: "REORDER", label: "Sắp xếp thứ tự", description: "Sắp xếp các mục đúng thứ tự" },
-    // { value: "RANGE", label: "Thanh phạm vi", description: "Chọn giá trị trong khoảng số" },
     { value: "LOCATION", label: "Địa điểm", description: "Đánh dấu vị trí trên bản đồ" },
 ];
 
@@ -108,9 +107,9 @@ const AIQuizGenerator = () => {
 
         try {
             const formData = new FormData();
-            
+
             let finalInstruction = instruction;
-            
+
             if (finalInstruction) formData.append("instruction", finalInstruction);
             if (pdfFile) formData.append("pdfFile", pdfFile);
             formData.append("questionCount", String(questionCount));
@@ -122,7 +121,7 @@ const AIQuizGenerator = () => {
                 },
             });
 
-            setIsDirty(false); 
+            setIsDirty(false);
             // Small delay to ensure state update is processed before navigation
             requestAnimationFrame(() => {
                 navigate(`/ai/review/${res.data.id}`);
@@ -158,11 +157,7 @@ const AIQuizGenerator = () => {
             )}
             <div className="w-full max-w-5xl">
                 {/* Header */}
-                <div className="text-center mb-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-3 border border-primary/20 shadow-sm">
-                        <Sparkles className="w-3 h-3 animate-pulse" />
-                        Cung cấp bởi AI
-                    </div>
+                <div className="text-center mb-6 mt-4">
                     <h1 className="text-4xl font-black text-foreground tracking-tighter mb-2 drop-shadow-md">
                         Tạo Quiz với AI
                     </h1>

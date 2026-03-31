@@ -372,7 +372,7 @@ const MatchLobby = () => {
                                 onClick={copyJoinLink}
                                 className="w-full h-12 bg-primary/20 hover:bg-primary/30 text-primary border-2 border-primary/30 font-black rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
                             >
-                                🔗 SAO CHÉP LINK THAM GIA
+                                SAO CHÉP LINK THAM GIA
                             </Button>
                         </div>
                     </div>

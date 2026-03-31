@@ -3,14 +3,13 @@ import { Input } from "./input"
 import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
+import { useModal } from "../../context/ModalContext";
 import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
-import { LogOut, TrendingUp, Sparkles, BookOpen, Palette, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User, ShieldCheck, Menu } from "lucide-react"
+import { TrendingUp, Sparkles, BookOpen, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User, ShieldCheck, Menu } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import apiClient from "../../api/client";
 import endpoints, { getAvatarUrl } from "../../api/api";
 import { SiGoogleclassroom } from "react-icons/si";
-import { FaHistory } from "react-icons/fa";
-import { GrMoney } from "react-icons/gr";
 import QuizSearch from "../quiz/QuizSearch";
 import { Quiz } from "../../types";
 import {
@@ -33,6 +32,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
   const [scrolled, setScrolled] = useState(false);
   const { token, user, logout } = useAuth();
   const { currentOrg } = useOrganization();
+  const { showAlert } = useModal();
   const { selectedTheme, themeId, handleThemeChange } = useTheme();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -157,6 +157,30 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
   const handleNavigateUserStatistics = () => {
     navigate(`/statistics`);
   }
+
+  const handlePlayNow = async (quizId: string | number) => {
+    try {
+      const res = await apiClient.post(
+        endpoints.matches,
+        { quizId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      navigate(`/match/${res.data.id}/lobby`);
+    } catch (err: any) {
+      console.error(err);
+      const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";
+      showAlert({
+        title: "Lỗi",
+        message: errorMessage,
+        type: "error"
+      });
+    }
+  };
   return (
     <nav
       className={`fixed top-0 left-0 w-full flex justify-center z-50 transition-all duration-300
@@ -181,10 +205,10 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           </Button>
         )}
         <div
-          className={`font-black tracking-tighter cursor-pointer text-primary transition-all duration-300 ${isCompactVariant ? 'text-xl' : 'text-2xl'}`}
+          className={`cursor-pointer transition-all duration-300 flex items-center ${isCompactVariant ? 'h-8' : scrolled ? 'h-10 lg:h-12' : 'h-14 lg:h-16'}`}
           onClick={handleReturnHome}
         >
-          Quizmon
+          <img src="/quizmon.png" alt="Quizmon Logo" className="h-full w-auto object-contain drop-shadow-sm" />
         </div>
       </div>
 
@@ -195,7 +219,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           {token && (
             <div className={`hidden lg:flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-inner transition-opacity duration-300 ${isSearchExpanded ? 'opacity-0 pointer-events-none w-0' : 'opacity-100'}`}>
               <Button variant="ghost" size="sm" onClick={() => navigate("/")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
-                <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Home" className="w-5 h-5 mr-2 object-contain" /> Trang chủ
+                <img src="https://cdn-icons-png.flaticon.com/512/2544/2544087.png" alt="Home" className="w-5 h-5 mr-2 object-contain" /> Trang chủ
               </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
                 <img src="https://cdn-icons-png.flaticon.com/512/8388/8388104.png" alt="Classroom" className="w-5 h-5 mr-2 object-contain" /> Lớp học
@@ -212,7 +236,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
               quizzes={quizzes}
               variant="navbar"
               onExpandChange={setIsSearchExpanded}
-              onPlay={(id) => navigate(`/match/${id}/lobby`)} // Simplified play logic for navbar
+              onPlay={handlePlayNow}
               onEdit={(id) => navigate(`/quiz/${id}/editor`)}
             />
           </div>
@@ -237,7 +261,11 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <div className="relative cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors">
-                  <Bell className={`w-6 h-6 transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`} />
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/1156/1156949.png" 
+                    alt="Notifications" 
+                    className={`w-6 h-6 object-contain transition-colors ${scrolled ? 'brightness-0' : 'brightness-100 invert'}`} 
+                  />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-background">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -291,7 +319,11 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10">
                 <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
-                  <FaHistory className="w-5 h-5 mr-2 text-primary" />
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
+                    alt="History" 
+                    className="w-5 h-5 mr-2 object-contain" 
+                  />
                   Lịch sử đấu
                 </DropdownMenuItem>
 
@@ -316,14 +348,22 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                 </DropdownMenuItem>
 
                 <DropdownMenuItem onClick={() => navigate('/billing')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
-                  <GrMoney className="w-5 h-5 mr-2 text-primary" />
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/3211/3211596.png" 
+                    alt="Billing" 
+                    className="w-5 h-5 mr-2 object-contain" 
+                  />
                   Gói dịch vụ & Thanh toán
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator className="bg-white/10" />
 
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive font-bold focus:bg-destructive/10 focus:text-destructive" inset={undefined}>
-                  <LogOut className="w-5 h-5 mr-2" />
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/3094/3094700.png" 
+                    alt="Logout" 
+                    className="w-5 h-5 mr-2 object-contain" 
+                  />
                   Đăng xuất
                 </DropdownMenuItem>
 
@@ -331,7 +371,11 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="cursor-pointer font-bold text-foreground">
-                    <Palette className="w-5 h-5 mr-2 text-primary" />
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/3308/3308315.png" 
+                      alt="Theme" 
+                      className="w-5 h-5 mr-2 object-contain" 
+                    />
                     Đổi Giao Diện
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>

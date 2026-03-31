@@ -13,6 +13,7 @@ import QuizCard from "@/components/quiz/QuizCard";
 import QuizSection from "@/components/quiz/QuizSection";
 import KnowledgeGlobeSVG from "@/components/ui/KnowledgeGlobeSVG";
 import CategoryNav from "@/components/ui/CategoryNav";
+import { checkAuth } from "@/lib/utils";
 
 
 interface Classroom {
@@ -80,6 +81,7 @@ const Home = () => {
     }, [token, user]);
 
     const handlePlayNow = async (quizId: string | number) => {
+        if (!checkAuth()) return;
         try {
             const res = await apiClient.post(
                 endpoints.matches,
@@ -104,10 +106,12 @@ const Home = () => {
     };
 
     const handleEditQuiz = async (quizId: string | number) => {
+        if (!checkAuth()) return;
         navigate(`/quiz/${quizId}/editor`);
     };
 
     const handleOpenHomeworkModal = (quizId: string | number) => {
+        if (!checkAuth()) return;
         setSelectedQuizId(quizId);
         setIsHomeworkModalOpen(true);
     };

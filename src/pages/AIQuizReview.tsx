@@ -80,7 +80,6 @@ const TYPE_LABELS: Record<string, string> = {
     CHECKBOXES: "Nhiều đáp án",
     TYPEANSWER: "Tự nhập",
     REORDER: "Sắp xếp",
-    RANGE: "Khoảng giá trị",
     LOCATION: "Vị trí",
 };
 
@@ -124,7 +123,6 @@ const AIQuizReview = () => {
         Array<{ text: string; isCorrect?: boolean; order?: number }>
     >([]);
     const [editCorrectAnswer, setEditCorrectAnswer] = useState("");
-    const [editRange, setEditRange] = useState({ min: 0, max: 100, val: 50 });
     const [editLocation, setEditLocation] = useState({ 
         lat: 0, 
         lon: 0, 
@@ -209,12 +207,6 @@ const AIQuizReview = () => {
         setEditText(q.questionText);
         if (q.questionType === "TYPEANSWER") {
             setEditCorrectAnswer(q.optionsData?.correctAnswer || "");
-        } else if (q.questionType === "RANGE") {
-            setEditRange({
-                min: q.optionsData?.minValue ?? 0,
-                max: q.optionsData?.maxValue ?? 100,
-                val: q.optionsData?.correctValue ?? 50
-            });
         } else if (q.questionType === "LOCATION") {
             setEditLocation({
                 lat: q.optionsData?.correctLatitude ?? 0,
@@ -236,7 +228,6 @@ const AIQuizReview = () => {
         setEditText("");
         setEditOptions([]);
         setEditCorrectAnswer("");
-        setEditRange({ min: 0, max: 100, val: 50 });
         setEditLocation({ 
             lat: 0, 
             lon: 0, 
@@ -255,12 +246,6 @@ const AIQuizReview = () => {
             let optionsData: Record<string, unknown>;
             if (selectedQuestion.questionType === "TYPEANSWER") {
                 optionsData = { correctAnswer: editCorrectAnswer };
-            } else if (selectedQuestion.questionType === "RANGE") {
-                optionsData = {
-                    minValue: editRange.min,
-                    maxValue: editRange.max,
-                    correctValue: editRange.val
-                };
             } else if (selectedQuestion.questionType === "LOCATION") {
                 optionsData = {
                     correctLatitude: editLocation.lat,

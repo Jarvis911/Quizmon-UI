@@ -6,8 +6,9 @@ import { Quiz } from "@/types";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Input } from "@/components/ui/input";
-import { Search, Library as LibraryIcon, Plus } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import QuizCard from "@/components/quiz/QuizCard";
+import { checkAuth } from "@/lib/utils";
 
 const Library = () => {
     const { user, token } = useAuth();
@@ -34,6 +35,7 @@ const Library = () => {
     }, [token]);
 
     const handlePlayNow = async (quizId: string | number) => {
+        if (!checkAuth()) return;
         try {
             const res = await apiClient.post(endpoints.matches, { quizId });
             navigate(`/match/${res.data.id}/lobby`);
@@ -47,10 +49,11 @@ const Library = () => {
     };
 
     const handleEditQuiz = (quizId: string | number) => {
+        if (!checkAuth()) return;
         navigate(`/quiz/${quizId}/editor`);
     };
 
-    const filteredQuizzes = myQuizzes.filter(quiz => 
+    const filteredQuizzes = myQuizzes.filter(quiz =>
         quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         quiz.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -60,7 +63,11 @@ const Library = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-3">
-                        <LibraryIcon className="w-10 h-10 text-primary" />
+                        <img
+                            src="https://cdn-icons-png.flaticon.com/512/3038/3038168.png"
+                            alt="Library"
+                            className="w-10 h-10 object-contain"
+                        />
                         Thư viện của tôi
                     </h1>
                     <p className="text-muted-foreground font-medium mt-2">
@@ -69,7 +76,7 @@ const Library = () => {
                 </div>
 
                 <div className="flex gap-3">
-                    <button 
+                    <button
                         onClick={() => navigate('/quiz')}
                         className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
                     >
@@ -81,9 +88,13 @@ const Library = () => {
 
             {/* Filters & Search */}
             <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input 
-                    placeholder="Tìm kiếm trong thư viện..." 
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png"
+                    alt="Search"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 object-contain"
+                />
+                <Input
+                    placeholder="Tìm kiếm trong thư viện..."
                     className="pl-12 h-14 bg-card/50 backdrop-blur-md border-2 border-white/5 rounded-2xl text-lg font-medium shadow-inner focus:ring-primary/20"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -100,9 +111,9 @@ const Library = () => {
             ) : filteredQuizzes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredQuizzes.map((quiz) => (
-                        <QuizCard 
-                            key={quiz.id} 
-                            quiz={quiz} 
+                        <QuizCard
+                            key={quiz.id}
+                            quiz={quiz}
                             onPlay={handlePlayNow}
                             onEdit={handleEditQuiz}
                         />
@@ -110,15 +121,17 @@ const Library = () => {
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/20 backdrop-blur-sm rounded-[3rem] border-4 border-dashed border-white/10">
-                    <div className="w-20 h-20 rounded-3xl bg-muted/20 flex items-center justify-center mb-2">
-                        <LibraryIcon className="w-10 h-10 text-muted-foreground opacity-20" />
-                    </div>
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/3038/3038168.png"
+                        alt="Library"
+                        className="w-10 h-10 object-contain opacity-20"
+                    />
                     <h2 className="text-2xl font-black text-foreground/50">Không tìm thấy Quiz nào</h2>
                     <p className="text-muted-foreground max-w-xs mx-auto">
                         {searchQuery ? "Hãy thử tìm kiếm với từ khóa khác." : "Bạn chưa tạo bài trắc nghiệm nào. Hãy bắt đầu sáng tạo ngay!"}
                     </p>
                     {!searchQuery && (
-                        <button 
+                        <button
                             onClick={() => navigate('/quiz')}
                             className="mt-4 text-primary font-bold hover:underline"
                         >

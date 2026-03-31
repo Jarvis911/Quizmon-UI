@@ -9,7 +9,6 @@ import type { Quiz } from "@/types";
 
 import ButtonQuestionForm from "@/components/question/ButtonQuestionForm";
 import CheckboxQuestionForm from "@/components/question/CheckboxQuestionForm";
-import RangeQuestionForm from "@/components/question/RangeQuestionForm";
 import ReorderQuestionForm from "@/components/question/ReorderQuestionForm";
 import TypeAnswerQuestionForm from "@/components/question/TypeAnswerQuestionForm";
 import LocationQuestionForm from "@/components/question/LocationQuestionForm";
@@ -113,8 +112,6 @@ const QuizEditor = () => {
                     return <ButtonQuestionForm {...formProps} />;
                 case "CHECKBOXES":
                     return <CheckboxQuestionForm {...formProps} />;
-                case "RANGE":
-                    return <RangeQuestionForm {...formProps} />;
                 case "REORDER":
                     return <ReorderQuestionForm {...formProps} />;
                 case "TYPEANSWER":
@@ -149,8 +146,6 @@ const QuizEditor = () => {
                 return <ButtonQuestionForm {...formProps} />;
             case "CHECKBOXES":
                 return <CheckboxQuestionForm {...formProps} />;
-            case "RANGE":
-                return <RangeQuestionForm {...formProps} />;
             case "REORDER":
                 return <ReorderQuestionForm {...formProps} />;
             case "TYPEANSWER":

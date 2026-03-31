@@ -16,12 +16,10 @@ import {
     Search,
     TrendingUp,
     LayoutDashboard,
-    History,
     FileSpreadsheet,
     ArrowUpRight,
     Target
 } from "lucide-react";
-import { FaHistory } from "react-icons/fa";
 import {
     Table,
     TableBody,
@@ -280,7 +278,11 @@ const UserStats = () => {
                             Tổng Quan
                         </TabsTrigger>
                         <TabsTrigger value="history" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
-                            <History className="w-4 h-4" />
+                            <img 
+                                src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
+                                alt="History" 
+                                className="w-4 h-4 object-contain" 
+                            />
                             Lịch Sử Đấu
                         </TabsTrigger>
                     </TabsList>
@@ -289,7 +291,18 @@ const UserStats = () => {
                         {/* Metrics Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {[
-                                { label: "Tổng Trận Đấu", value: totalMatches, icon: FaHistory, color: "text-blue-500", bg: "bg-blue-500/10", suffix: "trận" },
+                                { 
+                                    label: "Tổng Trận Đấu", 
+                                    value: totalMatches, 
+                                    icon: () => <img 
+                                        src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
+                                        alt="Total Matches" 
+                                        className="w-4 h-4 object-contain" 
+                                    />, 
+                                    color: "text-blue-500", 
+                                    bg: "bg-blue-500/10", 
+                                    suffix: "trận" 
+                                },
                                 { label: "Tỷ Lệ Thắng", value: `${(winRate * 100).toFixed(1)}%`, icon: Target, color: "text-green-500", bg: "bg-green-500/10", progress: winRate * 100 },
                                 { label: "Điểm Trung Bình", value: averageScore, icon: ArrowUpRight, color: "text-purple-500", bg: "bg-purple-500/10", suffix: "điểm" },
                                 { label: "Quiz Tham Gia", value: totalQuizzes, icon: Medal, color: "text-orange-500", bg: "bg-orange-500/10", suffix: "bộ" },
@@ -303,24 +316,24 @@ const UserStats = () => {
                                             </div>
                                         </div>
                                     </CardHeader>
-                                    <CardContent>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-4xl font-black text-foreground">{item.value}</span>
-                                            {item.suffix && <span className="text-xs font-bold text-muted-foreground">{item.suffix}</span>}
-                                        </div>
-                                        {item.progress !== undefined && (
-                                            <div className="mt-4 space-y-1.5">
-                                                <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
-                                                    <span>Chi số hiệu quả</span>
-                                                    <span>{item.progress.toFixed(0)}%</span>
-                                                </div>
-                                                <Progress value={item.progress} className="h-2 bg-slate-100 dark:bg-white/5" />
+                                <CardContent>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-4xl font-black text-foreground">{item.value}</span>
+                                        {item.suffix && <span className="text-xs font-bold text-muted-foreground">{item.suffix}</span>}
+                                    </div>
+                                    {item.progress !== undefined && (
+                                        <div className="mt-4 space-y-1.5">
+                                            <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
+                                                <span>Chi số hiệu quả</span>
+                                                <span>{item.progress.toFixed(0)}%</span>
                                             </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
+                                            <Progress value={item.progress} className="h-2 bg-slate-100 dark:bg-white/5" />
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Performance Trend */}
@@ -386,7 +399,11 @@ const UserStats = () => {
                             <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-foreground/5 bg-slate-50/50 dark:bg-white/5 pb-6">
                                 <div>
                                     <CardTitle className="text-2xl font-black flex items-center gap-3">
-                                        <History className="w-7 h-7 text-primary" />
+                                        <img 
+                                            src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
+                                            alt="History" 
+                                            className="w-7 h-7 object-contain" 
+                                        />
                                         Nhật Ký Thi Đấu
                                     </CardTitle>
                                     <CardDescription>Tổng cộng {recentMatches.length} trận đấu đã tham gia</CardDescription>

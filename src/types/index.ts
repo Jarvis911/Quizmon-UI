@@ -40,7 +40,6 @@ export type QuestionType =
     | 'BUTTONS'
     | 'CHECKBOXES'
     | 'REORDER'
-    | 'RANGE'
     | 'LOCATION'
     | 'TYPEANSWER';
 
@@ -88,15 +87,6 @@ export interface ReorderItem {
     correctOrder: number;
 }
 
-export interface RangeQuestion extends BaseQuestion {
-    type: 'RANGE';
-    data?: {
-        minValue: number;
-        maxValue: number;
-        correctValue: number;
-    } | null;
-}
-
 export interface LocationQuestion extends BaseQuestion {
     type: 'LOCATION';
     data?: {
@@ -116,7 +106,6 @@ export type Question =
     | ButtonQuestion
     | CheckboxQuestion
     | ReorderQuestion
-    | RangeQuestion
     | LocationQuestion
     | TypeAnswerQuestion;
 
@@ -248,10 +237,6 @@ export interface AIGeneratedQuestion {
     optionsData: {
         options?: Array<{ text: string; isCorrect?: boolean; order?: number }>;
         correctAnswer?: string;
-        // RANGE
-        minValue?: number;
-        maxValue?: number;
-        correctValue?: number;
         // LOCATION
         correctLatitude?: number;
         correctLongitude?: number;

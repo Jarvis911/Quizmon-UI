@@ -18,7 +18,6 @@ import {
   AlertCircle,
   ArrowRight
 } from "lucide-react";
-import { GrMoney } from "react-icons/gr";
 import { RiAiGenerate2 } from "react-icons/ri";
 import { PiStudent } from "react-icons/pi";
 import { CreateOrgModal } from "@/components/modals/CreateOrgModal";
@@ -137,7 +136,11 @@ export default function BillingPage() {
     <div className="max-w-6xl mx-auto p-6 md:p-10 space-y-12">
       <header className="text-center space-y-4">
         <h1 className="text-5xl font-black tracking-tighter text-foreground drop-shadow-sm flex items-center justify-center gap-4">
-          <GrMoney className="text-primary shrink-0" />
+          <img 
+            src="https://cdn-icons-png.flaticon.com/512/3211/3211596.png" 
+            alt="Billing" 
+            className="w-12 h-12 object-contain" 
+          />
           Gói dịch vụ & <span className="text-primary italic">Thanh toán</span>
         </h1>
         <p className="text-xl text-muted-foreground font-bold">Nâng cấp sức mạnh cho lớp học của bạn với AI và không giới hạn lượt chơi.</p>

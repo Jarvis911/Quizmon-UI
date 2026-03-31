@@ -27,7 +27,6 @@ import {
 // Question components
 import ButtonQuestionPlay from "@/components/question/ButtonQuestionPlay";
 import CheckboxQuestionPlay from "@/components/question/CheckboxQuestionPlay";
-import RangeQuestionPlay from "@/components/question/RangeQuestionPlay";
 import ReorderQuestionPlay from "@/components/question/ReorderQuestionPlay";
 import TypeAnswerQuestionPlay from "@/components/question/TypeAnswerQuestionPlay";
 import LocationQuestionPlay from "@/components/question/LocationQuestionPlay";
@@ -156,6 +155,7 @@ const MatchPlay = () => {
     const [gameOver, setGameOver] = useState(false);
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [isTTSEnabled, setIsTTSEnabled] = useState(true);
+    const [explode, setExplode] = useState(false);
     const [questionNumber, setQuestionNumber] = useState(0);
     const [showScoreboard, setShowScoreboard] = useState(true);
     const [isHost, setIsHost] = useState(false);
@@ -258,6 +258,7 @@ const MatchPlay = () => {
             setMaxTimer(timer);
             setExplode(false);
             setError(null);
+            setFeedback(null); // Clear previous feedback
             setQuestionNumber((prev) => prev + 1);
             questionRef.current = question;
         };
@@ -362,7 +363,7 @@ const MatchPlay = () => {
 
     const triggerFeedback = (isCorrect: boolean) => {
         setFeedback(isCorrect ? 'correct' : 'wrong');
-        setTimeout(() => setFeedback(null), 1000);
+        // Removed timeout to persist feedback until next question
     };
 
     // Game Over → Leaderboard or Homework Results
@@ -422,8 +423,6 @@ const MatchPlay = () => {
                 return <ButtonQuestionPlay {...(props as any)} />;
             case "CHECKBOXES":
                 return <CheckboxQuestionPlay {...(props as any)} />;
-            case "RANGE":
-                return <RangeQuestionPlay {...(props as any)} />;
             case "REORDER":
                 return <ReorderQuestionPlay {...(props as any)} />;
             case "TYPEANSWER":
