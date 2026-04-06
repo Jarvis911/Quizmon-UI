@@ -8,12 +8,14 @@ import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Gamepad2, Plus, Sparkles, Settings, Wand2 } from "lucide-react";
 import { SiGoogleclassroom } from "react-icons/si";
+import PromoBanner from "@/components/PromoBanner";
 
 import QuizCard from "@/components/quiz/QuizCard";
 import QuizSection from "@/components/quiz/QuizSection";
 import KnowledgeGlobeSVG from "@/components/ui/KnowledgeGlobeSVG";
 import CategoryNav from "@/components/ui/CategoryNav";
 import { checkAuth } from "@/lib/utils";
+import { getIconForCategory, defaultIcons } from "@/lib/categoryIcons";
 
 
 interface Classroom {
@@ -144,6 +146,11 @@ const Home = () => {
 
     return (
         <div className="min-h-screen relative overflow-x-hidden">
+            {/* Promotional Banner */}
+            <div className="relative z-40 bg-background">
+                <PromoBanner />
+            </div>
+
             {/* Global Background SVG Globe */}
             <div className="fixed -top-[10%] -left-[10%] md:-top-[20%] md:-left-[15%] w-[600px] md:w-[900px] h-[600px] md:h-[900px] text-primary pointer-events-none opacity-20 md:opacity-30 z-[-1]">
                 <KnowledgeGlobeSVG />
@@ -151,7 +158,7 @@ const Home = () => {
 
             {/* Category Navigation Bar */}
             {user && (
-                <div className="w-full relative z-20 pt-24 lg:pt-8">
+                <div className="w-full relative z-20 pt-8">
                     <CategoryNav categories={categories} />
                 </div>
             )}
@@ -165,19 +172,21 @@ const Home = () => {
                         {/* Action 1: Create Manually */}
                         <div
                             onClick={() => navigate('/quiz')}
-                            className="group flex gap-4 justify-between items-center p-6 bg-[#264653] hover:bg-[#1a3039] rounded-2xl shadow-[0_8px_0_#1a3039] hover:shadow-[0_4px_0_#1a3039] hover:translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden relative"
+                            className="group flex gap-4 justify-between items-center p-6 bg-white/70 hover:bg-white/90 backdrop-blur-3xl rounded-3xl border-2 border-blue-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
                         >
+                            {/* Azure-style Blue Gradient Sweep */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-400/30 transition-colors" />
+                            
                             <div className="flex-1 flex flex-col items-center text-center z-10">
-                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">Tạo quiz</h3>
-                                <p className="text-sm text-gray-200 font-semibold mb-6">Chơi miễn phí cho tối đa<br />300 người tham gia</p>
-                                <button className="bg-[#2a9d8f] text-white font-bold py-3 px-8 rounded-full shadow-[0_4px_0_#1d7066] group-hover:shadow-[0_2px_0_#1d7066] group-hover:translate-y-0.5 transition-all w-fit">
-                                    Bắt đầu tạo
+                                <h3 className="font-extrabold text-3xl text-slate-800 mb-2 tracking-tight">Tạo quiz</h3>
+                                <p className="text-sm text-slate-500 font-bold mb-6">Chơi miễn phí cho tối đa<br />300 người tham gia</p>
+                                <button className="bg-[#0078D4] text-white font-bold py-3 px-8 rounded-[4px] shadow-lg hover:bg-[#005a9e] transition-all w-fit uppercase text-xs tracking-widest">
+                                    Bắt đầu ngay
                                 </button>
                             </div>
                             <div className="hidden sm:flex flex-1 justify-center z-10 relative">
-                                <div className="absolute inset-0 bg-white/10 rounded-full blur-2xl scale-150" />
                                 <div className="text-white relative z-10">
-                                    <img src="/quiz.png" alt="Quiz" className="w-24 h-24 sm:w-36 sm:h-36 object-contain" />
+                                    <img src="/quiz.png" alt="Quiz" className="w-24 h-24 sm:w-36 sm:h-36 object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
                                 </div>
                             </div>
                         </div>
@@ -185,20 +194,22 @@ const Home = () => {
                         {/* Action 2: Create with AI */}
                         <div
                             onClick={() => navigate('/ai/generate')}
-                            className="group flex gap-4 justify-between items-center p-6 bg-[#264653] hover:bg-[#1a3039] rounded-2xl shadow-[0_8px_0_#1a3039] hover:shadow-[0_4px_0_#1a3039] hover:translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden relative"
+                            className="group flex gap-4 justify-between items-center p-6 bg-white/70 hover:bg-white/90 backdrop-blur-3xl rounded-3xl border-2 border-emerald-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
                         >
+                            {/* Azure-style Green Gradient Sweep */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-emerald-400/30 transition-colors" />
+
                             <div className="flex-1 flex flex-col items-center text-center z-10">
-                                <h3 className="font-extrabold text-3xl text-white mb-2 tracking-tight">Tạo với AI</h3>
-                                <p className="text-sm text-gray-200 font-semibold mb-6">Tự động tạo quiz từ<br />file PDF hoặc văn bản</p>
-                                <button className="bg-[#a8dadc] text-[#1d3557] font-bold py-3 px-8 rounded-full shadow-[0_4px_0_#457b9d] group-hover:shadow-[0_2px_0_#457b9d] group-hover:translate-y-0.5 transition-all w-fit">
+                                <h3 className="font-extrabold text-3xl text-slate-800 mb-2 tracking-tight">Tạo với AI</h3>
+                                <p className="text-sm text-slate-500 font-bold mb-6">Tự động tạo quiz từ<br />file PDF hoặc văn bản</p>
+                                <button className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-[4px] shadow-lg hover:bg-emerald-700 transition-all w-fit uppercase text-xs tracking-widest">
                                     Thử ngay
                                 </button>
                             </div>
                             <div className="hidden sm:flex flex-1 justify-center z-10 relative">
-                                <div className="absolute inset-0 bg-white/10 rounded-full blur-2xl scale-150" />
-                                <div className="text-white relative z-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                                <div className="text-white relative z-10 transform -rotate-6 group-hover:rotate-0 transition-transform duration-500">
                                     <div className="w-24 h-24 sm:w-36 sm:h-36 flex items-center justify-center p-4">
-                                        <img src="/magic-wand.png" alt="Magic Wand" className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(168,218,220,0.6)]" />
+                                        <img src="/magic-wand.png" alt="Magic Wand" className="w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.1)]" />
                                     </div>
                                 </div>
                             </div>
@@ -214,20 +225,20 @@ const Home = () => {
                         onPlay={handlePlayNow}
                         onEdit={handleEditQuiz}
                         onAssign={handleOpenHomeworkModal}
-                        iconColor="bg-indigo-500"
+                        icon={defaultIcons['My Quizzes']}
                     />
                 )}
 
                 {/* Categories Section */}
                 <div id="explore-categories" className="space-y-16">
-                    {categories.map((cat, idx) => (
+                    {categories.map((cat) => (
                         <CategoryQuizzes
                             key={cat.id}
                             category={cat}
                             onPlay={handlePlayNow}
                             onEdit={handleEditQuiz}
                             onAssign={handleOpenHomeworkModal}
-                            iconColor={idx % 2 === 0 ? "bg-rose-400" : "bg-emerald-400"}
+                            icon={getIconForCategory(cat.name)}
                             isAiGenerated={cat.name.toLowerCase().includes('ai')}
                         />
                     ))}
@@ -239,7 +250,7 @@ const Home = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                     <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><SiGoogleclassroom className="text-indigo-600" size={20} /> Giao Bài Tập</h3>
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><SiGoogleclassroom className="text-primary" size={20} /> Giao Bài Tập</h3>
                             <button onClick={() => setIsHomeworkModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
                         </div>
                         <form onSubmit={handleSubmitHomework} className="p-6 space-y-5">
@@ -249,7 +260,7 @@ const Home = () => {
                                     required
                                     value={homeworkForm.classroomId}
                                     onChange={e => setHomeworkForm({ ...homeworkForm, classroomId: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary outline-none"
                                 >
                                     <option value="" disabled>-- Chọn một lớp --</option>
                                     {classrooms.map(c => (
@@ -265,7 +276,7 @@ const Home = () => {
                                     type="datetime-local"
                                     value={homeworkForm.deadline}
                                     onChange={e => setHomeworkForm({ ...homeworkForm, deadline: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary outline-none"
                                 />
                             </div>
 
@@ -275,7 +286,7 @@ const Home = () => {
                                     id="strictMode"
                                     checked={homeworkForm.strictMode}
                                     onChange={e => setHomeworkForm({ ...homeworkForm, strictMode: e.target.checked })}
-                                    className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                    className="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer"
                                 />
                                 <label htmlFor="strictMode" className="text-sm font-medium text-orange-900 cursor-pointer select-none">
                                     <strong>Chế độ Nghiêm ngặt:</strong> Ngăn học sinh chuyển tab trình duyệt khi đang làm bài.
@@ -284,7 +295,7 @@ const Home = () => {
 
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setIsHomeworkModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Hủy</button>
-                                <button type="submit" disabled={!homeworkForm.classroomId || classrooms.length === 0} className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50">Giao Bài</button>
+                                <button type="submit" disabled={!homeworkForm.classroomId || classrooms.length === 0} className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50">Giao Bài</button>
                             </div>
                         </form>
                     </div>
@@ -371,14 +382,14 @@ const CategoryQuizzes = ({
     onPlay,
     onEdit,
     onAssign,
-    iconColor,
+    icon,
     isAiGenerated
 }: {
     category: Category,
     onPlay: (id: string | number) => void,
     onEdit: (id: string | number) => void,
     onAssign: (id: string | number) => void,
-    iconColor: string,
+    icon: React.ReactNode,
     isAiGenerated: boolean
 }) => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -406,7 +417,7 @@ const CategoryQuizzes = ({
             onPlay={onPlay}
             onEdit={onEdit}
             onAssign={onAssign}
-            iconColor={iconColor}
+            icon={icon}
             isAiGeneratedSection={isAiGenerated}
         />
     );

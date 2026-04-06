@@ -240,10 +240,10 @@ const UserStats = () => {
         : 0;
 
     return (
-        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50 p-4 lg:p-8">
+        <div className="min-h-[calc(100vh-64px)] p-4 lg:p-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Dashboard Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white/50 dark:bg-slate-900/50 p-8 rounded-3xl border border-white dark:border-white/10 shadow-2xl backdrop-blur-xl">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-card/40 backdrop-blur-md p-8 rounded-3xl border border-white/10 shadow-2xl">
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
                             <div className="p-3 bg-primary/10 rounded-2xl">
@@ -272,7 +272,7 @@ const UserStats = () => {
                 </div>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                    <TabsList className="bg-white/50 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-white dark:border-white/10 w-fit">
+                    <TabsList className="bg-card/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 w-fit">
                         <TabsTrigger value="overview" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Tổng Quan
@@ -307,7 +307,7 @@ const UserStats = () => {
                                 { label: "Điểm Trung Bình", value: averageScore, icon: ArrowUpRight, color: "text-purple-500", bg: "bg-purple-500/10", suffix: "điểm" },
                                 { label: "Quiz Tham Gia", value: totalQuizzes, icon: Medal, color: "text-orange-500", bg: "bg-orange-500/10", suffix: "bộ" },
                             ].map((item, idx) => (
-                                <Card key={idx} className="bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
+                                <Card key={idx} className="bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
                                     <CardHeader className="pb-2">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono">{item.label}</span>
@@ -337,7 +337,7 @@ const UserStats = () => {
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Performance Trend */}
-                            <Card className="lg:col-span-2 bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl">
+                            <Card className="lg:col-span-2 bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl">
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
                                         <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -353,7 +353,7 @@ const UserStats = () => {
                             </Card>
 
                             {/* Rank Distribution */}
-                            <Card className="bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl">
+                            <Card className="bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl">
                                 <CardHeader>
                                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                                         <Trophy className="w-5 h-5 text-yellow-500" />
@@ -395,8 +395,8 @@ const UserStats = () => {
                     </TabsContent>
 
                     <TabsContent value="history" className="mt-0 focus-visible:ring-0">
-                        <Card className="bg-white/50 dark:bg-slate-900/50 border-white dark:border-white/10 shadow-xl rounded-3xl overflow-hidden">
-                            <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-foreground/5 bg-slate-50/50 dark:bg-white/5 pb-6">
+                        <Card className="bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl overflow-hidden">
+                            <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 bg-white/5 pb-6">
                                 <div>
                                     <CardTitle className="text-2xl font-black flex items-center gap-3">
                                         <img 
@@ -436,7 +436,7 @@ const UserStats = () => {
                                 ) : (
                                     <div className="overflow-x-auto">
                                         <Table>
-                                            <TableHeader className="bg-slate-100/50 dark:bg-white/5">
+                                            <TableHeader className="bg-white/5">
                                                 <TableRow className="border-b border-foreground/5 hover:bg-transparent">
                                                     <TableHead className="w-40 font-black uppercase text-[10px] tracking-widest pl-8">Xếp Hạng</TableHead>
                                                     <TableHead className="font-black uppercase text-[10px] tracking-widest">Thông Tin Trận Đấu</TableHead>
@@ -447,7 +447,7 @@ const UserStats = () => {
                                             </TableHeader>
                                             <TableBody>
                                                 {filteredMatches.map((match: RecentMatch) => (
-                                                    <TableRow key={match.id} className="group hover:bg-white/40 dark:hover:bg-white/5 border-b border-foreground/5 transition-colors">
+                                                    <TableRow key={match.id} className="group hover:bg-white/10 border-b border-foreground/5 transition-colors">
                                                         <TableCell className="pl-8 py-6">
                                                             {getRankBadge(match.rank)}
                                                         </TableCell>

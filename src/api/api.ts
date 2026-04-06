@@ -11,6 +11,7 @@ interface Endpoints {
 
     // Quiz
     quizzes: string;
+    explore: string;
     quiz: (id: number) => string;
     quiz_rating: (id: number) => string;
     quiz_isRated: (id: number) => string;
@@ -84,6 +85,13 @@ interface Endpoints {
     subscription_current: string;
     subscriptions: string;
     subscription_usage: string;
+
+    // Promotions
+    promotions_active: string;
+    admin_promotions: string;
+    admin_promotion: (id: number) => string;
+    admin_promotion_publish: (id: number) => string;
+    subscription_checkout_free: string;
 }
 
 const endpoints: Endpoints = {
@@ -97,6 +105,7 @@ const endpoints: Endpoints = {
 
     // Quiz
     quizzes: `${BASE_URL}/quiz`,
+    explore: `${BASE_URL}/quiz/explore`,
     quiz: (id: number) => `${BASE_URL}/quiz/${id}`,
     quiz_rating: (id: number) => `${BASE_URL}/quiz/${id}/rating`,
     quiz_isRated: (id: number) => `${BASE_URL}/quiz/${id}/rated`,
@@ -171,6 +180,13 @@ const endpoints: Endpoints = {
     subscription_current: `${BASE_URL}/subscriptions/current`,
     subscriptions: `${BASE_URL}/subscriptions`,
     subscription_usage: `${BASE_URL}/subscriptions/usage`,
+
+    // Promotions
+    promotions_active: `${BASE_URL}/promotions/active`,
+    admin_promotions: `${BASE_URL}/admin/promotions`,
+    admin_promotion: (id: number) => `${BASE_URL}/admin/promotions/${id}`,
+    admin_promotion_publish: (id: number) => `${BASE_URL}/admin/promotions/${id}/publish`,
+    subscription_checkout_free: `${BASE_URL}/subscriptions/checkout-free`,
 };
 
 export const getAvatarUrl = (url: string | null | undefined): string => {

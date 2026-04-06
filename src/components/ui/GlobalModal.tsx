@@ -29,7 +29,7 @@ const GlobalModal = () => {
       case "warning":
         return <AlertCircle className="w-12 h-12 text-amber-500" />;
       case "confirm":
-        return <HelpCircle className="w-12 h-12 text-indigo-500" />;
+        return <HelpCircle className="w-12 h-12 text-primary" />;
       default:
         return <Info className="w-12 h-12 text-blue-500" />;
     }
@@ -67,7 +67,7 @@ const GlobalModal = () => {
               type === "error" ? "bg-rose-500 hover:bg-rose-600" : 
               type === "success" ? "bg-emerald-500 hover:bg-emerald-600" :
               type === "warning" ? "bg-amber-500 hover:bg-amber-600" :
-              "bg-indigo-600 hover:bg-indigo-700"
+              "bg-primary hover:bg-primary/90"
             )}
           >
             {confirmText}

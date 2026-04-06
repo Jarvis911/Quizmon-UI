@@ -57,48 +57,43 @@ interface MatchResponse {
 
 type MatchMode = "REALTIME" | "HOMEWORK";
 
-// ─── Circular Timer Component ──────────────────────────────────
-interface CircularTimerProps {
+// ─── Score Progress Bar Component ──────────────────────────────
+interface ScoreProgressBarProps {
     time: number;
     maxTime: number;
+    potentialPoints: number;
 }
 
-const CircularTimer = ({ time, maxTime }: CircularTimerProps) => {
-    const radius = 40;
-    const circumference = 2 * Math.PI * radius;
-    const progress = maxTime > 0 ? time / maxTime : 0;
-    const offset = circumference * (1 - progress);
+const ScoreProgressBar = ({ time, maxTime, potentialPoints }: ScoreProgressBarProps) => {
+    const progress = maxTime > 0 ? (time / maxTime) * 100 : 0;
     const isUrgent = time <= 5;
 
     return (
-        <div className="relative w-24 h-24 flex items-center justify-center">
-            <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                {/* Background ring */}
-                <circle
-                    cx="50" cy="50" r={radius}
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="6" fill="none"
-                />
-                {/* Progress ring */}
-                <circle
-                    cx="50" cy="50" r={radius}
-                    stroke={isUrgent ? "#ef4444" : "#a78bfa"}
-                    strokeWidth="6" fill="none"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-linear"
-                    style={{
-                        filter: isUrgent ? "drop-shadow(0 0 8px #ef4444)" : "drop-shadow(0 0 6px #a78bfa)",
-                    }}
-                />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className={`text-2xl font-black ${isUrgent ? "text-red-400 animate-pulse" : "text-white"}`}>
-                    {time}
-                </span>
-                <span className="text-[10px] text-white/50 uppercase tracking-wider">giây</span>
+        <div className="flex-1 max-w-xl mx-4 sm:mx-8 relative">
+            <div className="h-6 w-full bg-black/20 backdrop-blur-md rounded-full border-2 border-black/40 overflow-hidden relative shadow-inner">
+                {/* The animated decreasing stripe bar */}
+                <div
+                    className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-linear animate-stripe-slide rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] ${isUrgent ? "opacity-90" : ""}`}
+                    style={{ width: `${progress}%` }}
+                >
+                    {/* Inner Shadow for depth */}
+                    <div className="absolute inset-0 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]" />
+                </div>
+                
+                {/* Score Number - Positioned dynamically at the end of the progress */}
+                <div 
+                    className="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-linear flex items-center justify-center"
+                    style={{ left: `${Math.max(5, progress)}%` }}
+                >
+                   <span className="text-white text-sm sm:text-base font-black tabular-nums tracking-tighter drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] px-2 bg-black/20 rounded-full backdrop-blur-sm -translate-x-1/2">
+                        {potentialPoints.toLocaleString()}
+                    </span>
+                </div>
             </div>
+            {/* Urgent glow pulse */}
+            {isUrgent && (
+                <div className="absolute -inset-1 bg-red-500/10 rounded-full blur animate-pulse pointer-events-none" />
+            )}
         </div>
     );
 };
@@ -111,30 +106,30 @@ interface PlayerScoreCardProps {
 }
 
 const PlayerScoreCard = ({ player, rank, isCurrentUser }: PlayerScoreCardProps) => {
-    const rankColors = ["text-yellow-400", "text-gray-300", "text-amber-600"];
-    const rankEmojis = ["1st", "2nd", "3rd"];
+    const rankColors = ["text-yellow-500", "text-slate-400", "text-amber-700"];
+    const rankEmojis = ["🥇", "🥈", "🥉"];
 
     return (
         <div
             className={`flex items-center gap-2 py-2 px-3 rounded-xl transition-all duration-300 ${isCurrentUser
-                ? "bg-purple-500/20 border border-purple-400/30"
-                : "hover:bg-white/5"
+                ? "bg-primary/20 border border-primary/30 shadow-sm"
+                : "hover:bg-card/40"
                 }`}
         >
-            <span className={`text-sm font-bold w-6 text-center ${rankColors[rank] || "text-white/40"}`}>
+            <span className={`text-sm font-black w-6 text-center ${rankColors[rank] || "text-foreground/30"}`}>
                 {rank < 3 ? rankEmojis[rank] : `#${rank + 1}`}
             </span>
-            <Avatar className="w-7 h-7">
+            <Avatar className="w-7 h-7 border border-white/10 shadow-sm">
                 {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
-                <AvatarFallback className="bg-linear-to-br from-purple-500 to-pink-500 text-white text-xs font-bold">
+                <AvatarFallback className="bg-primary text-white text-[10px] font-black">
                     {(player.displayName || player.username || "?")[0].toUpperCase()}
                 </AvatarFallback>
             </Avatar>
-            <span className="text-white text-xs font-medium truncate flex-1">
+            <span className="text-foreground text-xs font-bold truncate flex-1">
                 {player.displayName || player.username}
             </span>
-            <span className="text-white font-bold text-sm tabular-nums">
-                {player.score}
+            <span className="text-foreground font-black text-sm tabular-nums">
+                {player.score.toLocaleString()}
             </span>
         </div>
     );
@@ -159,6 +154,7 @@ const MatchPlay = () => {
     const [questionNumber, setQuestionNumber] = useState(0);
     const [showScoreboard, setShowScoreboard] = useState(true);
     const [isHost, setIsHost] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const [confirmEndMatch, setConfirmEndMatch] = useState(false);
     const [confirmSurrender, setConfirmSurrender] = useState(false);
     const [musicUrl, setMusicUrl] = useState<string>("/audio/background.mp3");
@@ -252,10 +248,11 @@ const MatchPlay = () => {
     useEffect(() => {
         if (matchMode !== "REALTIME" || !user) return;
 
-        const handleNextQuestion = ({ question, timer }: { question: Question, timer: number }) => {
+        const handleNextQuestion = ({ question, timer, isPaused: initialPaused }: { question: Question, timer: number, isPaused?: boolean }) => {
             setQuestion(question);
             setTimer(timer);
             setMaxTimer(timer);
+            setIsPaused(initialPaused || false);
             setExplode(false);
             setError(null);
             setFeedback(null); // Clear previous feedback
@@ -302,6 +299,10 @@ const MatchPlay = () => {
             setTimeout(() => setNotification(null), 4000);
         };
 
+        const handlePauseStatusUpdated = ({ isPaused }: { isPaused: boolean }) => {
+            setIsPaused(isPaused);
+        };
+
         const handleSettingsUpdated = (settings: { musicUrl?: string }) => {
             if (settings.musicUrl !== undefined) {
                 setMusicUrl(settings.musicUrl || "/audio/background.mp3");
@@ -318,6 +319,7 @@ const MatchPlay = () => {
         socket.on("surrendered", handleSurrendered);
         socket.on("playerSurrendered", handlePlayerSurrendered);
         socket.on("matchSettingsUpdated", handleSettingsUpdated);
+        socket.on("pauseStatusUpdated", handlePauseStatusUpdated);
 
         return () => {
             socket.off("nextQuestion", handleNextQuestion);
@@ -330,6 +332,7 @@ const MatchPlay = () => {
             socket.off("surrendered", handleSurrendered);
             socket.off("playerSurrendered", handlePlayerSurrendered);
             socket.off("matchSettingsUpdated", handleSettingsUpdated);
+            socket.off("pauseStatusUpdated", handlePauseStatusUpdated);
         };
     }, [matchId, user, matchMode, scores, navigate]);
 
@@ -370,19 +373,19 @@ const MatchPlay = () => {
     if (gameOver) {
         if (matchMode === "HOMEWORK") {
             return (
-                <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-4xl shadow-2xl overflow-hidden border border-gray-100 p-8 max-w-md w-full text-center">
-                        <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <span className="text-4xl font-bold">HOÀN THÀNH</span>
+                <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+                    <div className="bg-card/40 backdrop-blur-3xl rounded-4xl shadow-2xl overflow-hidden border border-white/10 p-10 max-w-md w-full text-center animate-in zoom-in-95 duration-500">
+                        <div className="w-24 h-24 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-4 ring-primary/10">
+                            <span className="text-5xl font-black">🎉</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Đã nộp bài!</h2>
-                        <p className="text-gray-600 mb-6">Số điểm bạn đạt được</p>
-                        <div className="text-5xl font-black text-indigo-600 mb-8">{homeworkScore}</div>
+                        <h2 className="text-3xl font-black text-foreground mb-2 drop-shadow-sm">Hoàn thành!</h2>
+                        <p className="text-foreground/60 font-bold mb-8 uppercase tracking-widest text-xs">Số điểm đạt được</p>
+                        <div className="text-7xl font-black text-primary mb-10 drop-shadow-2xl tabular-nums animate-pulse">{homeworkScore.toLocaleString()}</div>
                         <button
                             onClick={() => navigate('/classrooms')}
-                            className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors w-full"
+                            className="px-8 py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:bg-primary/90 transition-all w-full shadow-xl shadow-primary/20 hover:translate-y-[-2px] active:translate-y-px"
                         >
-                            Về danh sách lớp
+                            VỀ DANH SÁCH LỚP
                         </button>
                     </div>
                 </div>
@@ -437,12 +440,8 @@ const MatchPlay = () => {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-            {/* Ambient background effects */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
-            </div>
+        <div className="min-h-screen relative overflow-hidden flex flex-col">
+            {/* Feedback Overlay */}
 
             {/* Feedback Overlay */}
             <div
@@ -453,6 +452,30 @@ const MatchPlay = () => {
                         : 'opacity-0'
                     }`}
             />
+
+            {/* Pause Overlay */}
+            {isPaused && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-[blur(2px)] animate-in fade-in duration-300">
+                    <div className="bg-card/60 backdrop-blur-3xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl text-center scale-up-center max-w-sm w-full mx-4">
+                        <div className="w-24 h-24 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-4 ring-amber-500/10">
+                            <span className="text-5xl animate-pulse">⏸️</span>
+                        </div>
+                        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Đang tạm dừng</h2>
+                        <p className="text-white/50 font-bold uppercase tracking-widest text-[10px] mb-8">
+                            {isHost ? "Bạn đã tạm dừng trận đấu" : "Vui lòng chờ host tiếp tục"}
+                        </p>
+                        
+                        {isHost && (
+                            <button
+                                onClick={() => socket.emit("togglePause", { matchId })}
+                                className="w-full py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                TIẾP TỤC TRẬN ĐẤU
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Hidden Background Music Player */}
             <div className="hidden">
@@ -471,52 +494,70 @@ const MatchPlay = () => {
                 {/* Left: Question counter & controls */}
                 <div className="flex items-center gap-3">
                     {questionNumber > 0 && (
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2">
-                            <span className="text-white/60 text-sm">Câu</span>
-                            <span className="text-white font-bold text-lg">{questionNumber}</span>
+                        <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                            <span className="text-foreground/60 text-sm">Câu</span>
+                            <span className="text-foreground font-extrabold text-lg">{questionNumber}</span>
                         </div>
                     )}
                     <button
                         onClick={toggleTTS}
-                        className={`p-2 rounded-xl transition-all duration-300 ${isTTSEnabled
-                            ? "bg-purple-500/30 text-purple-300 hover:bg-purple-500/40"
-                            : "bg-white/10 text-white/40 hover:bg-white/15"
+                        className={`p-2 rounded-xl transition-all duration-300 font-bold text-sm ${isTTSEnabled
+                            ? "bg-primary/20 text-primary hover:bg-primary/30"
+                            : "bg-card/40 text-foreground/40 hover:bg-card/60"
                             }`}
                         title={isTTSEnabled ? "Tắt giọng nói" : "Bật giọng nói"}
                     >
                         {isTTSEnabled ? "Âm thanh" : "Tắt âm"}
                     </button>
 
+                    {/* Host: Game Controls */}
+                    {isHost && (
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => socket.emit("togglePause", { matchId })}
+                                className={`px-3 py-2 rounded-xl border font-black uppercase text-[10px] tracking-tight transition-all shadow-sm ${
+                                    isPaused 
+                                    ? "bg-green-500/20 border-green-500/30 text-green-500 hover:bg-green-500/30" 
+                                    : "bg-amber-500/20 border-amber-500/30 text-amber-500 hover:bg-amber-500/30"
+                                }`}
+                            >
+                                {isPaused ? "Tiếp tục" : "Tạm dừng"}
+                            </button>
+                            <button
+                                onClick={() => socket.emit("skipQuestion", { matchId })}
+                                className="px-3 py-2 rounded-xl bg-slate-500/20 border border-slate-500/30 text-slate-400 text-[10px] font-black uppercase tracking-tight hover:bg-slate-500/30 transition-all shadow-sm"
+                            >
+                                Bỏ qua câu
+                            </button>
+                        </div>
+                    )}
+
                     {/* Host: End Match / Player: Surrender */}
                     {isHost ? (
                         <button
                             onClick={() => setConfirmEndMatch(true)}
-                            className="px-3 py-2 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs font-semibold hover:bg-red-500/30 transition-all"
+                            className="px-3 py-2 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-black uppercase tracking-tight hover:bg-destructive/20 transition-all shadow-sm"
                         >
-                            Kết thúc trận
+                            Kết thúc
                         </button>
                     ) : (
                         <button
                             onClick={() => setConfirmSurrender(true)}
-                            className="px-3 py-2 rounded-xl bg-white/10 border border-white/15 text-white/60 text-xs font-semibold hover:bg-white/15 hover:text-white/80 transition-all"
+                            className="px-3 py-2 rounded-xl bg-card/40 border border-white/10 text-foreground/60 text-xs font-black uppercase tracking-tight hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
                         >
                             Đầu hàng
                         </button>
                     )}
                 </div>
 
-                {/* Center: Timer */}
-                <CircularTimer time={timer} maxTime={maxTimer} />
+                {/* Center: Score & Progress */}
+                <ScoreProgressBar time={timer} maxTime={maxTimer} potentialPoints={potentialPoints} />
 
-                {/* Right: Score toggle & potential points */}
+                {/* Right: Score toggle */}
                 <div className="flex items-center gap-4">
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 text-center">
-                        <span className="text-[10px] text-white/50 uppercase tracking-wider block">Điểm tiềm năng</span>
-                        <span className="text-white font-bold text-lg tabular-nums">{potentialPoints}</span>
-                    </div>
                     <button
                         onClick={() => setShowScoreboard(!showScoreboard)}
-                        className="p-2 rounded-xl bg-white/10 text-white/60 hover:bg-white/15 transition-all"
+                        className="p-3 rounded-xl bg-card/40 text-foreground/60 hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
                         title="Bảng điểm"
                     >
                         Bảng điểm
@@ -532,7 +573,7 @@ const MatchPlay = () => {
                     </Alert>
                 )}
                 {notification && (
-                    <div className="mb-3 max-w-xl mx-auto bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-white text-center text-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="mb-3 max-w-xl mx-auto bg-primary/20 backdrop-blur-xl border border-primary/30 rounded-xl px-4 py-3 text-primary font-bold text-center text-sm shadow-xl animate-in fade-in slide-in-from-top-4 duration-500">
                         {notification}
                     </div>
                 )}
@@ -550,8 +591,8 @@ const MatchPlay = () => {
                 {/* ── Scoreboard Sidebar ── */}
                 {showScoreboard && sortedScores.length > 0 && (
                     <div className="w-64 shrink-0 animate-in slide-in-from-right-8 duration-500">
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sticky top-4">
-                            <h3 className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-3 px-1 flex items-center gap-2">
+                        <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sticky top-4 shadow-xl">
+                            <h3 className="text-foreground/40 text-[10px] font-black uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
                                 Bảng xếp hạng
                             </h3>
                             <div className="space-y-1">

@@ -39,26 +39,26 @@ export default function AdminUsers() {
     if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Người dùng & Doanh thu</h1>
-                <p className="text-slate-500 dark:text-slate-400">Xem tài khoản người dùng, gói đăng ký và trạng thái dùng thử.</p>
+        <div className="space-y-8">
+            <div className="relative">
+                <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Người dùng & Doanh thu</h1>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">Xem tài khoản người dùng, gói đăng ký và trạng thái doanh thu trên nền tảng.</p>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+            <div className="flex flex-col md:flex-row gap-4 bg-card/40 dark:bg-slate-900/40 p-6 rounded-4xl border border-white/10 backdrop-blur-md shadow-xl">
                 <div className="flex-1">
                     <input 
                         type="text" 
                         placeholder="Tìm theo tên hoặc email..." 
-                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full h-12 px-6 rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
                 <div className="w-full md:w-64">
                     <select 
-                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full h-12 px-6 rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none"
                         value={isAdmin}
                         onChange={(e) => setIsAdmin(e.target.value)}
                     >
@@ -69,40 +69,44 @@ export default function AdminUsers() {
                 </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+            <div className="rounded-[2.5rem] border border-white/10 bg-card/30 dark:bg-slate-900/30 overflow-hidden backdrop-blur-md shadow-2xl">
+                <table className="w-full text-sm text-left border-collapse">
+                    <thead className="bg-white/10 dark:bg-white/5 border-b border-white/5">
                         <tr>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">ID</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Tên người dùng</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Email</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Gói</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Trạng thái</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Ngày tham gia</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Người dùng</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Email</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Gói đăng ký</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Trạng thái</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Ngày tham gia</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody className="divide-y divide-white/5">
                         {users.map((user) => {
                             const subInfo = getSubscriptionStatus(user);
                             return (
-                                <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                    <td className="px-6 py-4">{user.id}</td>
-                                    <td className="px-6 py-4 font-medium flex items-center gap-2">
+                                <tr key={user.id} className="hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
+                                    <td className="px-8 py-5 font-bold text-slate-500">{user.id}</td>
+                                    <td className="px-8 py-5 font-black text-slate-900 dark:text-white flex items-center gap-3">
                                         {user.username}
-                                        {user.isAdmin && <span className="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-sm uppercase font-bold">Admin</span>}
+                                        {user.isAdmin && (
+                                            <span className="bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase font-black shadow-lg shadow-indigo-500/20">
+                                                Admin
+                                            </span>
+                                        )}
                                     </td>
-                                    <td className="px-6 py-4">{user.email}</td>
-                                    <td className="px-6 py-4">{subInfo.plan}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                                            subInfo.status === 'HOẠT ĐỘNG' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-                                            subInfo.status === 'DÙNG THỬ' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-                                            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                                    <td className="px-8 py-5 font-bold text-slate-600 dark:text-slate-300">{user.email}</td>
+                                    <td className="px-8 py-5 font-bold text-slate-500 italic">{subInfo.plan}</td>
+                                    <td className="px-8 py-5">
+                                        <span className={`px-4 py-1 rounded-full font-black text-[10px] uppercase tracking-wider shadow-sm ${
+                                            subInfo.status === 'HOẠT ĐỘNG' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
+                                            subInfo.status === 'DÙNG THỬ' ? 'bg-indigo-500/20 text-indigo-500 border border-indigo-500/20' :
+                                            'bg-slate-500/20 text-slate-500 border border-slate-500/20'
                                         }`}>
                                             {subInfo.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-500">{new Date(user.createdAt).toLocaleDateString()}</td>
+                                    <td className="px-8 py-5 font-medium text-slate-500">{new Date(user.createdAt).toLocaleDateString()}</td>
                                 </tr>
                             );
                         })}

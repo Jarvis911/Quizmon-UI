@@ -108,6 +108,12 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
                         setIsOpen(true);
                     }}
                     onFocus={() => setIsOpen(true)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && query.trim()) {
+                            setIsOpen(false);
+                            navigate(`/results?q=${encodeURIComponent(query.trim())}`);
+                        }
+                    }}
                     placeholder={isNavbar ? "Tìm kiếm..." : "Tìm kiếm Quiz (Ví dụ: Toán học, Lịch sử...)"}
                     className={`transition-all duration-300 bg-card/90 backdrop-blur-xl border-2 border-white/10 shadow-xl focus-visible:ring-0 focus:border-primary font-bold placeholder:text-muted-foreground placeholder:font-normal ${isNavbar
                             ? `h-10 pl-10 rounded-full ${isExpanded ? "w-full opacity-100 pr-10" : "w-0 opacity-0 border-transparent shadow-none"}`

@@ -218,13 +218,13 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           {/* Main Navigation Links */}
           {token && (
             <div className={`hidden lg:flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-inner transition-opacity duration-300 ${isSearchExpanded ? 'opacity-0 pointer-events-none w-0' : 'opacity-100'}`}>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors text-foreground`}>
                 <img src="https://cdn-icons-png.flaticon.com/512/2544/2544087.png" alt="Home" className="w-5 h-5 mr-2 object-contain" /> Trang chủ
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/classrooms")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors text-foreground`}>
                 <img src="https://cdn-icons-png.flaticon.com/512/8388/8388104.png" alt="Classroom" className="w-5 h-5 mr-2 object-contain" /> Lớp học
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/library")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors ${scrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/library")} className={`rounded-full hover:bg-white/20 font-bold px-4 whitespace-nowrap transition-colors text-foreground`}>
                 <img src="https://cdn-icons-png.flaticon.com/512/3038/3038168.png" alt="Library" className="w-5 h-5 mr-2 object-contain" /> Thư viện
               </Button>
             </div>
@@ -336,8 +336,12 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                 <DropdownMenuLabel className="text-[10px] uppercase font-black text-muted-foreground px-2 py-1">Không gian làm việc</DropdownMenuLabel>
                 
                 {user?.isAdmin && (
-                  <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
-                    <ShieldCheck className="w-5 h-5 mr-2" />
+                  <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer font-bold text-primary dark:text-blue-400 hover:bg-primary/5 dark:hover:bg-blue-500/10">
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/18570/18570983.png" 
+                      alt="Admin Dashboard" 
+                      className="w-5 h-5 mr-2 object-contain" 
+                    />
                     Bảng điều khiển Admin
                   </DropdownMenuItem>
                 )}

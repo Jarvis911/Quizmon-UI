@@ -18,15 +18,15 @@ import { Download } from "lucide-react";
 const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
   const configs = [
     { // 1st
-      height: "h-32",
-      ringColor: "ring-yellow-400",
-      bg: "from-yellow-500/30 to-amber-600/30",
-      borderColor: "border-yellow-400/40",
+      height: "h-36",
+      ringColor: "ring-yellow-500",
+      bg: "from-yellow-500/20 to-amber-600/20",
+      borderColor: "border-yellow-500/30",
       label: "HẠNG 1",
-      labelBg: "bg-yellow-400",
-      scale: "scale-110",
-      textSize: "text-lg",
-      scoreSize: "text-2xl",
+      labelBg: "bg-yellow-500",
+      scale: "scale-115",
+      textSize: "text-xl",
+      scoreSize: "text-3xl",
     },
     { // 2nd
       height: "h-24",
@@ -62,13 +62,13 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
     >
       {/* Avatar */}
       <div className="relative">
-        <Avatar className={`w-16 h-16 ring-4 ${config.ringColor} shadow-lg`}>
+        <Avatar className={`w-16 h-16 ring-4 ${config.ringColor} shadow-2xl`}>
           {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
-          <AvatarFallback className="bg-linear-to-br from-purple-500 to-pink-500 text-white text-xl font-bold">
+          <AvatarFallback className="bg-primary text-white text-xl font-black">
             {(player.displayName || player.username || "?")[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className={`absolute -top-3 -right-3 text-[10px] font-black px-2 py-1 rounded-full text-white shadow-lg ${config.labelBg}`}>
+        <span className={`absolute -top-3 -right-3 text-[10px] font-black px-2 py-1 rounded-full text-white shadow-xl ${config.labelBg} ring-2 ring-white/20`}>
           {config.label}
         </span>
       </div>
@@ -195,11 +195,11 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const handleGoHome = () => navigate('/');
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-transparent">
       {/* Ambient effects - use primary color for theme awareness */}
-      <div className="absolute inset-0 pointer-events-none opacity-40">
-        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-primary/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-primary/30 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-primary/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
 
       <div className="relative z-10 w-full max-w-2xl">
@@ -323,7 +323,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
             <Button
               onClick={handleSubmitRating}
               disabled={rating === 0}
-              className="bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+              className="w-full bg-primary text-white font-black h-12 rounded-xl shadow-lg ring-2 ring-primary/20"
             >
               Gửi đánh giá
             </Button>

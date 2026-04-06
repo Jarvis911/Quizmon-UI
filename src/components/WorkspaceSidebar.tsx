@@ -1,4 +1,4 @@
-import { X, Building2, Check, Plus, Settings } from "lucide-react";
+import { X, Building2, Check, Plus, Settings, Info, Shuffle, ShieldCheck, Users2 } from "lucide-react";
 import { useOrganization } from "@/context/OrganizationContext";
 import { Button } from "./ui/button";
 import { CreateOrgModal } from "./modals/CreateOrgModal";
@@ -80,6 +80,37 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
               </button>
             );
           })}
+
+          <div className="mt-8 px-2 space-y-4">
+            <div className="bg-primary/5 border border-primary/10 rounded-4xl p-5 relative overflow-hidden group">
+              <h3 className="text-sm font-black text-primary mb-4 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-primary text-white">
+                  <Info size={14} />
+                </div>
+                Mẹo sử dụng
+              </h3>
+              <ul className="space-y-4">
+                <li className="flex gap-3 items-start">
+                  <div className="p-2 rounded-xl bg-white/5 text-primary mt-0.5 group-hover:bg-primary/10 transition-colors">
+                    <Shuffle size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-foreground mb-0.5">Chuyển đổi linh hoạt</p>
+                    <p className="text-[10px] font-bold text-muted-foreground leading-relaxed">Nhấn vào tên để di chuyển giữa các không gian quản lý khác nhau.</p>
+                  </div>
+                </li>
+                <li className="flex gap-3 items-start">
+                  <div className="p-2 rounded-xl bg-white/5 text-primary mt-0.5 group-hover:bg-primary/10 transition-colors">
+                    <ShieldCheck size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-foreground mb-0.5">Dữ liệu tách biệt</p>
+                    <p className="text-[10px] font-bold text-muted-foreground leading-relaxed">Mỗi tổ chức có bộ câu hỏi, lớp học và thành viên riêng tư tuyệt đối.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 border-t border-white/10 bg-white/5 space-y-2">

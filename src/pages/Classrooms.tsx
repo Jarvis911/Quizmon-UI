@@ -3,7 +3,7 @@ import apiClient from "@/api/client";
 import { useModal } from "@/context/ModalContext";
 import { useNavigate } from "react-router-dom";
 import endpoints from "../api/api";
-import { Users, Plus, DoorOpen, ArrowRight } from "lucide-react";
+import { Users, Plus, DoorOpen, ArrowRight, HelpCircle, Info, CheckCircle2, GraduationCap, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,8 +28,10 @@ export default function Classrooms() {
     const [classrooms, setClassrooms] = useState<Classroom[]>([]);
     const { showAlert } = useModal();
     const [loading, setLoading] = useState(true);
+    const [showGuide, setShowGuide] = useState(false);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
     const [joinCode, setJoinCode] = useState("");
     const [createForm, setCreateForm] = useState({ name: "", description: "" });
     const navigate = useNavigate();
@@ -58,10 +60,10 @@ export default function Classrooms() {
             setJoinCode("");
             fetchClassrooms();
         } catch (error: any) {
-            showAlert({ 
-                title: "Thất bại", 
-                message: error.response?.data?.message || "Không thể tham gia lớp học", 
-                type: "error" 
+            showAlert({
+                title: "Thất bại",
+                message: error.response?.data?.message || "Không thể tham gia lớp học",
+                type: "error"
             });
         }
     };
@@ -74,77 +76,174 @@ export default function Classrooms() {
             setCreateForm({ name: "", description: "" });
             fetchClassrooms();
         } catch (error: any) {
-            showAlert({ 
-                title: "Thất bại", 
-                message: error.response?.data?.message || "Không thể tạo lớp học", 
-                type: "error" 
+            showAlert({
+                title: "Thất bại",
+                message: error.response?.data?.message || "Không thể tạo lớp học",
+                type: "error"
             });
         }
     };
+    const filteredClassrooms = classrooms.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
 
     if (loading) {
         return <div className="flex justify-center items-center h-full">Đang tải danh sách lớp học...</div>;
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-card/80 backdrop-blur-xl p-8 rounded-4xl shadow-xl border border-white/10 mb-10 gap-6">
+        <div className="min-h-[calc(100vh-64px)] p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-foreground tracking-tight">Lớp Học Của Tôi</h1>
-                    <p className="text-muted-foreground font-bold mt-2 opacity-80 uppercase tracking-widest text-xs">Quản lý không gian học tập và bài tập về nhà của bạn.</p>
+                    <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-3">
+                        <img
+                            src="https://cdn-icons-png.flaticon.com/512/8388/8388104.png"
+                            alt="Classrooms"
+                            className="w-10 h-10 object-contain"
+                        />
+                        Lớp học của tôi
+                    </h1>
+                    <p className="text-muted-foreground font-bold mt-2 opacity-80 uppercase tracking-widest text-xs">
+                        Quản lý không gian học tập và bài tập về nhà của bạn.
+                    </p>
                 </div>
                 <div className="flex flex-wrap gap-4">
                     <Button
+                        onClick={() => setShowGuide(!showGuide)}
+                        className={`flex items-center gap-2 border-2 border-primary/30 font-black h-12 px-6 rounded-2xl transition-all ${showGuide ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90' : 'text-primary bg-primary/10 hover:bg-primary/20 border-primary-20'}`}
+                    >
+                        <HelpCircle size={20} />
+                        {showGuide ? 'Đóng hướng dẫn' : 'Cách sử dụng'}
+                    </Button>
+                    <Button
                         variant="outline"
                         onClick={() => setIsJoinModalOpen(true)}
-                        className="flex items-center gap-2 border-indigo-500/30 text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 font-black h-12 px-6 rounded-2xl transition-all"
+                        className="flex items-center gap-2 border-primary/30 text-primary bg-primary/10 hover:bg-primary/20 font-black h-12 px-6 rounded-2xl transition-all"
                     >
                         <DoorOpen size={20} />
-                        THAM GIA LỚP
+                        Tham gia lớp
                     </Button>
                     <Button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="flex items-center gap-2 bg-primary text-primary-foreground hover:scale-105 shadow-lg shadow-primary/20 transition-all active:scale-95 font-black h-12 px-6 rounded-2xl"
                     >
                         <Plus size={20} />
-                        TẠO LỚP HỌC
+                        Tạo lớp học
                     </Button>
                 </div>
             </div>
 
-            {classrooms.length === 0 ? (
-                <div className="text-center bg-white/50 backdrop-blur-md p-16 rounded-3xl border border-gray-100 shadow-sm mt-8">
-                    <div className="bg-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-500">
-                        <Users size={32} />
+            {/* Search Bar */}
+            <div className="relative group">
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png"
+                    alt="Search"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 object-contain opacity-50 group-focus-within:opacity-100 transition-opacity"
+                />
+                <Input
+                    placeholder="Tìm kiếm lớp học của bạn..."
+                    className="pl-12 h-14 bg-card/50 backdrop-blur-md border-2 border-white/5 rounded-2xl text-lg font-medium shadow-inner focus:ring-primary/20"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+
+            {/* Quick Guide Section */}
+            {showGuide && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                    {/* Teacher Guide */}
+                    <div className="bg-primary/5 dark:bg-primary/10 border-2 border-primary/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                                <GraduationCap size={24} />
+                            </div>
+                            <h3 className="text-xl font-black text-primary">Dành cho Giáo viên</h3>
+                        </div>
+                        <ul className="space-y-6 relative z-10">
+                            {[
+                                { title: "Tạo không gian", desc: "Tạo lớp học mới và mô tả mục tiêu học tập của bạn." },
+                                { title: "Mời học sinh", desc: "Chia sẻ mã lớp học (6 ký tự) để học sinh có thể tham gia." },
+                                { title: "Giao bài tập", desc: "Chọn bài trắc nghiệm từ thư viện và giao trực tiếp vào lớp." }
+                            ].map((step, i) => (
+                                <li key={i} className="flex gap-4 items-start">
+                                    <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-black shrink-0 mt-1">{i + 1}</div>
+                                    <div>
+                                        <h4 className="font-black text-foreground mb-1">{step.title}</h4>
+                                        <p className="text-sm font-medium text-muted-foreground leading-relaxed">{step.desc}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-700 mb-2">Chưa có lớp học nào</h2>
-                    <p className="text-gray-500 max-w-md mx-auto mb-8">
-                        Bạn chưa tham gia hoặc tạo lớp học nào. Hãy tham gia lớp học hiện có bằng mã, hoặc tạo lớp học mới để mời học sinh.
+
+                    {/* Student Guide */}
+                    <div className="bg-slate-500/5 dark:bg-slate-500/10 border-2 border-slate-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-500 text-white flex items-center justify-center shadow-lg shadow-slate-500/20">
+                                <UserCircle size={24} />
+                            </div>
+                            <h3 className="text-xl font-black text-slate-500">Dành cho Học sinh</h3>
+                        </div>
+                        <ul className="space-y-6 relative z-10">
+                            {[
+                                { title: "Tham gia lớp", desc: "Nhập mã tham gia được giáo viên cung cấp để vào lớp." },
+                                { title: "Xem bài tập", desc: "Khi giáo viên giao bài, bạn sẽ thấy bài tập mới hiện lên." },
+                                { title: "Hoàn thành", desc: "Làm bài trắc nghiệm và nhận ngay kết quả thống kê." }
+                            ].map((step, i) => (
+                                <li key={i} className="flex gap-4 items-start">
+                                    <div className="w-6 h-6 rounded-full bg-slate-500/20 text-slate-500 flex items-center justify-center text-xs font-black shrink-0 mt-1">{i + 1}</div>
+                                    <div>
+                                        <h4 className="font-black text-foreground mb-1">{step.title}</h4>
+                                        <p className="text-sm font-medium text-muted-foreground leading-relaxed">{step.desc}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+
+            {classrooms.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/20 backdrop-blur-sm rounded-[3rem] border-4 border-dashed border-white/10">
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/8388/8388104.png"
+                        alt="Classrooms"
+                        className="w-10 h-10 object-contain opacity-20"
+                    />
+                    <h2 className="text-2xl font-black text-foreground/50">{searchQuery ? "Không tìm thấy lớp học nào" : "Chưa có lớp học nào"}</h2>
+                    <p className="text-muted-foreground max-w-md mx-auto font-medium">
+                        {searchQuery ? "Hãy thử tìm kiếm với từ khóa khác." : "Bạn chưa tham gia hoặc tạo lớp học nào. Hãy tham gia lớp học hiện có bằng mã, hoặc tạo lớp học mới để mời học sinh."}
                     </p>
-                    <div className="flex justify-center gap-4">
-                        <Button variant="outline" onClick={() => setIsJoinModalOpen(true)}>Nhập mã tham gia</Button>
-                        <Button onClick={() => setIsCreateModalOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">Tạo lớp học</Button>
+                    <div className="flex justify-center gap-4 mt-4">
+                        <Button variant="outline" onClick={() => setIsJoinModalOpen(true)} className="rounded-xl font-bold">Nhập mã tham gia</Button>
+                        <Button onClick={() => setIsCreateModalOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold">Tạo lớp học</Button>
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {classrooms.map(c => (
-                        <div key={c.id} onClick={() => navigate(`/classrooms/${c.id}`)} className="bg-card/60 backdrop-blur-xl group cursor-pointer rounded-3xl p-8 shadow-lg border border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+                    {filteredClassrooms.map(c => (
+                        <div
+                            key={c.id}
+                            onClick={() => navigate(`/classrooms/${c.id}`)}
+                            className="bg-card/40 backdrop-blur-md group cursor-pointer rounded-3xl p-8 shadow-lg border-2 border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
+                        >
                             <div className="flex justify-between items-start mb-6">
                                 <div className="bg-primary text-primary-foreground w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg transform group-hover:rotate-3 transition-transform">
                                     {c.name.substring(0, 2).toUpperCase()}
                                 </div>
-                                <div className="bg-foreground/5 text-xs font-black px-4 py-2 rounded-full text-muted-foreground uppercase tracking-widest border border-foreground/5">
+                                <div className="bg-foreground/5 text-[10px] font-black px-4 py-2 rounded-full text-muted-foreground uppercase tracking-widest border border-foreground/5">
                                     {c._count.members} Thành viên
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors">{c.name}</h3>
-                            <p className="text-muted-foreground font-medium text-sm line-clamp-2 h-10 mb-6 opacity-70">{c.description || "Không có mô tả."}</p>
+                            <h3 className="text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">{c.name}</h3>
+                            <p className="text-muted-foreground font-medium text-sm line-clamp-2 h-10 mb-6 opacity-70 leading-relaxed">{c.description || "Không có mô tả."}</p>
 
-                            <div className="flex justify-between items-center border-t border-foreground/5 pt-6 mt-4">
+                            <div className="flex justify-between items-center border-t border-white/5 pt-6 mt-4">
                                 <div className="text-sm text-muted-foreground flex items-center gap-1">
                                     <span className="font-black text-foreground">{c.teacher?.username}</span>
-                                    <span className="opacity-60 text-xs uppercase font-black ml-1">(Giáo viên)</span>
+                                    <span className="opacity-60 text-[10px] uppercase font-black ml-1">(GV)</span>
                                 </div>
                                 <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
                                     <ArrowRight size={20} />

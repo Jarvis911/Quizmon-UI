@@ -6,15 +6,18 @@ import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Building2, 
-  Users, 
-  UserPlus, 
-  Trash2, 
-  ShieldCheck, 
+import {
+  Building2,
+  Users,
+  UserPlus,
+  Trash2,
+  ShieldCheck,
   Mail,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  HelpCircle,
+  CreditCard,
+  Target
 } from "lucide-react";
 
 interface Member {
@@ -39,6 +42,7 @@ export default function OrganizationSettings() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -80,12 +84,12 @@ export default function OrganizationSettings() {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentOrg || !inviteEmail.trim()) return;
-    
+
     setIsUpdating(true); // Reusing isUpdating for invite loading state
     setMessage(null);
-    
+
     try {
-      await apiClient.post(endpoints.organization_members(currentOrg.id), { 
+      await apiClient.post(endpoints.organization_members(currentOrg.id), {
         email: inviteEmail.trim(),
         role: 'MEMBER'
       });
@@ -111,7 +115,7 @@ export default function OrganizationSettings() {
       setSearchResults([]);
       return;
     }
-    
+
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
       try {
@@ -133,7 +137,7 @@ export default function OrganizationSettings() {
       type: "confirm"
     });
     if (!confirmed) return;
-    
+
     try {
       await apiClient.delete(`${endpoints.organization_members(currentOrg.id)}/${userId}`);
       fetchMembers();
@@ -155,31 +159,73 @@ export default function OrganizationSettings() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-10">
-      <header>
-        <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-4">
-          <img src="https://cdn-icons-png.flaticon.com/512/738/738853.png" alt="Settings" className="w-10 h-10 object-contain drop-shadow-md" /> Cài đặt
-        </h1>
-        <p className="text-muted-foreground font-bold mt-2">Quản lý thành viên và tùy chọn không gian làm việc của bạn.</p>
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-10 h-10 object-contain drop-shadow-md" /> Cài đặt tổ chức
+          </h1>
+          <p className="text-muted-foreground font-bold mt-2">Quản lý thành viên và tùy chọn không gian làm việc của bạn.</p>
+        </div>
+        <Button
+          onClick={() => setShowGuide(!showGuide)}
+          className={`flex items-center gap-2 border-2 border-primary/30 font-black h-12 px-6 rounded-2xl transition-all ${showGuide ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90' : 'text-primary bg-primary/10 hover:bg-primary/20 border-primary/20'}`}
+        >
+          <HelpCircle size={20} />
+          {showGuide ? 'Đóng hướng dẫn' : 'Tổ chức là gì?'}
+        </Button>
       </header>
+
+      {/* Organization Guide Section */}
+      {showGuide && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-primary/5 border-2 border-primary/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
+            <h3 className="text-xl font-black text-primary mb-4 flex items-center gap-2">
+              <Building2 size={24} /> Tổ chức là gì?
+            </h3>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+              Là một <strong className="font-black text-foreground">không gian làm việc chung</strong> (Team, Trường học, Công ty) giúp bạn quản lý bài trắc nghiệm và thành viên tại một nơi duy nhất.
+            </p>
+          </div>
+
+          <div className="bg-emerald-500/5 border-2 border-emerald-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
+            <h3 className="text-xl font-black text-emerald-500 mb-4 flex items-center gap-2">
+              <CreditCard size={24} /> Lợi ích dùng chung
+            </h3>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+              <strong className="font-black text-foreground text-emerald-600 dark:text-emerald-400">Tiết kiệm chi phí</strong>: Khi Tổ chức được nâng cấp gói trả phí, <strong className="font-black text-foreground text-emerald-600 dark:text-emerald-400">tất cả thành viên</strong> trong đó đều được sử dụng các tính năng Premium mà không cần mua lẻ.
+            </p>
+          </div>
+
+          <div className="bg-amber-500/5 border-2 border-amber-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
+            <h3 className="text-xl font-black text-amber-500 mb-4 flex items-center gap-2">
+              <ShieldCheck size={24} /> Vai trò & Bảo mật
+            </h3>
+            <ul className="text-sm font-medium text-muted-foreground space-y-2 relative z-10">
+              <li>• <strong className="font-black text-foreground">Chủ sở hữu</strong>: Quản lý thành viên, tên tổ chức và thanh toán.</li>
+              <li>• <strong className="font-black text-foreground">Thành viên</strong>: Tham gia tổ chức để cùng làm việc và hưởng gói Premium.</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Org Info */}
         <section className="lg:col-span-1 space-y-6">
           <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-8 shadow-xl">
             <h2 className="text-xl font-black mb-6 flex items-center gap-2">
-              <Building2 size={20} className="text-primary" /> Thông tin chung
+              Thông tin chung
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">Tên tổ chức</label>
-                <Input 
-                  value={name} 
-                  onChange={e => setName(e.target.value)} 
+                <Input
+                  value={name}
+                  onChange={e => setName(e.target.value)}
                   className="bg-white/5 border-white/10 rounded-xl h-12 font-bold focus:ring-primary"
                 />
               </div>
-              <Button 
-                onClick={handleUpdateOrg} 
+              <Button
+                onClick={handleUpdateOrg}
                 className="w-full rounded-xl font-bold h-12"
                 disabled={isUpdating || name === currentOrg.name}
               >
@@ -200,7 +246,7 @@ export default function OrganizationSettings() {
           <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-8 shadow-xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black flex items-center gap-2">
-                <Users size={20} className="text-primary" /> Thành viên
+                Thành viên
               </h2>
               <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-black uppercase tracking-tighter">
                 {members.length} Thành viên
@@ -224,7 +270,7 @@ export default function OrganizationSettings() {
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                       <Mail size={20} />
                     </div>
-                    
+
                     {searchResults.length > 0 && (
                       <div className="absolute top-full left-0 right-0 mt-2 bg-card border-2 border-primary/20 rounded-2xl shadow-xl z-50 overflow-hidden">
                         {searchResults.map((user: any) => (
@@ -273,9 +319,9 @@ export default function OrganizationSettings() {
                         <ShieldCheck size={12} /> {member.role}
                       </div>
                       {member.user.id !== (user as any)?.id && ( // Can't remove yourself
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleRemoveMember(member.user.id)}
                           className="opacity-0 group-hover:opacity-100 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"
                         >

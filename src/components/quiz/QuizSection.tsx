@@ -12,6 +12,7 @@ interface QuizSectionProps {
     onAssign?: (id: string | number) => void;
     isAiGeneratedSection?: boolean;
     iconColor?: string;
+    icon?: React.ReactNode;
 }
 
 const QuizSection: React.FC<QuizSectionProps> = ({
@@ -21,7 +22,8 @@ const QuizSection: React.FC<QuizSectionProps> = ({
     onEdit,
     onAssign,
     isAiGeneratedSection = false,
-    iconColor = 'bg-indigo-500'
+    iconColor = 'bg-indigo-500',
+    icon
 }) => {
     const [emblaRef, emblaApi] = useEmblaCarousel({
         align: 'start',
@@ -43,7 +45,13 @@ const QuizSection: React.FC<QuizSectionProps> = ({
         <section className="relative z-10 space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <div className={`h-10 w-2 ${iconColor} rounded-full shadow-lg opacity-80`} />
+                    {icon ? (
+                        <div className="flex items-center justify-center w-12 h-12 group-hover:scale-110 transition-transform duration-300">
+                            {icon}
+                        </div>
+                    ) : (
+                        <div className={`h-10 w-2 ${iconColor} rounded-full shadow-lg opacity-80`} />
+                    )}
                     <h2 className="text-slate-800 dark:text-white text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm">
                         {title}
                     </h2>

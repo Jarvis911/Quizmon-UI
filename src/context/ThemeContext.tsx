@@ -17,6 +17,17 @@ export interface Theme {
 
 export const BACKGROUND_THEMES: Theme[] = [
     {
+        id: 'coban',
+        name: 'Cơ bản',
+        className: 'bg-slate-50',
+        navbarStyles: {
+            logo: 'text-[#0078D4]',
+            buttonPrimary: 'bg-[#0078D4] hover:bg-[#005a9e] text-white',
+            buttonSecondary: 'bg-white hover:bg-slate-50 text-[#0078D4] border border-slate-200',
+            borderFocus: 'border-[#0078D4] focus:border-[#0078D4]'
+        }
+    },
+    {
         id: 'lavender',
         name: 'Hoa oải hương',
         className: 'bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-300',
@@ -83,7 +94,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const [themeId, setThemeId] = useState<string>(() => {
-        return localStorage.getItem("home_bg_theme") || "lavender";
+        return localStorage.getItem("home_bg_theme") || "coban";
     });
 
     const selectedTheme = BACKGROUND_THEMES.find(t => t.id === themeId) || BACKGROUND_THEMES[0];

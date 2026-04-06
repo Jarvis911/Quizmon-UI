@@ -48,26 +48,26 @@ export default function AdminQuizzes() {
     if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kiểm duyệt Quiz</h1>
-                <p className="text-slate-500 dark:text-slate-400">Quản lý và loại bỏ các quiz không phù hợp.</p>
+        <div className="space-y-8">
+            <div className="relative">
+                <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Kiểm duyệt Quiz</h1>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">Quản lý và loại bỏ các quiz không phù hợp từ cộng đồng.</p>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+            <div className="flex flex-col md:flex-row gap-4 bg-card/40 dark:bg-slate-900/40 p-6 rounded-4xl border border-white/10 backdrop-blur-md shadow-xl">
                 <div className="flex-1">
                     <input 
                         type="text" 
                         placeholder="Tìm theo tiêu đề hoặc người tạo..." 
-                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full h-12 px-6 rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
                 <div className="w-full md:w-64">
                     <select 
-                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full h-12 px-6 rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none"
                         value={categoryId}
                         onChange={(e) => setCategoryId(e.target.value)}
                     >
@@ -79,37 +79,37 @@ export default function AdminQuizzes() {
                 </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+            <div className="rounded-[2.5rem] border border-white/10 bg-card/30 dark:bg-slate-900/30 overflow-hidden backdrop-blur-md shadow-2xl">
+                <table className="w-full text-sm text-left border-collapse">
+                    <thead className="bg-white/10 dark:bg-white/5 border-b border-white/5">
                         <tr>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">ID</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Tiêu đề</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Người tạo</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400">Ngày tạo</th>
-                            <th className="px-6 py-3 font-medium text-slate-500 dark:text-slate-400 text-right">Hành động</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Tiêu đề</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Người tạo</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Ngày tạo</th>
+                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody className="divide-y divide-white/5">
                         {quizzes.map((quiz) => (
-                            <tr key={quiz.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                <td className="px-6 py-4">{quiz.id}</td>
-                                <td className="px-6 py-4 font-medium">{quiz.title}</td>
-                                <td className="px-6 py-4">{quiz.creator?.username || quiz.creatorId}</td>
-                                <td className="px-6 py-4">{new Date(quiz.createdAt).toLocaleDateString()}</td>
-                                <td className="px-6 py-4 text-right">
+                            <tr key={quiz.id} className="hover:bg-white/10 dark:hover:bg-white/5 transition-colors group">
+                                <td className="px-8 py-5 font-bold text-slate-500">{quiz.id}</td>
+                                <td className="px-8 py-5 font-black text-slate-900 dark:text-white">{quiz.title}</td>
+                                <td className="px-8 py-5 font-bold text-slate-600 dark:text-slate-300">{quiz.creator?.username || quiz.creatorId}</td>
+                                <td className="px-8 py-5 font-medium text-slate-500">{new Date(quiz.createdAt).toLocaleDateString()}</td>
+                                <td className="px-8 py-5 text-right">
                                     <button 
                                         onClick={() => handleDelete(quiz.id)}
-                                        className="text-red-500 hover:text-red-700 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10"
+                                        className="text-rose-500 hover:text-rose-700 p-3 rounded-2xl hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100"
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 className="w-5 h-5" />
                                     </button>
                                 </td>
                             </tr>
                         ))}
                         {quizzes.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Không tìm thấy quiz nào.</td>
+                                <td colSpan={5} className="px-8 py-20 text-center text-slate-500 font-bold">Không tìm thấy quiz nào.</td>
                             </tr>
                         )}
                     </tbody>

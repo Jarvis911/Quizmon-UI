@@ -170,6 +170,18 @@ const LavenderScene = () => (
     </div>
 );
 
+const BasicScene = () => (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none bg-[#f8fafc]">
+        {/* Subtle background texture or very faint grid could go here */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `radial-gradient(#0078D4 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }} />
+
+        {/* Large Azure-style soft blurs */}
+        <div className="absolute -top-20 -right-20 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-1/4 -left-20 w-[400px] h-[400px] bg-emerald-400/10 rounded-full blur-[100px] animate-[pulse_15s_ease-in-out_infinite_reverse]" />
+        <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] bg-cyan-300/10 rounded-full blur-[80px] animate-[pulse_12s_ease-in-out_infinite]" />
+    </div>
+);
+
 const DefaultScene = () => (
     <div className="absolute inset-0 bg-transparent pointer-events-none" />
 );
@@ -181,6 +193,7 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ themeId 
         case 'ocean': return <OceanScene />;
         case 'midnight': return <MidnightScene />;
         case 'lavender': return <LavenderScene />;
+        case 'coban': return <BasicScene />;
         case 'default':
         default: return <DefaultScene />;
     }

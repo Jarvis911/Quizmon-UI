@@ -2,6 +2,8 @@ import { useState, FormEvent, HTMLAttributes } from "react";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Mail, Lock, ArrowRight, ArrowLeft } from "lucide-react";
 
 interface LoginFormProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -12,6 +14,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -36,144 +39,149 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    const ok = await login(email, password);
-    if (!ok) {
-      setError("Đăng nhập thất bại, vui lòng thử lại!");
-    } else {
-      navigate("/");
+    setIsLoading(true);
+    setError("");
+    try {
+      const ok = await login(email, password);
+      if (!ok) {
+        setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      setError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const onSignUp = () => {
-    navigate(`/sign-up`);
-  }
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:5000/auth/google";
   };
 
   return (
-    <div className="w-full h-screen bg-pink-50/30 flex flex-row font-sans overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f8fafc] p-6 relative overflow-hidden">
+      {/* Back to Home Navigation */}
+      <div className="absolute top-8 left-8 z-20">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/")}
+          className="group flex items-center gap-2 font-black text-slate-400 hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform" />
+          Trở về trang chủ
+        </Button>
+      </div>
 
-      {/* Left Panel: Form */}
-      <div className="w-full md:w-[60%] lg:w-[50%] h-full flex flex-col relative overflow-y-auto bg-white pt-6">
+      {/* Basic Gradient Style Accents */}
+      <div className="absolute -bottom-24 -right-24 size-[600px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute -top-24 -left-24 size-[600px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '10s' }} />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(52,211,153,0.05),transparent_40%)] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[30%] h-full bg-linear-to-l from-slate-200/20 to-transparent pointer-events-none transform -skew-x-12 translate-x-1/4" />
 
-        {/* Header (Logo & Signup Button) */}
-        <div className="w-full flex justify-between items-center px-6 md:px-10 mb-8 md:mb-16">
-          <div
-            onClick={() => navigate("/")}
-            className="text-white text-3xl font-black tracking-tighter cursor-pointer bg-[#FF758F] py-2 px-4 rounded-xl shadow-[0_4px_0_0_#C9184A] hover:bg-[#FF4D6D] transition-all hover:scale-105 active:scale-95"
-          >
-            Quizmon
-          </div>
+      {/* Brand Logo */}
+      <div 
+        onClick={() => navigate("/")}
+        className="mb-10 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+      >
+        <img src="/quizmon.png" alt="Quizmon Logo" className="h-16 w-auto object-contain drop-shadow-sm" />
+      </div>
 
-          <button
-            type="button"
-            onClick={onSignUp}
-            className="text-pink-600 font-bold border-2 border-pink-100 py-2 px-6 rounded-lg hover:border-pink-200 hover:bg-pink-50 transition-all shadow-sm active:scale-95"
-          >
-            Đăng ký
-          </button>
+      {/* Main Login Card */}
+      <div className="w-full max-w-md bg-white rounded-4xl p-10 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-black tracking-tight text-slate-800">
+            Chào mừng trở lại!
+          </h1>
+          <p className="text-slate-500 font-bold mt-2">
+            Đăng nhập để tiếp tục học tập.
+          </p>
         </div>
 
-        {/* Central Form Wrapper */}
-        <div className="flex-1 w-full max-w-sm mx-auto flex flex-col items-center justify-center px-4 pb-20">
-          <h1 className="text-[2.5rem] font-black text-slate-800 mb-2 border-b-2 border-transparent">
-            Đăng nhập
-          </h1>
-          <p className="text-slate-500 font-medium mb-8">Chào mừng bạn quay trở lại! 🌸</p>
-
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-
-            <div className="relative group">
-              <input
-                id="email"
-                type="text"
-                placeholder="Tên đăng nhập hoặc email"
-                value={email}
-                onChange={(e: FormEvent) => setEmail((e.target as HTMLInputElement).value)}
-                required
-                className="w-full py-4 px-5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-slate-700 text-lg font-medium focus:outline-none focus:border-[#FF758F] focus:bg-white focus:shadow-[0_0_0_4px_rgba(255,117,143,0.1)] placeholder:text-slate-400 transition-all"
-                autoComplete="email"
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">Email / Tài khoản</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  className="w-full bg-slate-50 border-2 border-slate-50 py-4 pl-12 pr-4 rounded-2xl text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="relative group">
-              <input
-                id="password"
-                type="password"
-                placeholder="Mật khẩu"
-                value={password}
-                onChange={(e: FormEvent) => setPassword((e.target as HTMLInputElement).value)}
-                required
-                className="w-full py-4 px-5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-slate-700 text-lg font-medium focus:outline-none focus:border-[#FF758F] focus:bg-white focus:shadow-[0_0_0_4px_rgba(255,117,143,0.1)] placeholder:text-slate-400 transition-all"
-                autoComplete="current-password"
-              />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Mật khẩu</label>
+                <a href="#" className="text-xs font-black text-primary hover:underline">Quên mật khẩu?</a>
+              </div>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full bg-slate-50 border-2 border-slate-50 py-4 pl-12 pr-4 rounded-2xl text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-
-            {error && <p className="text-rose-500 text-sm font-bold text-center">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={!email || !password}
-              className="w-full mt-2 py-4 rounded-2xl bg-[#FF758F] text-white text-xl font-black shadow-[0_6px_0_0_#C9184A] transition-all hover:bg-[#FF4D6D] hover:-translate-y-1 hover:shadow-[0_8px_0_0_#A4133C] active:translate-y-1 active:shadow-none disabled:bg-slate-200 disabled:shadow-[0_4px_0_0_#cbd5e1] disabled:translate-y-0 disabled:cursor-not-allowed"
-            >
-              Bắt đầu thôi!
-            </button>
-          </form>
-
-          <div className="flex w-full items-center gap-4 my-8 opacity-40">
-            <div className="flex-1 h-px bg-slate-300 rounded-full"></div>
-            <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">hoặc</span>
-            <div className="flex-1 h-px bg-slate-300 rounded-full"></div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="w-full py-3.5 rounded-2xl bg-white border-2 border-slate-100 text-slate-600 text-lg font-bold shadow-[0_4px_0_0_#f1f5f9] flex items-center justify-center gap-3 transition-all hover:bg-slate-50 hover:border-slate-200 active:translate-y-0.5 active:shadow-none"
+          {error && (
+            <div className="bg-rose-50 text-rose-500 text-sm font-bold py-3 px-4 rounded-xl border border-rose-100 animate-in fade-in">
+              {error}
+            </div>
+          )}
+
+          <Button 
+            type="submit" 
+            className="w-full py-7 rounded-2xl text-xl font-black shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all"
+            disabled={isLoading}
           >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6" />
-            Đăng nhập với Google
-          </button>
+            {isLoading ? "Đang xử lý..." : "Đăng nhập ngay!"}
+            <ArrowRight className="ml-2 size-6" />
+          </Button>
 
-          <a href="#" className="mt-8 text-pink-500 font-bold hover:text-pink-600 hover:underline text-sm tracking-wide transition-colors">
-            Quên mật khẩu?
-          </a>
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-slate-100" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-4 font-black text-slate-300 tracking-widest">hoặc</span>
+            </div>
+          </div>
 
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={handleGoogleLogin}
+            className="w-full py-7 rounded-2xl font-black text-lg border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200 transition-all gap-3 text-slate-600"
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-6" alt="Google" />
+            Tiếp tục với Google
+          </Button>
+        </form>
+
+        <div className="mt-10 text-center text-sm font-bold text-slate-400">
+          Chưa có tài khoản?{" "}
+          <span 
+            className="text-primary cursor-pointer hover:underline"
+            onClick={() => navigate("/sign-up")}
+          >
+            Đăng ký ngay
+          </span>
         </div>
       </div>
 
-      {/* Right Panel: Pink Theme Concept */}
-      <div className="hidden md:flex flex-1 h-full bg-[#FFB3C1] relative items-center justify-center border-l-8 border-pink-50 shadow-[inset_10px_0_30px_-10px_rgba(0,0,0,0.05)] overflow-hidden">
-        {/* Subtle pattern overlays - Blobs and Squares */}
-        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #fff 20%, transparent 20%)', backgroundSize: '60px 60px' }}></div>
-        
-        {/* Animated background elements */}
-        <div className="absolute w-[200%] h-[200%] rotate-12 flex flex-wrap gap-12 p-12 z-0 opacity-20">
-          {Array.from({ length: 48 }).map((_, i) => (
-            <div 
-              key={i} 
-              className="w-32 h-32 rounded-[2.5rem] bg-white opacity-40 shrink-0 shadow-xl animate-pulse" 
-              style={{ animationDelay: `${i * 0.1}s`, animationDuration: '4s' }}
-            ></div>
-          ))}
-        </div>
-
-
-
-        {/* Tagline Box */}
-        <div className="absolute bottom-16 text-center z-20 w-full px-12">
-          <div className="bg-white/20 backdrop-blur-md py-6 px-8 rounded-3xl border border-white/30 shadow-2xl inline-block transition-transform hover:scale-105">
-            <h2 className="text-white text-[1.4rem] md:text-[1.8rem] font-black tracking-tight drop-shadow-sm whitespace-pre-line leading-snug font-sans">
-              Trải nghiệm phép màu của{"\n"}Học tập cùng Quizmon
-            </h2>
-          </div>
-        </div>
-
-        {/* Corner shapes */}
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#FF4D6D] rounded-full opacity-20 blur-3xl"></div>
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-white rounded-full opacity-10 blur-2xl"></div>
+      <div className="mt-8 text-slate-300 text-xs font-bold tracking-widest uppercase">
+        © 2026 Quizmon Team
       </div>
     </div>
   );

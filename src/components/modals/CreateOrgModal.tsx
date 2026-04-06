@@ -55,7 +55,7 @@ export function CreateOrgModal({ isOpen, onClose }: CreateOrgModalProps) {
       <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-2xl border-white/10 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black flex items-center gap-2">
-            <Building2 className="text-primary" /> Tạo không gian làm việc
+            <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Workspace" className="w-8 h-8 object-contain" /> Tạo không gian làm việc
           </DialogTitle>
           <DialogDescription className="font-bold text-muted-foreground">
             Đặt tên cho tổ chức mới của bạn. Bạn có thể mời các thành viên trong nhóm sau đó.

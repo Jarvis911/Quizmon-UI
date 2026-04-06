@@ -3,6 +3,7 @@ import { SignUpForm } from "./components/auth/SignupForm";
 import Navbar from "./components/ui/navbar";
 import QuizEditor from "./pages/QuizEditor";
 import Home from "./pages/Home";
+import Results from "./pages/Results";
 import MatchLobby from "./pages/MatchLobby.tsx";
 import MatchPlay from "./pages/MatchPlay";
 import CreateQuizForm from "./components/quiz/CreateQuizForm";
@@ -28,6 +29,7 @@ import AdminQuizzes from "./pages/admin/AdminQuizzes";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAI from "./pages/admin/AdminAI";
+import AdminPromotions from "./pages/admin/AdminPromotions";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -64,7 +66,7 @@ function RootLayout() {
     // Compact navbar padding on quiz routes
     const isQuizRoute = location.pathname.startsWith('/quiz');
     const isAdminRoute = location.pathname.startsWith('/admin');
-    const paddingTopClass = isAdminRoute ? "pt-[64px]" /* if navbar is used, but wait, admin has its own layout? We will show navbar above AdminLayout */ : isNoNavbarRoute ? "" : isQuizRoute ? "pt-[48px]" : "pt-[64px]";
+    const paddingTopClass = isAdminRoute ? "pt-[64px]" /* if navbar is used, but wait, admin has its own layout? We will show navbar above AdminLayout */ : isNoNavbarRoute ? "" : isQuizRoute ? "pt-[48px]" : "pt-24 lg:pt-32";
 
     return (
         <div className={`w-full h-full min-h-screen ${paddingTopClass}`}>
@@ -92,6 +94,7 @@ const router = createBrowserRouter([
             { path: "/login", element: <LoginForm /> },
             { path: "/sign-up", element: <SignUpForm /> },
             { path: "/", element: <Home /> },
+            { path: "/results", element: <Results /> },
             { path: "/home", element: <Navigate to="/" replace /> },
 
             // Protected Routes
@@ -123,6 +126,7 @@ const router = createBrowserRouter([
                     { path: "reports", element: <AdminReports /> },
                     { path: "users", element: <AdminUsers /> },
                     { path: "ai", element: <AdminAI /> },
+                    { path: "promotions", element: <AdminPromotions /> },
                 ]
             }
         ]
