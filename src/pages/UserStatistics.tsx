@@ -12,22 +12,12 @@ import {
     Medal,
     Clock,
     Calendar,
-    Download,
     Search,
     TrendingUp,
-    LayoutDashboard,
     FileSpreadsheet,
     ArrowUpRight,
     Target
 } from "lucide-react";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import {
     Select,
     SelectContent,
@@ -242,30 +232,32 @@ const UserStats = () => {
     return (
         <div className="min-h-[calc(100vh-64px)] p-4 lg:p-8">
             <div className="max-w-7xl mx-auto space-y-8">
-                {/* Dashboard Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-card/40 backdrop-blur-md p-8 rounded-3xl border border-white/10 shadow-2xl">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                            <div className="p-3 bg-primary/10 rounded-2xl">
-                                <LayoutDashboard className="w-8 h-8 text-primary" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-black tracking-tight text-foreground">Bảng Điều Khiển Học Tập</h1>
-                                <p className="text-muted-foreground font-medium italic">Chào mừng trở lại, {user?.username}! Đây là tiến trình của bạn.</p>
-                            </div>
-                        </div>
+                {/* Dashboard Header - Match Classroom style */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-3">
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png"
+                                alt="History"
+                                className="w-10 h-10 object-contain"
+                            />
+                            Lịch sử đấu của tôi
+                        </h1>
+                        <p className="text-muted-foreground font-bold mt-2 opacity-80 uppercase tracking-widest text-xs">
+                            Theo dõi tiến trình, thứ hạng và hiệu quả học tập của bạn.
+                        </p>
                     </div>
 
-                    <div className="flex items-center gap-4 bg-slate-100 dark:bg-white/5 p-2 rounded-2xl border border-white/20">
+                    <div className="flex items-center gap-4 bg-card/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 shadow-lg">
                         <Calendar className="w-5 h-5 text-muted-foreground ml-2" />
                         <Select value={period} onValueChange={setPeriod}>
                             <SelectTrigger className="w-[180px] border-none bg-transparent shadow-none focus:ring-0 font-bold">
                                 <SelectValue placeholder="Khoảng thời gian" />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-white/20 backdrop-blur-lg">
-                                <SelectItem value="week" className="rounded-lg">7 Ngày Qua</SelectItem>
-                                <SelectItem value="month" className="rounded-lg">30 Ngày Qua</SelectItem>
-                                <SelectItem value="all" className="rounded-lg">Tất Cả Thời Gian</SelectItem>
+                                <SelectItem value="week" className="rounded-lg font-bold">7 Ngày Qua</SelectItem>
+                                <SelectItem value="month" className="rounded-lg font-bold">30 Ngày Qua</SelectItem>
+                                <SelectItem value="all" className="rounded-lg font-bold">Tất Cả Thời Gian</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -307,7 +299,7 @@ const UserStats = () => {
                                 { label: "Điểm Trung Bình", value: averageScore, icon: ArrowUpRight, color: "text-purple-500", bg: "bg-purple-500/10", suffix: "điểm" },
                                 { label: "Quiz Tham Gia", value: totalQuizzes, icon: Medal, color: "text-orange-500", bg: "bg-orange-500/10", suffix: "bộ" },
                             ].map((item, idx) => (
-                                <Card key={idx} className="bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
+                                <Card key={idx} className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-xl rounded-[2.5rem] overflow-hidden hover:scale-[1.02] transition-transform duration-500">
                                     <CardHeader className="pb-2">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono">{item.label}</span>
@@ -337,7 +329,7 @@ const UserStats = () => {
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Performance Trend */}
-                            <Card className="lg:col-span-2 bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl">
+                            <Card className="lg:col-span-2 bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-xl rounded-[2.5rem]">
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
                                         <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -353,7 +345,7 @@ const UserStats = () => {
                             </Card>
 
                             {/* Rank Distribution */}
-                            <Card className="bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl">
+                            <Card className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-xl rounded-[2.5rem]">
                                 <CardHeader>
                                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                                         <Trophy className="w-5 h-5 text-yellow-500" />
@@ -394,115 +386,82 @@ const UserStats = () => {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="history" className="mt-0 focus-visible:ring-0">
-                        <Card className="bg-card/40 backdrop-blur-md border-white/10 shadow-xl rounded-3xl overflow-hidden">
-                            <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 bg-white/5 pb-6">
-                                <div>
-                                    <CardTitle className="text-2xl font-black flex items-center gap-3">
-                                        <img 
-                                            src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
-                                            alt="History" 
-                                            className="w-7 h-7 object-contain" 
-                                        />
-                                        Nhật Ký Thi Đấu
-                                    </CardTitle>
-                                    <CardDescription>Tổng cộng {recentMatches.length} trận đấu đã tham gia</CardDescription>
+                    <TabsContent value="history" className="space-y-8 mt-0 focus-visible:ring-0">
+                        {/* Search Bar - Classroom style */}
+                        <div className="relative group">
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png"
+                                alt="Search"
+                                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 object-contain opacity-50 group-focus-within:opacity-100 transition-opacity"
+                            />
+                            <Input
+                                placeholder="Tìm kiếm trận đấu theo tên quiz..."
+                                className="pl-12 h-14 bg-card/40 backdrop-blur-md border-2 border-white/5 rounded-2xl text-lg font-medium shadow-inner focus:ring-primary/20"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        {filteredMatches.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-24 text-center space-y-4 bg-card/20 backdrop-blur-sm rounded-[3rem] border-4 border-dashed border-white/10">
+                                <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-2 opacity-20">
+                                    <Calendar size={40} />
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="relative group">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                        <Input
-                                            placeholder="Tìm kiếm quiz..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-10 w-full sm:w-[300px] rounded-2xl border-white/20 bg-white/80 dark:bg-slate-950/80 focus:ring-primary focus:border-primary"
-                                        />
-                                    </div>
-                                    <Button variant="outline" className="rounded-2xl gap-2 font-bold border-white/20 hover:bg-white/20">
-                                        <Download className="w-4 h-4" />
-                                        Xuất Tất Cả
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                {filteredMatches.length === 0 ? (
-                                    <div className="text-center py-24">
-                                        <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                                            <Calendar className="w-10 h-10 text-muted-foreground/30" />
+                                <h2 className="text-2xl font-black text-foreground/50">{searchQuery ? "Không tìm thấy trận đấu nào" : "Chưa có lịch sử đấu"}</h2>
+                                <p className="text-muted-foreground max-w-md mx-auto font-medium">
+                                    {searchQuery ? "Hãy thử tìm kiếm với từ khóa khác." : "Bạn chưa tham gia trận đấu nào. Hãy bắt đầu thi đấu để xem kết quả tại đây!"}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredMatches.map((match: RecentMatch) => (
+                                    <div
+                                        key={match.id}
+                                        className="bg-card/40 backdrop-blur-md group rounded-[2.5rem] p-8 shadow-lg border-2 border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col"
+                                    >
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="bg-primary text-primary-foreground w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg transform group-hover:rotate-3 transition-transform">
+                                                {match.quizName.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                {getRankBadge(match.rank)}
+                                            </div>
                                         </div>
-                                        <h3 className="text-xl font-bold text-foreground">Không tìm thấy dữ liệu</h3>
-                                        <p className="text-muted-foreground max-w-xs mx-auto mt-2">Hãy thử thay đổi từ khóa tìm kiếm hoặc khoảng thời gian thống kê.</p>
+
+                                        <h3 className="text-xl font-black text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">{match.quizName}</h3>
+                                        <div className="flex items-center gap-1.5 mb-6 opacity-60">
+                                            <Target className="w-3 h-3" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">ID: {match.quizId}</span>
+                                        </div>
+
+                                        <div className="mt-auto space-y-4">
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-3xl font-black bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">{match.score}</span>
+                                                <span className="text-[10px] font-black uppercase text-muted-foreground">Điểm</span>
+                                            </div>
+
+                                            <div className="flex justify-between items-center border-t border-white/5 pt-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-foreground/80">{formatDate(match.createdAt).split(" ")[1]}</span>
+                                                    <span className="text-[10px] text-muted-foreground/60 font-mono">{formatDate(match.createdAt).split(" ")[0]}</span>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="w-10 h-10 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDownloadExcel(match.id);
+                                                    }}
+                                                >
+                                                    <FileSpreadsheet className="w-5 h-5" />
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader className="bg-white/5">
-                                                <TableRow className="border-b border-foreground/5 hover:bg-transparent">
-                                                    <TableHead className="w-40 font-black uppercase text-[10px] tracking-widest pl-8">Xếp Hạng</TableHead>
-                                                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Thông Tin Trận Đấu</TableHead>
-                                                    <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Điểm Số</TableHead>
-                                                    <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Thời Gian</TableHead>
-                                                    <TableHead className="w-20 text-right pr-8 font-black uppercase text-[10px] tracking-widest">Báo Cáo</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {filteredMatches.map((match: RecentMatch) => (
-                                                    <TableRow key={match.id} className="group hover:bg-white/10 border-b border-foreground/5 transition-colors">
-                                                        <TableCell className="pl-8 py-6">
-                                                            {getRankBadge(match.rank)}
-                                                        </TableCell>
-                                                        <TableCell className="py-6">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-12 h-12 bg-linear-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center font-black text-primary border border-primary/20">
-                                                                    {match.quizName.charAt(0)}
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="font-black text-foreground group-hover:text-primary transition-colors text-base">{match.quizName}</span>
-                                                                    <span className="text-[10px] text-muted-foreground/70 font-mono flex items-center gap-1.5 uppercase font-bold tracking-tighter">
-                                                                        <Target className="w-3 h-3" />
-                                                                        ID: {match.quizId}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-center py-6">
-                                                            <div className="inline-flex flex-col items-center">
-                                                                <span className="font-black text-2xl bg-linear-to-r from-primary to-accent bg-clip-text text-transparent drop-shadow-sm">
-                                                                    {match.score}
-                                                                </span>
-                                                                <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Points</span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-center py-6">
-                                                            <div className="flex flex-col items-center gap-1">
-                                                                <div className="flex items-center gap-1.5 text-xs font-bold text-foreground/80">
-                                                                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                                                                    {formatDate(match.createdAt).split(" ")[1]}
-                                                                </div>
-                                                                <div className="text-[10px] text-muted-foreground/60 font-mono">
-                                                                    {formatDate(match.createdAt).split(" ")[0]}
-                                                                </div>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-right pr-8 py-6">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="rounded-xl hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
-                                                                onClick={() => handleDownloadExcel(match.id)}
-                                                                title="Tải báo cáo chi tiết (.xlsx)"
-                                                            >
-                                                                <FileSpreadsheet className="w-5 h-5" />
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                ))}
+                            </div>
+                        )}
                     </TabsContent>
                 </Tabs>
             </div>
