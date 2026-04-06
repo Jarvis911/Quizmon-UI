@@ -17,7 +17,7 @@ const ITEM_COLORS = [
   "bg-gradient-to-r from-pink-500/60 to-pink-600/60",
 ];
 
-const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult }) => {
+const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, correctAnswer }) => {
   const [submitted, setSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(
     socket,
@@ -47,7 +47,21 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
     setSubmitted(false);
   }, [question.id]);
 
+  // Show correct answer when it arrives
+  useEffect(() => {
+    if (correctAnswer && Array.isArray(correctAnswer)) {
+      const correctOrderIds = correctAnswer as number[];
+      setItems((prevItems) => {
+        const sorted = [...prevItems].sort((a, b) => {
+          return correctOrderIds.indexOf(a.id) - correctOrderIds.indexOf(b.id);
+        });
+        return sorted;
+      });
+    }
+  }, [correctAnswer]);
+
   const handleDragEnd = (event) => {
+    if (correctAnswer !== null || timer <= 0) return;
     const { active, over } = event;
     if (active.id !== over.id) {
       setItems((items) => {
@@ -97,7 +111,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
       <QuestionMedia media={question.media?.[0]} />
       <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-foreground flex-1 flex flex-col justify-between">
         <div>
-          <h2 className="min-w-[250px] max-w-full break-words text-2xl font-black mb-6 text-foreground drop-shadow-sm">
+          <h2 className="min-w-[250px] max-w-full wrap-break-word text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -117,7 +131,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
           disabled={submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
           className="mt-6 w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
         >
-          ✅ XÁC NHẬN
+          XÁC NHẬN
         </Button>
       </div>
     </div>

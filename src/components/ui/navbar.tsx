@@ -264,7 +264,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                   <img 
                     src="https://cdn-icons-png.flaticon.com/512/1156/1156949.png" 
                     alt="Notifications" 
-                    className={`w-6 h-6 object-contain transition-colors ${scrolled ? 'brightness-0' : 'brightness-100 invert'}`} 
+                    className="w-6 h-6 object-contain transition-colors brightness-100 invert" 
                   />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-background">

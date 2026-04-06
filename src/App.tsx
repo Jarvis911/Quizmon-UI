@@ -39,6 +39,7 @@ import { ModalProvider } from "./context/ModalContext";
 import GlobalModal from "./components/ui/GlobalModal";
 import WorkspaceSidebar from "./components/WorkspaceSidebar";
 import { createBrowserRouter, RouterProvider, Navigate, useLocation, Outlet } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import { ReactNode, useState } from "react";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -76,6 +77,7 @@ function RootLayout() {
                         <FeatureProvider>
                             {(!isNoNavbarRoute || isAdminRoute) && <Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />}
                             <WorkspaceSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+                            <ScrollToTop />
                             <GlobalModal />
                             <Outlet />
                         </FeatureProvider>

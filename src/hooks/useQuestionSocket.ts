@@ -38,6 +38,10 @@ const useQuestionSocket = (
     });
 
     useEffect(() => {
+        // Reset state for new question
+        setIsCorrect(null);
+        setIsWrong(false);
+
         const handleAnswerSubmitted = ({ questionId: qId }: AnswerSubmittedPayload) => {
             if (qId === questionId) {
                 console.log(`Submitted answer for question ${questionId}`);

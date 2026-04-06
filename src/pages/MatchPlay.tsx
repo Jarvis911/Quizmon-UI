@@ -158,6 +158,8 @@ const MatchPlay = () => {
     const [confirmEndMatch, setConfirmEndMatch] = useState(false);
     const [confirmSurrender, setConfirmSurrender] = useState(false);
     const [musicUrl, setMusicUrl] = useState<string>("/audio/background.mp3");
+    const [correctAnswerInfo, setCorrectAnswerInfo] = useState<any>(null);
+    const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
     // Homework mode integration
     const [matchMode, setMatchMode] = useState<MatchMode>("REALTIME");
@@ -256,6 +258,8 @@ const MatchPlay = () => {
             setExplode(false);
             setError(null);
             setFeedback(null); // Clear previous feedback
+            setCorrectAnswerInfo(null);
+            setShowCorrectAnswer(false);
             setQuestionNumber((prev) => prev + 1);
             questionRef.current = question;
         };
@@ -264,9 +268,14 @@ const MatchPlay = () => {
             setTimer(remainingTime);
         };
 
-        const handleAnswerResult = ({ userId, isCorrect, questionId }: { userId: number, isCorrect: boolean, questionId: number }) => {
+        const handleAnswerResult = ({ userId, isCorrect, questionId, correctAnswer }: { userId: number, isCorrect: boolean, questionId: number, correctAnswer?: any }) => {
             if (userId === user.id && questionRef.current?.id === questionId) {
                 triggerFeedback(isCorrect);
+            }
+            // Always store correct answer for current question
+            if (questionRef.current?.id === questionId) {
+                setCorrectAnswerInfo(correctAnswer);
+                setShowCorrectAnswer(true);
             }
         };
 
@@ -417,7 +426,8 @@ const MatchPlay = () => {
             timer,
             mode: matchMode,
             onHomeworkSubmit: matchMode === "HOMEWORK" ? handleNextHomeworkQuestion : undefined,
-            onResult: triggerFeedback
+            onResult: triggerFeedback,
+            correctAnswer: correctAnswerInfo
         };
 
         // Casting to any for component props to avoid complex discriminative union issues in this view
@@ -452,6 +462,8 @@ const MatchPlay = () => {
                         : 'opacity-0'
                     }`}
             />
+
+            {/* --- Removed redundant overlay because each question component now highlights its own correct answer. --- */}
 
             {/* Pause Overlay */}
             {isPaused && (
