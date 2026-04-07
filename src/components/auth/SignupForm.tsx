@@ -1,4 +1,5 @@
 import { HTMLAttributes, useState } from "react"
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -64,7 +65,7 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = `${BASE_URL}/auth/google`;
   };
 
   return (

@@ -1,4 +1,5 @@
 import { useState, FormEvent, HTMLAttributes } from "react";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useEffect } from "react";
@@ -56,7 +57,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = `${BASE_URL}/auth/google`;
   };
 
   return (
