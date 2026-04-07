@@ -1,25 +1,52 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Sparkles, Send, Loader2, Wand2, Save } from "lucide-react";
-import AgentChat from "@/components/agent/AgentChat";
+import { ChevronLeft, Sparkles, Loader2, Save } from "lucide-react";
+import AgentChat, { Message as AgentMessage } from "@/components/agent/AgentChat";
 import LiveCanvas from "@/components/agent/LiveCanvas";
 import { io, Socket } from "socket.io-client";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+type QuizQuestion = {
+    id?: string;
+    questionText: string;
+    questionType: string;
+    optionsData: any;
+};
+
+type QuizData = {
+    title: string;
+    description?: string;
+    suggestedCategory?: string;
+    questions: QuizQuestion[];
+};
+
+type AgentUpdatePayload = {
+    suggestedTitle?: string;
+    suggestedDescription?: string;
+    suggestedCategory?: string;
+    questions?: QuizQuestion[];
+    // Sometimes backend might evolve; keep extra fields
+    [k: string]: any;
+};
+
 const AgenticQuizWorkspace = () => {
     const navigate = useNavigate();
     const { token } = useAuth();
     const { showAlert, showConfirm } = useModal();
     const [socket, setSocket] = useState<Socket | null>(null);
-    const [quizData, setQuizData] = useState<any>({
+    const [quizData, setQuizData] = useState<QuizData>({
         title: "Quiz Mới Tuyệt Vời",
+        description: "Quiz Mới Tuyệt Vời",
         questions: []
     });
+    const [messages, setMessages] = useState<AgentMessage[]>([
+        { role: "agent", text: "Chào bạn! Mình là Quizmon Agent. Bạn muốn tạo quiz về chủ đề gì?" }
+    ]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [categories, setCategories] = useState<any[]>([]);
@@ -48,13 +75,39 @@ const AgenticQuizWorkspace = () => {
             console.log("Connected to Agentic AI Socket");
         });
 
-        newSocket.on("agentUpdate", (data) => {
-            setQuizData(data);
+        newSocket.on("agentUpdate", (data: AgentUpdatePayload) => {
+            setQuizData((prev) => {
+                const next: QuizData = {
+                    title: data?.suggestedTitle || prev.title,
+                    description:
+                        data?.suggestedDescription ||
+                        prev.description ||
+                        data?.suggestedTitle ||
+                        prev.title,
+                    suggestedCategory: data?.suggestedCategory ?? prev.suggestedCategory,
+                    questions: Array.isArray(data?.questions) ? data.questions : prev.questions,
+                };
+
+                setMessages((m) => [
+                    ...m,
+                    {
+                        role: "agent",
+                        text: `Mình đã cập nhật quiz: "${next.title}" (${next.questions.length} câu). Bạn muốn thêm/sửa/xoá gì tiếp?`,
+                    },
+                ]);
+
+                return next;
+            });
+
             setIsGenerating(false);
         });
 
         newSocket.on("error", (err) => {
             showAlert({ title: "Lỗi", message: err.message, type: "error" });
+            setMessages((prev) => [
+                ...prev,
+                { role: "agent", text: `Mình gặp lỗi khi xử lý: ${err?.message || "Không rõ nguyên nhân"}. Bạn thử lại giúp mình nhé.` }
+            ]);
             setIsGenerating(false);
         });
 
@@ -68,12 +121,17 @@ const AgenticQuizWorkspace = () => {
     const handleSendMessage = (message: string) => {
         if (!socket || !message.trim()) return;
         setIsGenerating(true);
+        setMessages((prev) => [...prev, { role: "user", text: message }]);
         socket.emit("agentChat", { message });
     };
 
     const handleSave = async () => {
         if (quizData.questions.length === 0) {
             showAlert({ title: "Nhắc nhở", message: "Bạn cần có ít nhất 1 câu hỏi để lưu quiz.", type: "warning" });
+            return;
+        }
+        if (!selectedCategoryId) {
+            showAlert({ title: "Nhắc nhở", message: "Vui lòng chọn danh mục trước khi lưu quiz.", type: "warning" });
             return;
         }
 
@@ -148,7 +206,7 @@ const AgenticQuizWorkspace = () => {
                     <Button 
                         className="bg-primary text-primary-foreground font-black px-6 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all gap-2"
                         onClick={handleSave}
-                        disabled={isSaving || isGenerating}
+                        disabled={isSaving || isGenerating || !selectedCategoryId}
                     >
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Lưu Quiz
@@ -160,7 +218,7 @@ const AgenticQuizWorkspace = () => {
             <main className="flex-1 flex overflow-hidden">
                 {/* Left Pane: Chat */}
                 <aside className="w-[400px] border-r border-white/5 bg-white/5 backdrop-blur-3xl flex flex-col relative z-10 shadow-2xl">
-                    <AgentChat onSend={handleSendMessage} isGenerating={isGenerating} />
+                    <AgentChat messages={messages} onSend={handleSendMessage} isGenerating={isGenerating} />
                 </aside>
 
                 {/* Right Pane: Live Canvas */}

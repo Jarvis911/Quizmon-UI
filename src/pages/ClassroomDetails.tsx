@@ -45,6 +45,7 @@ export default function ClassroomDetails() {
     const [classroom, setClassroom] = useState<ClassroomDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
+    const [downloadingAssignmentId, setDownloadingAssignmentId] = useState<number | null>(null);
 
     // Check if the current user is the teacher
     const currentUserId = (() => {
@@ -78,14 +79,32 @@ export default function ClassroomDetails() {
         }
     };
 
-    const handleDownloadReport = (assignmentId: number) => {
-        console.log("Downloading report for assignment:", assignmentId);
-        // TODO: Implement report download
-        showAlert({
-            title: "Thông báo",
-            message: "Tính năng này đang được phát triển.",
-            type: "info"
-        });
+    const handleDownloadReport = async (assignmentId: number) => {
+        try {
+            setDownloadingAssignmentId(assignmentId);
+            const res = await apiClient.get(endpoints.report_excel(Number(assignmentId)), {
+                responseType: "blob",
+            });
+
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `classroom_assignment_${assignmentId}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error: any) {
+            console.error("Failed to download Excel report", error);
+            showAlert({
+                title: "Lỗi",
+                message: error?.response?.data?.message || "Không thể tải báo cáo Excel.",
+                type: "error",
+            });
+        } finally {
+            setDownloadingAssignmentId(null);
+        }
     };
 
     const handleCopyCode = () => {
@@ -198,8 +217,9 @@ export default function ClassroomDetails() {
                                                 <button
                                                     onClick={() => handleDownloadReport(assignment.id)}
                                                     className="flex-1 sm:flex-none px-6 py-3 bg-emerald-500/10 text-emerald-500 font-black rounded-xl hover:bg-emerald-500 hover:text-white transition-all text-xs uppercase tracking-widest border border-emerald-500/20"
+                                                    disabled={downloadingAssignmentId === assignment.id}
                                                 >
-                                                    BÁO CÁO EXCEL
+                                                    {downloadingAssignmentId === assignment.id ? "ĐANG TẢI..." : "BÁO CÁO EXCEL"}
                                                 </button>
                                             ) : (
                                                 <button

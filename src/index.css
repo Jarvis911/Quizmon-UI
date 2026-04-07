@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Quicksand:wght@300..700&display=swap');
-@import "tailwindcss";
-@import "tw-animate-css";
+@import "tailwindcss/preflight";
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+/* @import "tw-animate-css"; */
 
 :root {
   --font-quicksand: "Quicksand", sans-serif;

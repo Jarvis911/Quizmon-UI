@@ -175,30 +175,14 @@ const QuizEditor = () => {
 
             {/* Navbar preview */}
             <footer className="fixed inset-x-0 bottom-0 overflow-x-auto h-24 flex items-center gap-3 px-4 bg-card/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-40">
-                {/* General Information Square */}
+                {/* Edit Cover */}
                 <div
                     className="min-w-20 h-20 relative rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-primary/30 hover:border-primary/50 bg-primary/5 group shrink-0"
                     onClick={() => setIsSettingsOpen(true)}
-                    title="Cài đặt thông tin chung"
+                    title="Sửa ảnh bìa và thông tin"
                 >
                     <Settings className="w-6 h-6 text-primary/80 mb-1 group-hover:rotate-90 transition-transform duration-500" />
-                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Cài đặt</span>
-                </div>
-                
-                {/* Save and Exit */}
-                <div
-                    className="min-w-20 h-20 relative rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-green-500/30 hover:border-green-500/50 bg-green-500/5 group shrink-0"
-                    onClick={() => {
-                        window.location.href = `/library`; // Use redirect to bypass unsaved changes logic if needed, or normal navigation
-                    }}
-                    title="Lưu và Thoát"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-green-500/80 mb-1 group-hover:scale-110 transition-transform duration-300">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Lưu & Thoát</span>
+                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Sửa bìa</span>
                 </div>
 
                 {questions.map((q, i) => (
@@ -252,6 +236,22 @@ const QuizEditor = () => {
                 >
                     <Plus className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
+
+                {/* Save and Exit */}
+                <div
+                    className="min-w-20 h-20 rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-green-500/30 hover:border-green-500/50 bg-green-500/5 group"
+                    onClick={() => {
+                        window.location.href = `/library`; 
+                    }}
+                    title="Lưu và Thoát"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-green-500/80 mb-1 group-hover:scale-110 transition-transform duration-300">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span className="text-[10px] font-bold text-foreground/80 leading-none">Lưu & Thoát</span>
+                </div>
             </footer>
 
             {quiz && (

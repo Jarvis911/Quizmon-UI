@@ -120,7 +120,7 @@ const PlayerScoreCard = ({ player, rank, isCurrentUser }: PlayerScoreCardProps) 
                 {rank < 3 ? rankEmojis[rank] : `#${rank + 1}`}
             </span>
             <Avatar className="w-7 h-7 border border-white/10 shadow-sm">
-                {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
+                {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} className="object-cover" />}
                 <AvatarFallback className="bg-primary text-white text-[10px] font-black">
                     {(player.displayName || player.username || "?")[0].toUpperCase()}
                 </AvatarFallback>
@@ -502,7 +502,7 @@ const MatchPlay = () => {
             </div>
 
             {/* ── Top Bar ── */}
-            <div className="relative z-10 flex items-center justify-between px-6 py-4">
+            <div className="relative z-10 flex items-center justify-between px-2 md:px-6 py-2 md:py-4 gap-1 md:gap-4">
                 {/* Left: Question counter & controls */}
                 <div className="flex items-center gap-3">
                     {questionNumber > 0 && (
@@ -513,33 +513,36 @@ const MatchPlay = () => {
                     )}
                     <button
                         onClick={toggleTTS}
-                        className={`p-2 rounded-xl transition-all duration-300 font-bold text-sm ${isTTSEnabled
+                        className={`px-2 py-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-300 font-black text-[10px] md:text-sm ${isTTSEnabled
                             ? "bg-primary/20 text-primary hover:bg-primary/30"
                             : "bg-card/40 text-foreground/40 hover:bg-card/60"
                             }`}
                         title={isTTSEnabled ? "Tắt giọng nói" : "Bật giọng nói"}
                     >
-                        {isTTSEnabled ? "Âm thanh" : "Tắt âm"}
+                        <span className="sm:inline hidden">{isTTSEnabled ? "Âm thanh" : "Tắt âm"}</span>
+                        <span className="sm:hidden">{isTTSEnabled ? "VOICE" : "MUTE"}</span>
                     </button>
 
                     {/* Host: Game Controls */}
                     {isHost && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 md:gap-2">
                             <button
                                 onClick={() => socket.emit("togglePause", { matchId })}
-                                className={`px-3 py-2 rounded-xl border font-black uppercase text-[10px] tracking-tight transition-all shadow-sm ${
+                                className={`px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl border font-black uppercase text-[9px] md:text-[10px] tracking-tight transition-all shadow-sm ${
                                     isPaused 
                                     ? "bg-green-500/20 border-green-500/30 text-green-500 hover:bg-green-500/30" 
                                     : "bg-amber-500/20 border-amber-500/30 text-amber-500 hover:bg-amber-500/30"
                                 }`}
                             >
-                                {isPaused ? "Tiếp tục" : "Tạm dừng"}
+                                <span className="sm:inline hidden">{isPaused ? "Tiếp tục" : "Tạm dừng"}</span>
+                                <span className="sm:hidden">{isPaused ? "▶️" : "⏸️"}</span>
                             </button>
                             <button
                                 onClick={() => socket.emit("skipQuestion", { matchId })}
-                                className="px-3 py-2 rounded-xl bg-slate-500/20 border border-slate-500/30 text-slate-400 text-[10px] font-black uppercase tracking-tight hover:bg-slate-500/30 transition-all shadow-sm"
+                                className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-500/20 border border-slate-500/30 text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-tight hover:bg-slate-500/30 transition-all shadow-sm"
                             >
-                                Bỏ qua câu
+                                <span className="sm:inline hidden">Bỏ qua câu</span>
+                                <span className="sm:hidden">NEXT</span>
                             </button>
                         </div>
                     )}
@@ -548,16 +551,18 @@ const MatchPlay = () => {
                     {isHost ? (
                         <button
                             onClick={() => setConfirmEndMatch(true)}
-                            className="px-3 py-2 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-black uppercase tracking-tight hover:bg-destructive/20 transition-all shadow-sm"
+                            className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-[9px] md:text-xs font-black uppercase tracking-tight hover:bg-destructive/20 transition-all shadow-sm"
                         >
-                            Kết thúc
+                            <span className="sm:inline hidden">Kết thúc</span>
+                            <span className="sm:hidden">STOP</span>
                         </button>
                     ) : (
                         <button
                             onClick={() => setConfirmSurrender(true)}
-                            className="px-3 py-2 rounded-xl bg-card/40 border border-white/10 text-foreground/60 text-xs font-black uppercase tracking-tight hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
+                            className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-card/40 border border-white/10 text-foreground/60 text-[9px] md:text-xs font-black uppercase tracking-tight hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
                         >
-                            Đầu hàng
+                            <span className="sm:inline hidden">Đầu hàng</span>
+                            <span className="sm:hidden">EXIT</span>
                         </button>
                     )}
                 </div>
@@ -592,10 +597,10 @@ const MatchPlay = () => {
             </div>
 
             {/* ── Main Content Area ── */}
-            <div className="relative z-10 flex px-6 pb-6 gap-4" style={{ minHeight: "calc(100vh - 140px)" }}>
+            <div className="relative z-10 flex flex-col lg:flex-row px-2 md:px-6 pb-6 gap-4" style={{ minHeight: "calc(100vh - 140px)" }}>
                 {/* Question Area */}
-                <div className="flex-1 flex items-start justify-center">
-                    <div className="w-full max-w-4xl">
+                <div className="flex-1 flex items-stretch justify-center">
+                    <div className={`w-full ${question?.type === 'LOCATION' ? 'max-w-full h-full' : 'max-w-4xl'}`}>
                         {renderQuestion()}
                     </div>
                 </div>

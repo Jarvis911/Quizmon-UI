@@ -4,19 +4,17 @@ import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-    Trophy,
-    Medal,
     Clock,
     Calendar,
     Search,
-    TrendingUp,
     FileSpreadsheet,
-    ArrowUpRight,
-    Target
+    Target,
+    ArrowUpDown,
+    ChevronUp,
+    ChevronDown
 } from "lucide-react";
 import {
     Select,
@@ -47,6 +45,18 @@ const UserStats = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState("overview");
+    const [chartMode, setChartMode] = useState<"line" | "bar">("line");
+    const [sortConfig, setSortConfig] = useState<{ key: keyof RecentMatch; direction: 'asc' | 'desc' }>({
+        key: 'createdAt',
+        direction: 'desc'
+    });
+
+    const handleSort = (key: keyof RecentMatch) => {
+        setSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+        }));
+    };
 
     const fetchStats = async (selectedPeriod: string) => {
         try {
@@ -74,10 +84,21 @@ const UserStats = () => {
 
     const filteredMatches = useMemo(() => {
         if (!stats?.recentMatches) return [];
-        return stats.recentMatches.filter(match =>
+        const matches = stats.recentMatches.filter(match =>
             match.quizName.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [stats?.recentMatches, searchQuery]);
+
+        return [...matches].sort((a, b) => {
+            const aValue = a[sortConfig.key];
+            const bValue = b[sortConfig.key];
+
+            if (aValue === undefined || bValue === undefined) return 0;
+
+            if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }, [stats?.recentMatches, searchQuery, sortConfig]);
 
     const getRankCount = (rank: string): number => {
         try {
@@ -108,87 +129,240 @@ const UserStats = () => {
         }
     };
 
-    const handleDownloadExcel = (matchId: number | string) => {
-        const url = endpoints.report_excel(Number(matchId));
-        window.open(url, "_blank");
+    const handleDownloadExcel = async (matchId: number | string) => {
+        try {
+            const res = await apiClient.get(endpoints.report_excel(Number(matchId)), {
+                responseType: "blob",
+            });
+
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `match_${matchId}_report.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Failed to download Excel report", err);
+        }
     };
 
-    // Performance Chart Component (Inline SVG)
+    // Performance Chart Component (Enhanced Manual SVG)
     const PerformanceChart = () => {
         if (!stats.recentMatches || stats.recentMatches.length < 2) return (
-            <div className="h-48 flex items-center justify-center border border-dashed rounded-lg bg-white/5">
-                <p className="text-muted-foreground text-sm">Cần ít nhất 2 trận đấu để hiển thị xu hướng</p>
+            <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl bg-white/5 m-4">
+                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-muted-foreground opacity-20">
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/2496/2496781.png"
+                        alt="Stats"
+                        className="w-8 h-8 object-contain opacity-40"
+                    />
+                </div>
+                <p className="text-muted-foreground text-sm font-medium tracking-wide">Cần ít nhất 2 trận đấu để hiển thị xu hướng</p>
             </div>
         );
-
-        const data = [...stats.recentMatches].reverse().map(m => m.score);
-        const maxScore = Math.max(...data, 100);
+ 
+        const data = [...stats.recentMatches].reverse();
+        const scores = data.map(m => m.score);
+        const maxScore = Math.max(...scores, 10);
+        const yMax = Math.ceil(maxScore / 10) * 10;
+        
         const width = 800;
-        const height = 200;
-        const padding = 40;
+        const height = 300;
+        const paddingLeft = 50;
+        const paddingRight = 30;
+        const paddingTop = 40;
+        const paddingBottom = 50;
+        
+        const chartWidth = width - paddingLeft - paddingRight;
+        const chartHeight = height - paddingTop - paddingBottom;
+ 
+        const getX = (index: number) => paddingLeft + (index * chartWidth) / (data.length - 1);
+        const getY = (score: number) => height - paddingBottom - (score / yMax) * chartHeight;
 
-        const points = data.map((d, i) => {
-            const x = padding + (i * (width - 2 * padding)) / (data.length - 1);
-            const y = height - padding - (d / maxScore) * (height - 2 * padding);
-            return `${x},${y}`;
-        }).join(" ");
+        const points = data.map((d, i) => `${getX(i)},${getY(d.score)}`).join(" ");
+        
+        const yTicks = [0, yMax / 4, yMax / 2, (yMax * 3) / 4, yMax];
 
         return (
-            <div className="w-full overflow-hidden">
-                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto drop-shadow-lg">
+            <div className="w-full overflow-hidden p-2">
+                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto drop-shadow-2xl overflow-visible select-none">
                     {/* Gradients */}
                     <defs>
                         <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#a855f7" />
-                            <stop offset="100%" stopColor="#ec4899" />
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="100%" stopColor="#8b5cf6" />
                         </linearGradient>
                         <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#a855f7" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                        </linearGradient>
+                        <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="100%" stopColor="#8b5cf6" />
                         </linearGradient>
                     </defs>
-
-                    {/* Grid lines */}
-                    <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="currentColor" strokeOpacity="0.1" />
-                    <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="currentColor" strokeOpacity="0.05" />
-
-                    {/* Area under line */}
-                    <path
-                        d={`M${padding},${height - padding} L${points} L${width - padding},${height - padding} Z`}
-                        fill="url(#areaGradient)"
-                    />
-
-                    {/* Line */}
-                    <polyline
-                        points={points}
-                        fill="none"
-                        stroke="url(#lineGradient)"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-
-                    {/* Data Points */}
-                    {data.map((d, i) => {
-                        const x = padding + (i * (width - 2 * padding)) / (data.length - 1);
-                        const y = height - padding - (d / maxScore) * (height - 2 * padding);
+ 
+                    {/* Y-Axis Grid & Labels */}
+                    {yTicks.map((tick, i) => {
+                        const y = getY(tick);
                         return (
-                            <g key={i} className="group cursor-help">
-                                <circle
-                                    cx={x}
-                                    cy={y}
-                                    r="6"
-                                    fill="#fff"
-                                    stroke="#a855f7"
-                                    strokeWidth="3"
-                                    className="transition-all duration-300 group-hover:r-8"
+                            <g key={i}>
+                                <line 
+                                    x1={paddingLeft} 
+                                    y1={y} 
+                                    x2={width - paddingRight} 
+                                    y2={y} 
+                                    stroke="currentColor" 
+                                    strokeOpacity={tick === 0 ? "0.15" : "0.05"} 
+                                    strokeWidth={tick === 0 ? "2" : "1"}
+                                    strokeDasharray={tick === 0 ? "0" : "4"}
                                 />
-                                <text x={x} y={y - 12} fontSize="10" fontWeight="bold" textAnchor="middle" fill="#a855f7" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {d}
+                                <text 
+                                    x={paddingLeft - 10} 
+                                    y={y + 4} 
+                                    textAnchor="end" 
+                                    fill="currentColor" 
+                                    className="text-[10px] font-black opacity-30 font-mono"
+                                >
+                                    {Math.round(tick)}
                                 </text>
                             </g>
                         );
                     })}
+
+                    {chartMode === "line" ? (
+                        <>
+                            {/* Area under line */}
+                            <path
+                                d={`M${paddingLeft},${height - paddingBottom} L${points} L${width - paddingRight},${height - paddingBottom} Z`}
+                                fill="url(#areaGradient)"
+                                className="transition-all duration-1000"
+                            />
+ 
+                            {/* Line */}
+                            <polyline
+                                points={points}
+                                fill="none"
+                                stroke="url(#lineGradient)"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="transition-all duration-1000"
+                            />
+ 
+                            {/* Interactive Scan Line & Tooltip Groups */}
+                            {data.map((d, i) => {
+                                const x = getX(i);
+                                const y = getY(d.score);
+                                return (
+                                    <g key={i} className="group cursor-default">
+                                        {/* Scanner Line */}
+                                        <line 
+                                            x1={x} y1={paddingTop} 
+                                            x2={x} y2={height - paddingBottom} 
+                                            stroke="currentColor" 
+                                            strokeOpacity="0" 
+                                            className="group-hover:stroke-opacity-10 transition-opacity"
+                                            strokeWidth="2"
+                                        />
+                                        
+                                        {/* Point */}
+                                        <circle
+                                            cx={x}
+                                            cy={y}
+                                            r="6"
+                                            fill="#fff"
+                                            stroke="#3b82f6"
+                                            strokeWidth="3"
+                                            className="transition-all duration-300 group-hover:r-10 shadow-lg"
+                                        />
+
+                                        {/* Tooltip Card */}
+                                        <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                            <rect 
+                                                x={x - 60} y={y < 80 ? y + 20 : y - 70} 
+                                                width="120" height="50" 
+                                                rx="12" 
+                                                className="fill-background/90 backdrop-blur-md stroke-primary/20 shadow-xl"
+                                            />
+                                            <text x={x} y={y < 80 ? y + 38 : y - 52} fontSize="11" fontWeight="900" textAnchor="middle" fill="currentColor" className="text-foreground">
+                                                {d.quizName.length > 15 ? d.quizName.substring(0, 15) + '...' : d.quizName}
+                                            </text>
+                                            <text x={x} y={y < 80 ? y + 54 : y - 36} fontSize="14" fontWeight="900" textAnchor="middle" fill="#3b82f6">
+                                                {d.score} điểm
+                                            </text>
+                                        </g>
+
+                                        {/* X-Axis Label */}
+                                        <text 
+                                            x={x} 
+                                            y={height - paddingBottom + 20} 
+                                            textAnchor="middle" 
+                                            className="text-[9px] font-black opacity-0 group-hover:opacity-100 transition-opacity fill-muted-foreground uppercase tracking-widest font-mono"
+                                        >
+                                            {formatDate(d.createdAt).split(" ")[0]}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+                        </>
+                    ) : (
+                        <>
+                            {/* Bar Chart Rendering */}
+                            {data.map((d, i) => {
+                                const barWidth = (chartWidth / data.length) * 0.7;
+                                const x = paddingLeft + (i * chartWidth) / data.length + (chartWidth / data.length - barWidth) / 2;
+                                const barHeight = (d.score / yMax) * chartHeight;
+                                const y = height - paddingBottom - barHeight;
+                                return (
+                                    <g key={i} className="group">
+                                        <path
+                                            d={`
+                                                M ${x},${y + Math.min(8, barHeight)} 
+                                                a 8,8 0 0 1 8,-8 
+                                                h ${Math.max(0, barWidth - 16)} 
+                                                a 8,8 0 0 1 8,8 
+                                                v ${Math.max(0, barHeight - 8)} 
+                                                h -${barWidth} 
+                                                z
+                                            `}
+                                            fill="#3b82f6"
+                                            className="transition-all duration-500 opacity-60 group-hover:opacity-100 cursor-default"
+                                        />
+                                        
+                                        {/* Tooltip Card for Bars */}
+                                        <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                            <rect 
+                                                x={x + barWidth/2 - 60} y={y < 80 ? y + 20 : y - 65} 
+                                                width="120" height="50" 
+                                                rx="12" 
+                                                className="fill-background/90 backdrop-blur-md stroke-primary/20 shadow-xl"
+                                            />
+                                            <text x={x + barWidth/2} y={y < 80 ? y + 38 : y - 47} fontSize="11" fontWeight="900" textAnchor="middle" fill="currentColor">
+                                                {d.quizName.length > 15 ? d.quizName.substring(0, 15) + '...' : d.quizName}
+                                            </text>
+                                            <text x={x + barWidth/2} y={y < 80 ? y + 54 : y - 31} fontSize="14" fontWeight="900" textAnchor="middle" fill="#3b82f6">
+                                                {d.score} điểm
+                                            </text>
+                                        </g>
+
+                                        {/* X-Axis Label */}
+                                        <text 
+                                            x={x + barWidth / 2} 
+                                            y={height - paddingBottom + 20} 
+                                            textAnchor="middle" 
+                                            className="text-[9px] font-black opacity-0 group-hover:opacity-100 transition-opacity fill-muted-foreground uppercase tracking-widest font-mono"
+                                        >
+                                            {formatDate(d.createdAt).split(" ")[0]}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+                        </>
+                    )}
                 </svg>
             </div>
         );
@@ -266,14 +440,18 @@ const UserStats = () => {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
                     <TabsList className="bg-card/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 w-fit">
                         <TabsTrigger value="overview" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/4825/4825706.png"
+                                alt="Overview"
+                                className="w-4 h-4 object-contain"
+                            />
                             Tổng Quan
                         </TabsTrigger>
                         <TabsTrigger value="history" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
-                            <img 
-                                src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
-                                alt="History" 
-                                className="w-4 h-4 object-contain" 
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png"
+                                alt="History"
+                                className="w-4 h-4 object-contain"
                             />
                             Lịch Sử Đấu
                         </TabsTrigger>
@@ -281,108 +459,160 @@ const UserStats = () => {
 
                     <TabsContent value="overview" className="space-y-8 mt-0 focus-visible:ring-0">
                         {/* Metrics Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[
-                                { 
-                                    label: "Tổng Trận Đấu", 
-                                    value: totalMatches, 
-                                    icon: () => <img 
-                                        src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
-                                        alt="Total Matches" 
-                                        className="w-4 h-4 object-contain" 
-                                    />, 
-                                    color: "text-blue-500", 
-                                    bg: "bg-blue-500/10", 
-                                    suffix: "trận" 
-                                },
-                                { label: "Tỷ Lệ Thắng", value: `${(winRate * 100).toFixed(1)}%`, icon: Target, color: "text-green-500", bg: "bg-green-500/10", progress: winRate * 100 },
-                                { label: "Điểm Trung Bình", value: averageScore, icon: ArrowUpRight, color: "text-purple-500", bg: "bg-purple-500/10", suffix: "điểm" },
-                                { label: "Quiz Tham Gia", value: totalQuizzes, icon: Medal, color: "text-orange-500", bg: "bg-orange-500/10", suffix: "bộ" },
-                            ].map((item, idx) => (
-                                <Card key={idx} className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-xl rounded-[2.5rem] overflow-hidden hover:scale-[1.02] transition-transform duration-500">
-                                    <CardHeader className="pb-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono">{item.label}</span>
-                                            <div className={`p-2 rounded-xl ${item.bg}`}>
-                                                <item.icon className={`w-4 h-4 ${item.color}`} />
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                <CardContent>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-4xl font-black text-foreground">{item.value}</span>
-                                        {item.suffix && <span className="text-xs font-bold text-muted-foreground">{item.suffix}</span>}
-                                    </div>
-                                    {item.progress !== undefined && (
-                                        <div className="mt-4 space-y-1.5">
-                                            <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
-                                                <span>Chi số hiệu quả</span>
-                                                <span>{item.progress.toFixed(0)}%</span>
-                                            </div>
-                                            <Progress value={item.progress} className="h-2 bg-slate-100 dark:bg-white/5" />
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Performance Trend */}
-                            <Card className="lg:col-span-2 bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-xl rounded-[2.5rem]">
-                                <CardHeader className="flex flex-row items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                            <TrendingUp className="w-5 h-5 text-primary" />
-                                            Biểu Đồ Xu Hướng Hiệu Suất
-                                        </CardTitle>
-                                        <CardDescription>Biến thiên điểm số qua các trận đấu gần nhất</CardDescription>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <PerformanceChart />
-                                </CardContent>
-                            </Card>
-
-                            {/* Rank Distribution */}
-                            <Card className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-xl rounded-[2.5rem]">
-                                <CardHeader>
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <Trophy className="w-5 h-5 text-yellow-500" />
-                                        Các Thành Tích Cao
-                                    </CardTitle>
-                                    <CardDescription>Phân bố các thứ hạng bục vinh quang</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    {[1, 2, 3].map((rank) => {
-                                        const count = getRankCount(rank.toString());
-                                        const percentage = totalMatches > 0 ? (count / totalMatches) * 100 : 0;
-                                        const colors = rank === 1 ? "bg-yellow-400" : rank === 2 ? "bg-slate-400" : "bg-orange-500";
-                                        return (
-                                            <div key={rank} className="group">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-xl ${colors}/20 flex items-center justify-center font-black text-lg ${colors.replace("bg-", "text-")}`}>
-                                                            {rank}
-                                                        </div>
-                                                        <div className="font-bold">Hạng {rank === 1 ? "Quán Quân" : rank === 2 ? "Á Quân 1" : "Á Quân 2"}</div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="font-black text-foreground">{count} trận</div>
-                                                        <div className="text-[10px] text-muted-foreground/70 font-mono tracking-tighter">{percentage.toFixed(1)}%</div>
+                        <div className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-2xl rounded-[3rem] overflow-hidden transition-all duration-500">
+                            {/* Section 1: Metrics Table */}
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-white/10 bg-white/5">
+                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Tổng Trận Đấu</th>
+                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Tỷ Lệ Thắng</th>
+                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Điểm Trung Bình</th>
+                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Quiz Tham Gia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{totalMatches}</span>
+                                                        <span className="text-xs font-bold text-muted-foreground">trận</span>
                                                     </div>
                                                 </div>
-                                                <div className="h-6 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden p-1">
-                                                    <div
-                                                        className={`h-full ${colors} rounded-full transition-all duration-1000 group-hover:opacity-80`}
-                                                        style={{ width: `${percentage}%` }}
+                                            </td>
+                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{(winRate * 100).toFixed(1)}%</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{averageScore}</span>
+                                                        <span className="text-xs font-bold text-muted-foreground">điểm</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{totalQuizzes}</span>
+                                                        <span className="text-xs font-bold text-muted-foreground">bộ</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="border-t border-white/10" />
+
+                            {/* Section 2: Charts Grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-10 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+                                {/* Performance Trend */}
+                                <div className="lg:col-span-7 p-8 lg:p-10">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                                        <div>
+                                            <h3 className="text-2xl font-black flex items-center gap-3">
+                                                <div className="p-2 bg-primary/10 rounded-xl">
+                                                    <img
+                                                        src="https://cdn-icons-png.flaticon.com/512/4825/4825706.png"
+                                                        alt="Trend"
+                                                        className="w-6 h-6 object-contain"
                                                     />
                                                 </div>
+                                                Xu Hướng Hiệu Suất
+                                            </h3>
+                                            <p className="text-muted-foreground font-medium mt-1">Biến thiên điểm số qua các trận đấu gần nhất</p>
+                                        </div>
+
+                                        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-sm self-start sm:self-center">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`rounded-xl px-6 h-10 font-bold transition-all ${chartMode === 'line' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
+                                                onClick={() => setChartMode('line')}
+                                            >
+                                                <img
+                                                    src="https://cdn-icons-png.flaticon.com/512/4825/4825706.png"
+                                                    alt="Line"
+                                                    className={`w-4 h-4 mr-2 object-contain ${chartMode === 'line' ? '' : 'opacity-50'}`}
+                                                />
+                                                Đường
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`rounded-xl px-6 h-10 font-bold transition-all ${chartMode === 'bar' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
+                                                onClick={() => setChartMode('bar')}
+                                            >
+                                                <img
+                                                    src="https://cdn-icons-png.flaticon.com/512/2496/2496781.png"
+                                                    alt="Bar"
+                                                    className={`w-4 h-4 mr-2 object-contain ${chartMode === 'bar' ? '' : 'opacity-50'}`}
+                                                />
+                                                Cột
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <PerformanceChart />
+                                </div>
+
+                                {/* Rank Distribution */}
+                                <div className="lg:col-span-3 p-8 lg:p-10 bg-white/2">
+                                    <div className="mb-10">
+                                        <h3 className="text-2xl font-black flex items-center gap-3">
+                                            <div className="p-2 bg-yellow-500/10 rounded-xl">
+                                                <img
+                                                    src="https://cdn-icons-png.flaticon.com/512/861/861506.png"
+                                                    alt="Achievement"
+                                                    className="w-6 h-6 object-contain"
+                                                />
                                             </div>
-                                        );
-                                    })}
-                                </CardContent>
-                            </Card>
+                                            Thành Tích
+                                        </h3>
+                                        <p className="text-muted-foreground font-medium mt-1">Phân bố thứ hạng vinh quang</p>
+                                    </div>
+
+                                    <div className="space-y-8">
+                                        {[1, 2, 3].map((rank) => {
+                                            const count = getRankCount(rank.toString());
+                                            const percentage = totalMatches > 0 ? (count / totalMatches) * 100 : 0;
+                                            const colors = rank === 1 ? "bg-yellow-400" : rank === 2 ? "bg-slate-400" : "bg-orange-500";
+                                            const glow = rank === 1 ? "shadow-yellow-400/20" : rank === 2 ? "shadow-slate-400/20" : "shadow-orange-500/20";
+                                            
+                                            return (
+                                                <div key={rank} className="group cursor-default">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className={`w-12 h-12 rounded-2xl ${colors}/10 flex items-center justify-center font-black text-xl shadow-inner ${colors.replace("bg-", "text-")} transition-transform group-hover:scale-110 duration-500`}>
+                                                                {rank}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-black text-lg">Hạng {rank === 1 ? "Quán Quân" : rank === 2 ? "Á Quân 1" : "Á Quân 2"}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="font-black text-xl text-foreground">{count} trận</div>
+                                                            <div className="text-[10px] text-muted-foreground/60 font-mono tracking-wider">{percentage.toFixed(1)}%</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden p-1 border border-white/5">
+                                                        <div
+                                                            className={`h-full ${colors} ${glow} shadow-lg rounded-full transition-all duration-1000 group-hover:opacity-90`}
+                                                            style={{ width: `${percentage}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </TabsContent>
 
@@ -413,53 +643,101 @@ const UserStats = () => {
                                 </p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredMatches.map((match: RecentMatch) => (
-                                    <div
-                                        key={match.id}
-                                        className="bg-card/40 backdrop-blur-md group rounded-[2.5rem] p-8 shadow-lg border-2 border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col"
-                                    >
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div className="bg-primary text-primary-foreground w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg transform group-hover:rotate-3 transition-transform">
-                                                {match.quizName.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                {getRankBadge(match.rank)}
-                                            </div>
-                                        </div>
-
-                                        <h3 className="text-xl font-black text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">{match.quizName}</h3>
-                                        <div className="flex items-center gap-1.5 mb-6 opacity-60">
-                                            <Target className="w-3 h-3" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">ID: {match.quizId}</span>
-                                        </div>
-
-                                        <div className="mt-auto space-y-4">
-                                            <div className="flex items-baseline gap-1">
-                                                <span className="text-3xl font-black bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">{match.score}</span>
-                                                <span className="text-[10px] font-black uppercase text-muted-foreground">Điểm</span>
-                                            </div>
-
-                                            <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-foreground/80">{formatDate(match.createdAt).split(" ")[1]}</span>
-                                                    <span className="text-[10px] text-muted-foreground/60 font-mono">{formatDate(match.createdAt).split(" ")[0]}</span>
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="w-10 h-10 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDownloadExcel(match.id);
-                                                    }}
+                            <div className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-2xl rounded-[2.5rem] overflow-hidden transition-all duration-500">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse min-w-[800px]">
+                                        <thead>
+                                            <tr className="border-b border-white/10 bg-white/5">
+                                                <th 
+                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-40 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    onClick={() => handleSort('rank')}
                                                 >
-                                                    <FileSpreadsheet className="w-5 h-5" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        Thứ hạng
+                                                        <ArrowUpDown size={12} className={sortConfig.key === 'rank' ? "text-primary" : "opacity-30"} />
+                                                    </div>
+                                                </th>
+                                                <th 
+                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-left cursor-pointer hover:bg-white/5 transition-colors"
+                                                    onClick={() => handleSort('quizName')}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Bộ Quiz
+                                                        <ArrowUpDown size={12} className={sortConfig.key === 'quizName' ? "text-primary" : "opacity-30"} />
+                                                    </div>
+                                                </th>
+                                                <th 
+                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-40 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    onClick={() => handleSort('score')}
+                                                >
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        Điểm số
+                                                        <ArrowUpDown size={12} className={sortConfig.key === 'score' ? "text-primary" : "opacity-30"} />
+                                                    </div>
+                                                </th>
+                                                <th 
+                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-left w-56 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    onClick={() => handleSort('createdAt')}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Thời gian
+                                                        <ArrowUpDown size={12} className={sortConfig.key === 'createdAt' ? "text-primary" : "opacity-30"} />
+                                                    </div>
+                                                </th>
+                                                <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-32">Tác vụ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredMatches.map((match: RecentMatch) => (
+                                                <tr key={match.id} className="border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-all duration-300 group">
+                                                    <td className="p-6 text-center">
+                                                        {getRankBadge(match.rank)}
+                                                    </td>
+                                                    <td className="p-6">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-lg font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">{match.quizName}</span>
+                                                            <div className="flex items-center gap-1.5 opacity-40">
+                                                                <Target className="w-3 h-3" />
+                                                                <span className="text-[10px] font-black uppercase tracking-widest leading-none">ID: {match.quizId}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-6 text-center">
+                                                        <div className="flex flex-col items-center">
+                                                            <span className="text-2xl font-black text-foreground group-hover:text-primary group-hover:scale-110 transition-all">{match.score}</span>
+                                                            <span className="text-[10px] font-black uppercase text-muted-foreground/60">Điểm</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-6">
+                                                        <div className="flex flex-col">
+                                                            <div className="flex items-center gap-2 text-foreground font-bold">
+                                                                <Clock className="w-3.5 h-3.5 text-primary" />
+                                                                {formatDate(match.createdAt).split(" ")[1]}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-muted-foreground/60 font-mono text-[10px] mt-1">
+                                                                <Calendar size={12} className="opacity-50" />
+                                                                {formatDate(match.createdAt).split(" ")[0]}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-6 text-center">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="w-12 h-12 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDownloadExcel(match.id);
+                                                            }}
+                                                        >
+                                                            <FileSpreadsheet className="w-6 h-6" />
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
                     </TabsContent>

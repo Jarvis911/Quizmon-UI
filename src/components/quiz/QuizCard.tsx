@@ -49,7 +49,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
                     {difficulty && (
                         <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
                             <span className={`text-[10px] font-black uppercase tracking-wider ${difficulty === 'EASY' ? 'text-emerald-500' :
-                                    difficulty === 'MEDIUM' ? 'text-amber-500' : 'text-rose-500'
+                                difficulty === 'MEDIUM' ? 'text-amber-500' : 'text-rose-500'
                                 }`}>
                                 {difficulty === 'EASY' ? 'DỄ' :
                                     difficulty === 'MEDIUM' ? 'VỪA' : 'KHÓ'}
@@ -66,32 +66,34 @@ const QuizCard: React.FC<QuizCardProps> = ({
                 </div>
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 p-4">
-                    <Button
-                        onClick={() => onPlay(quiz.id)}
-                        className="w-full h-10 px-4 rounded-full bg-primary hover:bg-primary/90 font-black text-xs uppercase tracking-wider"
-                    >
-                        <Play className="w-4 h-4 mr-2 fill-current" /> CHƠI NGAY
-                    </Button>
+                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
+                    <div className="flex flex-col gap-1.5 w-full animate-in zoom-in-95 duration-300">
+                        <Button
+                            onClick={() => onPlay(quiz.id)}
+                            className="w-full h-8 px-2 rounded-lg bg-primary hover:bg-primary/90 font-black text-[9px] uppercase tracking-tighter"
+                        >
+                            <Play className="w-3 h-3 mr-1 fill-current" /> CHƠI NGAY
+                        </Button>
 
-                    {isOwner && (
-                        <>
-                            <Button
-                                variant="secondary"
-                                onClick={() => onEdit?.(quiz.id)}
-                                className="w-full h-10 px-4 rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-xs uppercase tracking-wider"
-                            >
-                                <Edit3 className="w-4 h-4 mr-2" /> CHỈNH SỬA
-                            </Button>
-                            <Button
-                                variant="secondary"
-                                onClick={() => onAssign?.(quiz.id)}
-                                className="w-full h-10 px-4 rounded-full bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-xs uppercase tracking-wider"
-                            >
-                                <SiGoogleclassroom className="w-4 h-4 mr-2" /> GIAO BÀI
-                            </Button>
-                        </>
-                    )}
+                        {isOwner && (
+                            <div className="flex flex-row gap-1 w-full">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => onEdit?.(quiz.id)}
+                                    className="flex-1 h-8 px-1 rounded-lg bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[9px] uppercase tracking-tighter"
+                                >
+                                    <Edit3 className="w-3 h-3 mr-1" /> SỬA
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => onAssign?.(quiz.id)}
+                                    className="flex-1 h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
+                                >
+                                    <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

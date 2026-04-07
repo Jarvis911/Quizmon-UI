@@ -20,11 +20,7 @@ function LocationPicker({ setLocation }) {
   return null;
 }
 
-const arrowIcon = new Icon({
-  iconUrl: "https://res.cloudinary.com/dpfbtypxx/image/upload/v1757436540/ChatGPT_Image_Aug_17__2025__12_27_39_PM-removebg-preview_ginjv1.png",
-  iconSize: [80, 80],
-  iconAnchor: [40, 40],
-});
+
 
 function FlyToLocation({ location }) {
   const map = useMap();
@@ -50,7 +46,8 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
   useEffect(() => {
     setLocation(null);
     setIsCorrect(null);
-    setSubmitted(null);
+    setSubmitted(false);
+    setCorrectLocation(null);
   }, [question.id]);
 
   useEffect(() => {
@@ -127,7 +124,7 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
   }, [timer, submitted, mode, location]);
 
   return (
-    <div className="relative w-[90vw] h-screen">
+    <div className="relative w-full h-[60vh] md:h-full bg-card/20 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl animate-in fade-in zoom-in-95 duration-500">
       <MapContainer
         center={[question.data?.initialCenter?.lat || 10.7904, question.data?.initialCenter?.lon || 106.69285]}
         zoom={question.data?.initialZoom || 10}
@@ -144,7 +141,7 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
         {location && <Marker position={[location.lat, location.lon]} />}
         {correctLocation && (
           <>
-            <Marker position={[correctLocation.lat, correctLocation.lon]} icon={arrowIcon} />
+            <Marker position={[correctLocation.lat, correctLocation.lon]} />
             <Circle
               center={[correctLocation.lat, correctLocation.lon]}
               radius={question.optionsData?.radius500 || 30000}
@@ -165,27 +162,28 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
         )}
       </MapContainer>
 
-      {/* Question overlay - glassmorphic */}
+      {/* Question overlay - Tiny & Tucked in the corner */}
       <div
-        className="absolute top-16 left-8
-                    bg-card/60 backdrop-blur-2xl border-2 border-white/20 rounded-3xl 
-                    p-8 shadow-3xl text-foreground w-full max-w-lg pointer-events-auto z-10"
+        className="absolute bottom-3 left-3 right-3 md:right-auto md:bottom-6 md:left-6
+                    bg-card/30 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-3xl
+                    p-3 md:p-4 shadow-2xl text-foreground md:w-[280px] pointer-events-auto z-10 
+                    animate-in slide-in-from-bottom-4 duration-700"
       >
-        <h2 className="text-2xl font-black mb-6 text-center wrap-break-word max-w-full drop-shadow-sm">{question.text}</h2>
+        <h2 className="text-[13px] md:text-sm font-black mb-2 md:mb-3 leading-tight drop-shadow-sm line-clamp-2 md:line-clamp-3">{question.text}</h2>
 
         {location && (
-          <div className="bg-primary/10 rounded-2xl p-4 mb-6 border border-primary/20">
-            <p className="text-sm font-black text-primary text-center uppercase tracking-widest">
-              📍 Vị trí đã chọn
-            </p>
-            <p className="text-lg font-bold text-foreground text-center tabular-nums">
-              {location.lat.toFixed(5)}, {location.lon.toFixed(5)}
-            </p>
+          <div className="bg-primary/10 rounded-lg p-2 mb-3 border border-primary/20 flex items-center justify-between">
+            <span className="text-[9px] font-black text-primary uppercase tracking-widest leading-none">
+               Tọa độ
+            </span>
+            <span className="text-xs font-bold text-foreground tabular-nums leading-none">
+              {location.lat.toFixed(4)}, {location.lon.toFixed(4)}
+            </span>
           </div>
         )}
 
         <Button
-          className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
+          className="w-full h-10 md:h-12 text-sm font-black bg-primary text-primary-foreground rounded-lg md:rounded-xl shadow-lg hover:-translate-y-px active:translate-y-px transition-all"
           onClick={handleSubmit}
           disabled={submitted || !location || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
         >

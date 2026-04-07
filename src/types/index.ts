@@ -300,6 +300,7 @@ export interface RecentMatch {
     id: number | string;
     quizId: number | string;
     quizName: string;
+    quizThumbnail?: string;
     score: number;
     rank: number;
     createdAt: string;

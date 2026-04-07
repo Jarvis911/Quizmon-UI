@@ -3,21 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Sparkles, User, Loader2, Bot } from "lucide-react";
 
-interface Message {
+export interface Message {
     role: "user" | "agent";
     text: string;
 }
 
 interface AgentChatProps {
+    messages: Message[];
     onSend: (message: string) => void;
     isGenerating: boolean;
 }
 
-const AgentChat = ({ onSend, isGenerating }: AgentChatProps) => {
+const AgentChat = ({ messages, onSend, isGenerating }: AgentChatProps) => {
     const [input, setInput] = useState("");
-    const [messages, setMessages] = useState<Message[]>([
-        { role: "agent", text: "Chào bạn! Mình là Quizmon Agent. Mình có thể giúp gì cho bạn hôm nay?" }
-    ]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -28,8 +26,6 @@ const AgentChat = ({ onSend, isGenerating }: AgentChatProps) => {
 
     const handleSend = () => {
         if (!input.trim() || isGenerating) return;
-        const newMsg: Message = { role: "user", text: input };
-        setMessages(prev => [...prev, newMsg]);
         onSend(input);
         setInput("");
     };

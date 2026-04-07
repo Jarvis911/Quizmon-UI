@@ -252,7 +252,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
                   <div className="flex items-center gap-4">
                     <span className="text-muted-foreground font-black w-8 text-center text-lg">#{index + 4}</span>
                     <Avatar className="w-10 h-10 border-2 border-white/10 shadow-md">
-                      {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
+                      {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} className="object-cover" />}
                       <AvatarFallback className="bg-linear-to-br from-primary to-primary/60 text-primary-foreground text-sm font-bold">
                         {(player.displayName || player.username || "?")[0].toUpperCase()}
                       </AvatarFallback>

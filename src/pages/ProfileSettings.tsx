@@ -16,8 +16,21 @@ import {
   CheckCircle2,
   AlertCircle,
   Plus,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
 
 const PREDEFINED_AVATARS = [
   "https://projectpokemon.org/images/normal-sprite/bulbasaur.gif",
@@ -43,8 +56,25 @@ const ProfileSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   
   const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const toastTimeoutRef = useRef<any | null>(null);
+
+  useEffect(() => {
+    if (message) {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    }
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, [message]);
 
   useEffect(() => {
     if (user) {
@@ -54,16 +84,44 @@ const ProfileSettings = () => {
     }
   }, [user]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordLoading(true);
+    setMessage(null);
+
+    if (newPassword !== confirmPassword) {
+      setMessage({ text: "Mật khẩu xác nhận không khớp", type: "error" });
+      setPasswordLoading(false);
+      return;
+    }
+
+    try {
+      const response = await apiClient.put(endpoints.user_profile_update, {
+        oldPassword,
+        newPassword,
+      });
+
+      if (response.status === 200) {
+        setMessage({ text: "Đổi mật khẩu thành công!", type: "success" });
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setIsPasswordModalOpen(false);
+      }
+    } catch (error: any) {
+      setMessage({ 
+        text: error.response?.data?.message || "Lỗi khi đổi mật khẩu", 
+        type: "error" 
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
-
-    if (newPassword && newPassword !== confirmPassword) {
-      setMessage({ text: "Mật khẩu xác nhận không khớp", type: "error" });
-      setLoading(false);
-      return;
-    }
 
     try {
       const response = await apiClient.put(
@@ -72,19 +130,14 @@ const ProfileSettings = () => {
           username,
           avatarUrl,
           bio,
-          ...(newPassword ? { oldPassword, newPassword } : {}),
         }
       );
 
       if (response.status === 200) {
         updateUserData(response.data.user);
         setMessage({ text: "Cập nhật trang cá nhân thành công!", type: "success" });
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
       }
     } catch (error: any) {
-      console.error("Update profile error:", error);
       setMessage({ 
         text: error.response?.data?.message || "Có lỗi xảy ra khi cập nhật", 
         type: "error" 
@@ -137,15 +190,31 @@ const ProfileSettings = () => {
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 shadow-lg backdrop-blur-xl border-2 ${
-            message.type === 'success' ? 'bg-emerald-500/20 text-emerald-100 border-emerald-500/30' : 'bg-rose-500/20 text-rose-100 border-rose-500/30'
-          }`}>
-            {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-            <p className="font-bold">{message.text}</p>
+          <div className="fixed top-8 left-1/2 -translate-x-1/2 z-100 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className={`px-6 py-4 rounded-2xl flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-2xl border-2 ${
+              message.type === 'success' 
+                ? 'bg-emerald-500/90 text-white border-emerald-400/50' 
+                : 'bg-rose-500/90 text-white border-rose-400/50'
+            }`}>
+              <div className={`p-2 rounded-xl ${message.type === 'success' ? 'bg-white/20' : 'bg-white/20'}`}>
+                {message.type === 'success' ? <CheckCircle2 className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+              </div>
+              <div className="flex flex-col">
+                <p className="font-black text-sm uppercase tracking-tight">{message.type === 'success' ? 'Thành công' : 'Thất bại'}</p>
+                <p className="font-bold text-lg leading-tight">{message.text}</p>
+              </div>
+              <button 
+                onClick={() => setMessage(null)}
+                className="ml-4 p-1 hover:bg-white/20 rounded-lg transition-colors"
+                title="Đóng"
+              >
+                <Plus className="w-5 h-5 rotate-45" />
+              </button>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleProfileUpdate} className="space-y-8">
           {/* Profile Section */}
           <div className="bg-card/60 backdrop-blur-2xl rounded-4xl shadow-2xl border-2 border-white/5 overflow-hidden transition-all hover:border-white/10">
             <div className="p-6 sm:p-8 border-b border-white/5 bg-white/5">
@@ -161,19 +230,28 @@ const ProfileSettings = () => {
               {/* Avatar Selection */}
               <div className="flex flex-col items-center sm:flex-row sm:items-start gap-8">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-4xl overflow-hidden border-4 border-white/20 bg-white/5 flex items-center justify-center shadow-2xl group-hover:border-primary/50 transition-all duration-300">
+                  <div className="w-36 h-36 rounded-[2.5rem] overflow-hidden border-4 border-white/20 bg-linear-to-br from-white/10 to-white/5 flex items-center justify-center shadow-2xl group-hover:border-primary/50 transition-all duration-500 relative">
                     {avatarUrl ? (
-                      <img src={getAvatarUrl(avatarUrl)} alt="Avatar Preview" className="w-full h-full object-cover" />
+                      <img src={getAvatarUrl(avatarUrl)} alt="Avatar Preview" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
                     ) : (
-                      <User className="w-16 h-16 text-white/20" />
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-primary/20 via-primary/10 to-transparent">
+                          <span className="text-4xl font-black text-primary/40 mb-1 drop-shadow-sm">
+                            {username ? username[0].toUpperCase() : "?"}
+                          </span>
+                          <User className="w-8 h-8 text-primary/20" />
+                      </div>
                     )}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                      <Camera className="w-8 h-8 text-white scale-75 group-hover:scale-100 transition-transform" />
+                    </div>
                   </div>
                   <button 
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute -bottom-2 -right-2 bg-primary p-2.5 rounded-2xl shadow-xl border-4 border-card hover:scale-110 active:scale-95 transition-all text-primary-foreground"
+                    className="absolute -bottom-1 -right-1 bg-primary w-11 h-11 rounded-2xl shadow-xl border-4 border-card flex items-center justify-center hover:scale-110 active:scale-95 transition-all text-primary-foreground group/plus z-10"
+                    title="Tải ảnh lên"
                   >
-                    <Plus className="w-5 h-5 font-bold" />
+                    <Plus className="w-6 h-6 font-bold group-hover:rotate-90 transition-transform duration-300" />
                   </button>
                   <input 
                     type="file" 
@@ -265,59 +343,111 @@ const ProfileSettings = () => {
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-foreground placeholder:text-foreground/20 focus:border-primary/50 focus:bg-white/10 transition-all outline-none font-bold resize-none"
                 />
               </div>
-            </div>
-          </div>
 
+              {/* Security trigger - hidden password change */}
+              <div className="pt-4">
+                <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group group-hover:border-rose-500/30"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 transition-colors">
+                          <Lock className="w-6 h-6 text-rose-500" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-black text-foreground">Bảo mật</p>
+                          <p className="text-xs font-bold text-foreground/40 uppercase">Cập nhật mật khẩu định kỳ để bảo vệ tài khoản</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-foreground/20 group-hover:text-foreground group-hover:translate-x-1 transition-all" />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-card/40 backdrop-blur-3xl border-white/10 max-w-sm rounded-[2.5rem] p-0 overflow-hidden shadow-2xl">
+                    <div className="absolute inset-0 bg-linear-to-br from-rose-500/10 via-transparent to-rose-500/5 pointer-events-none" />
+                    <DialogHeader className="p-8 pb-4 relative z-10">
+                      <div className="flex items-center gap-4 mb-2">
+                        <div className="w-12 h-12 bg-rose-500/20 rounded-2xl flex items-center justify-center shadow-inner ring-4 ring-rose-500/10">
+                          <Lock className="w-6 h-6 text-rose-500" />
+                        </div>
+                        <div>
+                          <DialogTitle className="text-2xl font-black text-foreground">Đổi mật khẩu</DialogTitle>
+                          <DialogDescription className="text-[10px] font-black text-foreground/40 uppercase tracking-widest leading-none">An toàn là trên hết</DialogDescription>
+                        </div>
+                      </div>
+                    </DialogHeader>
 
-          {/* Security Section */}
-          <div className="bg-card/60 backdrop-blur-2xl rounded-4xl shadow-2xl border-2 border-white/5 overflow-hidden">
-            <div className="p-6 sm:p-8 border-b border-white/5 bg-white/5">
-              <h2 className="text-xl font-black text-foreground flex items-center gap-3">
-                <div className="p-2 bg-rose-500/20 rounded-xl">
-                  <Lock className="w-5 h-5 text-rose-500" />
-                </div>
-                Đổi mật khẩu
-              </h2>
-            </div>
-            
-            <div className="p-6 sm:p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-foreground/90 uppercase tracking-widest">Mật khẩu cũ</label>
-                  <input
-                    type="password"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-foreground placeholder:text-foreground/20 focus:border-primary/50 focus:bg-white/10 transition-all outline-none font-bold"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-foreground/90 uppercase tracking-widest">Mật khẩu mới</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-foreground placeholder:text-foreground/20 focus:border-primary/50 focus:bg-white/10 transition-all outline-none font-bold"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-foreground/90 uppercase tracking-widest">Xác nhận lại</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-foreground placeholder:text-foreground/20 focus:border-primary/50 focus:bg-white/10 transition-all outline-none font-bold"
-                  />
-                </div>
+                    <div className="p-8 py-4 space-y-5 relative z-10">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-foreground/40 uppercase tracking-widest pl-1">Mật khẩu hiện tại</label>
+                        <div className="relative group">
+                          <input
+                            type={showOldPassword ? "text" : "password"}
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                            className="w-full h-14 pl-4 pr-12 rounded-2xl bg-white/5 border border-white/10 focus:border-rose-500/50 transition-all outline-none font-bold"
+                            placeholder="••••••••"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowOldPassword(!showOldPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/20 hover:text-rose-500 transition-colors"
+                          >
+                            {showOldPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-foreground/40 uppercase tracking-widest pl-1">Mật khẩu mới</label>
+                          <div className="relative group">
+                            <input
+                              type={showNewPassword ? "text" : "password"}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              className="w-full h-14 pl-4 pr-12 rounded-2xl bg-white/5 border border-white/10 focus:border-rose-500/50 transition-all outline-none font-bold"
+                              placeholder="••••••••"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/20 hover:text-rose-500 transition-colors"
+                            >
+                              {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-foreground/40 uppercase tracking-widest pl-1">Xác nhận mật khẩu</label>
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full h-14 px-4 rounded-2xl bg-white/5 border border-white/10 focus:border-rose-500/50 transition-all outline-none font-bold"
+                            placeholder="••••••••"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <DialogFooter className="p-8 pt-4 relative z-10">
+                      <Button
+                        onClick={handlePasswordChange}
+                        disabled={passwordLoading || !oldPassword || !newPassword}
+                        className="w-full h-14 bg-linear-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black rounded-2xl shadow-xl shadow-rose-500/20 uppercase tracking-tighter flex items-center justify-center gap-2 group"
+                      >
+                        {passwordLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />}
+                        XÁC NHẬN ĐỔI MỚI
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                Nếu không muốn đổi mật khẩu, bạn có thể để trống các trường trên.
-              </p>
             </div>
           </div>
+
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-6 pt-4 pb-20">
@@ -329,9 +459,10 @@ const ProfileSettings = () => {
               Hủy bỏ
             </button>
             <button
-              type="submit"
+              onClick={handleProfileUpdate}
+              type="button"
               disabled={loading}
-              className="flex items-center gap-2 px-10 py-4 rounded-2xl font-black text-white bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-95 text-lg"
+              className="flex items-center gap-2 px-10 py-4 rounded-2xl font-black text-white bg-linear-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700 shadow-2xl shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-95 text-xl"
             >
               {loading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />

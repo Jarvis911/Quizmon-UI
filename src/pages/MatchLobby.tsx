@@ -29,7 +29,10 @@ import {
     Users,
     Maximize,
     Minimize,
-    Settings
+    Settings,
+    Search,
+    Timer,
+    Music
 } from "lucide-react";
 import { useFullscreen } from "react-use";
 
@@ -93,8 +96,16 @@ const MatchLobby = () => {
 
     // Player customization
     const [displayName, setDisplayName] = useState(user?.username || "");
-    const [avatarUrl, setAvatarUrl] = useState(PREDEFINED_AVATARS[0]);
+    const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || PREDEFINED_AVATARS[0]);
     const [profileOpen, setProfileOpen] = useState(false);
+
+    // Sync profile when user context updates (e.g. after login or profile edit)
+    useEffect(() => {
+        if (user) {
+            if (!displayName) setDisplayName(user.username || "");
+            if (!avatarUrl || avatarUrl === PREDEFINED_AVATARS[0]) setAvatarUrl(user.avatarUrl || PREDEFINED_AVATARS[0]);
+        }
+    }, [user]);
 
     // Host settings
     const [timePerQuestion, setTimePerQuestion] = useState(30);
@@ -500,7 +511,7 @@ const MatchLobby = () => {
                                         )}
                                         <Avatar className="w-16 h-16 ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all shadow-lg overflow-hidden">
                                             {p.avatarUrl ? (
-                                                <AvatarImage src={getAvatarUrl(p.avatarUrl)} alt={p.displayName || p.username} className="object-contain p-1" />
+                                                <AvatarImage src={getAvatarUrl(p.avatarUrl)} alt={p.displayName || p.username} className="object-cover" />
                                             ) : null}
                                             <AvatarFallback className="bg-primary text-primary-foreground text-xl font-black">
                                                 {(p.displayName || p.username || "?")[0].toUpperCase()}
@@ -549,7 +560,7 @@ const MatchLobby = () => {
                                     </div>
                                 ) : (
                                     <div className="h-16 bg-primary/20 flex items-center justify-center">
-                                         <span className="text-3xl">📚</span>
+                                        <span className="text-3xl">📚</span>
                                     </div>
                                 )}
                                 <CardHeader className="pb-2 pt-4 px-5 border-b border-white/5">
@@ -595,18 +606,21 @@ const MatchLobby = () => {
                                             {/* Summary Section inside Modal */}
                                             <div className="bg-white/5 border border-white/5 p-4 rounded-2xl grid grid-cols-2 gap-4">
                                                 <div className="text-center">
-                                                     <p className="text-[10px] font-black text-foreground/40 uppercase">Thời gian</p>
-                                                     <p className="text-lg font-black text-primary">{timePerQuestion}s</p>
+                                                    <p className="text-[10px] font-black text-foreground/40 uppercase">Thời gian</p>
+                                                    <p className="text-lg font-black text-primary">{timePerQuestion}s</p>
                                                 </div>
                                                 <div className="text-center">
-                                                     <p className="text-[10px] font-black text-foreground/40 uppercase">Nhạc nền</p>
-                                                     <p className={`text-lg font-black ${musicUrl ? "text-green-400" : "text-foreground/30"}`}>{musicUrl ? "BẬT" : "TẮT"}</p>
+                                                    <p className="text-[10px] font-black text-foreground/40 uppercase">Nhạc nền</p>
+                                                    <p className={`text-lg font-black ${musicUrl ? "text-green-400" : "text-foreground/30"}`}>{musicUrl ? "BẬT" : "TẮT"}</p>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-end">
-                                                    <Label className="text-foreground/80 font-bold">⏱ Thời gian mỗi câu (giây)</Label>
+                                                    <Label className="text-foreground/80 font-bold flex items-center gap-2">
+                                                        <Timer className="w-4 h-4 text-primary" />
+                                                        Thời gian mỗi câu (giây)
+                                                    </Label>
                                                     <span className="text-2xl font-black text-primary">{timePerQuestion}s</span>
                                                 </div>
                                                 <Slider
@@ -620,7 +634,10 @@ const MatchLobby = () => {
                                             </div>
 
                                             <div className="space-y-4">
-                                                <Label className="text-foreground/80 font-bold">🎵 Nhạc nền (Mp3, Youtube...)</Label>
+                                                <Label className="text-foreground/80 font-bold flex items-center gap-2">
+                                                    <Music className="w-4 h-4 text-primary" />
+                                                    Nhạc nền (Mp3, Youtube...)
+                                                </Label>
                                                 <div className="flex gap-2">
                                                     <div className="relative flex-1">
                                                         <Input
@@ -643,7 +660,7 @@ const MatchLobby = () => {
                                                         onClick={() => setIsSearchOpen(true)}
                                                         className="h-14 px-6 bg-primary/10 hover:bg-primary/20 text-primary border-2 border-primary/20 font-black rounded-xl"
                                                     >
-                                                        🔍
+                                                        <Search className="w-5 h-5" />
                                                     </Button>
                                                 </div>
                                             </div>
