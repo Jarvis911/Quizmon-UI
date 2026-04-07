@@ -95,7 +95,7 @@ const Home = () => {
                 }
             );
 
-            navigate(`/match/${res.data.id}/lobby`);
+            navigate(`/match/${res.data.pin}/lobby`);
         } catch (err: any) {
             console.error(err);
             const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";

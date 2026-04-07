@@ -62,7 +62,7 @@ function RootLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Hide navbar and standard bg on match, join, login, sign-up, and agentic workspace routes
-    const isNoNavbarRoute = /^\/(match\/\d+\/(lobby|play)|join|login|sign-up|ai\/agentic-workspace|admin)/.test(location.pathname);
+    const isNoNavbarRoute = /^\/(match\/[a-zA-Z0-9]+\/(lobby|play)|join|login|sign-up|ai\/agentic-workspace|admin)/.test(location.pathname);
 
     // Compact navbar padding on quiz routes
     const isQuizRoute = location.pathname.startsWith('/quiz');
@@ -101,8 +101,8 @@ const router = createBrowserRouter([
 
             // Protected Routes
             { path: "/quiz/:id/editor", element: <ProtectedRoute><QuizEditor /></ProtectedRoute> },
-            { path: "/match/:id/lobby", element: <ProtectedRoute><MatchLobby /></ProtectedRoute> },
-            { path: "/match/:id/play", element: <ProtectedRoute><MatchPlay /></ProtectedRoute> },
+            { path: "/match/:pin/lobby", element: <ProtectedRoute><MatchLobby /></ProtectedRoute> },
+            { path: "/match/:pin/play", element: <ProtectedRoute><MatchPlay /></ProtectedRoute> },
             { path: "/quiz", element: <ProtectedRoute><CreateQuizForm /></ProtectedRoute> },
             { path: "/statistics", element: <ProtectedRoute><UserStats /></ProtectedRoute> },
             { path: "/ai/generate", element: <ProtectedRoute><AIQuizGenerator /></ProtectedRoute> },

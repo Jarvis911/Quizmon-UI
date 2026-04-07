@@ -32,7 +32,7 @@ interface Endpoints {
 
     // Match
     matches: string;
-    match: (id: number) => string;
+    match: (id: string | number) => string;
 
     // Rating
     rating: string;
@@ -127,7 +127,7 @@ const endpoints: Endpoints = {
 
     // Match
     matches: `${BASE_URL}/match`,
-    match: (id: number) => `${BASE_URL}/match/${id}`,
+    match: (id: string | number) => `${BASE_URL}/match/${id}`,
 
     // Rating
     rating: `${BASE_URL}/rating`,

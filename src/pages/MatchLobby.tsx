@@ -78,7 +78,9 @@ const PREDEFINED_AVATARS = [
 ];
 
 const MatchLobby = () => {
-    const { id: matchId } = useParams<{ id: string }>();
+    const { pin } = useParams<{ pin: string }>();
+    const [matchId, setMatchId] = useState<number | null>(null);
+    const internalIdRef = useRef<number | null>(null); // Keep for unmount cleanup only
     const { user, token } = useAuth();
     const { showAlert, showConfirm } = useModal();
     const navigate = useNavigate();
@@ -92,7 +94,8 @@ const MatchLobby = () => {
     const [match, setMatch] = useState<MatchResponse | null>(null);
     const [isHost, setIsHost] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [alreadyInMatchId, setAlreadyInMatchId] = useState<string | null>(null);
+    const [alreadyInMatchId, setAlreadyInMatchId] = useState<string | number | null>(null);
+    const [alreadyInMatchPin, setAlreadyInMatchPin] = useState<string | null>(null);
 
     // Player customization
     const [displayName, setDisplayName] = useState(user?.username || "");
@@ -123,13 +126,15 @@ const MatchLobby = () => {
 
     // ─── Fetch match data ────────────────────────────────────────
     useEffect(() => {
-        if (!user || !matchId) return;
+        if (!user || !pin) return;
 
         const fetchMatch = async () => {
             try {
-                const res = await apiClient.get<MatchResponse>(endpoints.match(Number(matchId)));
+                const res = await apiClient.get<MatchResponse>(endpoints.match(pin!));
                 setQuiz(res.data.quiz);
                 setMatch(res.data);
+                setMatchId(res.data.id);
+                internalIdRef.current = res.data.id;
                 setIsHost(res.data.hostId === user.id);
 
                 // Pre-fill settings
@@ -155,25 +160,26 @@ const MatchLobby = () => {
             }
         };
         fetchMatch();
-    }, [matchId, user, token]);
+    }, [pin, user, token]);
 
     // Handle component unmount to leave match if user navigates away natively
     useEffect(() => {
         return () => {
-            if (!isNavigationHandled.current && matchId) {
-                socket.emit("leaveMatch", { matchId });
+            if (!isNavigationHandled.current && internalIdRef.current) {
+                socket.emit("leaveMatch", { matchId: internalIdRef.current });
             }
         };
-    }, [matchId]);
+    }, []);
 
     // ─── Socket events ───────────────────────────────────────────
     useEffect(() => {
-        if (!user || !matchId) return;
+        if (!user || !pin) return;
 
         const onConnect = () => {
+            if (!matchId) return;
             console.log("⚡ [Socket] Connected/Reconnected. Joining match...");
             socket.emit("joinMatch", {
-                matchId,
+                matchId: matchId,
                 userId: user.id,
                 username: user.username,
                 displayName: displayName || user.username,
@@ -199,7 +205,7 @@ const MatchLobby = () => {
         socket.on("connect", onConnect);
         socket.on("gameStarted", () => {
             isNavigationHandled.current = true;
-            navigate(`/match/${matchId}/play`);
+            navigate(`/match/${pin}/play`);
         });
         socket.on("playerJoined", updatePlayers);
         socket.on("playerLeft", updatePlayers);
@@ -210,13 +216,16 @@ const MatchLobby = () => {
                 setIsHost(true);
             }
         });
-        socket.on("alreadyInMatch", ({ currentMatchId }) => {
+        socket.on("alreadyInMatch", ({ currentMatchId, currentMatchPin }) => {
             setAlreadyInMatchId(currentMatchId);
+            setAlreadyInMatchPin(currentMatchPin || null);
         });
         socket.on("leftMatch", () => {
             if (alreadyInMatchId) {
                 setAlreadyInMatchId(null);
-                socket.emit("joinMatch", { matchId, userId: user.id, username: user.username });
+                if (matchId) {
+                    socket.emit("joinMatch", { matchId: matchId, userId: user.id, username: user.username });
+                }
             } else {
                 isNavigationHandled.current = true;
                 navigate('/');
@@ -250,16 +259,21 @@ const MatchLobby = () => {
             socket.off("matchCancelled");
             socket.off("hostChanged");
         };
-    }, [matchId, user, displayName, avatarUrl, navigate, alreadyInMatchId]);
+    }, [pin, user, displayName, avatarUrl, navigate, alreadyInMatchId, matchId]);
 
     // ─── Actions ─────────────────────────────────────────────────
-    const startGame = () => socket.emit("startMatch", { matchId });
+    const startGame = () => {
+        if (matchId) {
+            socket.emit("startMatch", { matchId: matchId });
+        }
+    };
 
     const handleReconnect = () => {
         if (alreadyInMatchId) {
             isNavigationHandled.current = true;
-            navigate(`/match/${alreadyInMatchId}/lobby`);
+            navigate(`/match/${alreadyInMatchPin || alreadyInMatchId}/lobby`);
             setAlreadyInMatchId(null);
+            setAlreadyInMatchPin(null);
         }
     };
 
@@ -274,7 +288,7 @@ const MatchLobby = () => {
 
     const leaveRoom = () => {
         if (matchId) {
-            socket.emit("leaveMatch", { matchId });
+            socket.emit("leaveMatch", { matchId: matchId });
         }
     };
 
@@ -286,29 +300,32 @@ const MatchLobby = () => {
                 type: "confirm"
             });
             if (confirmed) {
-                socket.emit("cancelMatch", { matchId });
+                socket.emit("cancelMatch", { matchId: matchId });
             }
         }
     };
 
     const savePlayerProfile = () => {
-        socket.emit("updatePlayerInfo", {
-            matchId,
-            userId: user?.id,
-            displayName: displayName || user?.username,
-            avatarUrl,
-        });
+        if (matchId) {
+            socket.emit("updatePlayerInfo", {
+                matchId: matchId,
+                userId: user?.id,
+                displayName: displayName || user?.username,
+                avatarUrl,
+            });
+        }
         setProfileOpen(false);
     };
 
     const saveHostSettings = async () => {
         try {
+            if (!matchId) return;
             await apiClient.put(
-                endpoints.match(Number(matchId)),
+                endpoints.match(matchId),
                 { timePerQuestion, musicUrl: musicUrl || null }
             );
             socket.emit("updateMatchSettings", {
-                matchId,
+                matchId: matchId,
                 timePerQuestion,
                 musicUrl: musicUrl || null,
             });
@@ -320,19 +337,19 @@ const MatchLobby = () => {
     };
 
     const copyRoomCode = useCallback(() => {
-        const code = match?.pin || String(matchId);
+        const code = match?.pin || pin || "";
         navigator.clipboard.writeText(code);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-    }, [matchId, match]);
+    }, [pin, match]);
 
     const copyJoinLink = () => {
-        const link = `${window.location.origin}/join?code=${match?.pin || matchId}`;
+        const link = `${window.location.origin}/join?code=${match?.pin || pin}`;
         navigator.clipboard.writeText(link);
         showAlert({ title: "Đã sao chép", message: "Link tham gia đã được sao chép vào bộ nhớ tạm!", type: "info" });
     };
 
-    const joinLink = `${window.location.origin}/join?code=${match?.pin || matchId}`;
+    const joinLink = `${window.location.origin}/join?code=${match?.pin || pin}`;
 
     if (!user) return null;
 
@@ -348,7 +365,7 @@ const MatchLobby = () => {
                     <div className="hidden md:flex flex-col items-center">
                         <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest leading-none mb-1">Mã tham gia</span>
                         <span className="text-2xl font-black text-primary tracking-wider font-mono leading-none">
-                            PIN {match?.pin || matchId}
+                            PIN {match?.pin || pin}
                         </span>
                     </div>
 
@@ -390,7 +407,7 @@ const MatchLobby = () => {
                             >
                                 <span className="text-foreground/40 text-[10px] font-black uppercase tracking-widest">Mã phòng</span>
                                 <span className="text-5xl md:text-6xl font-black text-primary tracking-wider font-mono drop-shadow-sm">
-                                    {match?.pin || matchId}
+                                    {match?.pin || pin}
                                 </span>
                                 <span className="text-[10px] text-foreground/50 font-bold mt-1">
                                     {copied ? "✓ ĐÃ SAO CHÉP" : "NHẤN ĐỂ SAO CHÉP MÃ"}
@@ -727,7 +744,7 @@ const MatchLobby = () => {
                             </div>
                             <DialogTitle className="text-3xl font-black text-foreground">Phát hiện trận đấu đang diễn ra!</DialogTitle>
                             <DialogDescription className="text-lg text-foreground/70 font-medium leading-relaxed">
-                                Bạn đang có một phòng thi đấu khác chưa kết thúc (Phòng: <span className="font-black text-primary px-2 py-1 bg-primary/10 rounded-lg">{alreadyInMatchId}</span>).
+                                Bạn đang có một phòng thi đấu khác chưa kết thúc (Phòng: <span className="font-black text-primary px-2 py-1 bg-primary/10 rounded-lg">{alreadyInMatchPin || alreadyInMatchId}</span>).
                                 <br /><br />
                                 Bạn muốn tiếp tục thi đấu ở phòng cũ, hay rời bỏ để tham gia phòng mới này?
                             </DialogDescription>

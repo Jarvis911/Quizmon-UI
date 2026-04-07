@@ -137,7 +137,9 @@ const PlayerScoreCard = ({ player, rank, isCurrentUser }: PlayerScoreCardProps) 
 
 // ─── Main MatchPlay Component ──────────────────────────────────
 const MatchPlay = () => {
-    const { id: matchId } = useParams<{ id: string }>();
+    const { pin } = useParams<{ pin: string }>();
+    const [matchId, setMatchId] = useState<number | null>(null);
+    const internalIdRef = useRef<number | null>(null);
     const { user, token } = useAuth();
     const navigate = useNavigate();
     const [question, setQuestion] = useState<Question | null>(null);
@@ -171,10 +173,12 @@ const MatchPlay = () => {
 
     // Fetch match to determine host and mode
     useEffect(() => {
-        if (!matchId) return;
+        if (!pin) return;
         const fetchMatch = async () => {
             try {
-                const res = await apiClient.get<MatchResponse>(endpoints.match(Number(matchId)));
+                const res = await apiClient.get<MatchResponse>(endpoints.match(pin));
+                setMatchId(res.data.id);
+                internalIdRef.current = res.data.id;
                 setIsHost(res.data.hostId === user?.id);
                 setMatchMode(res.data.mode || "REALTIME");
                 if (res.data.musicUrl) {
@@ -197,7 +201,7 @@ const MatchPlay = () => {
             }
         };
         fetchMatch();
-    }, [matchId, token, user?.id]);
+    }, [pin, token, user?.id]);
 
     // Handle Homework specific countdown and submission
     useEffect(() => {
@@ -226,7 +230,8 @@ const MatchPlay = () => {
         } else {
             // Finish homework
             try {
-                const res = await apiClient.post<{ score: number }>(endpoints.homework_finish(Number(matchId)), {});
+                if (!matchId) return;
+                const res = await apiClient.post<{ score: number }>(endpoints.homework_finish(matchId), {});
                 setHomeworkScore(res.data.score || 0);
                 setGameOver(true);
                 setNotification("Bạn đã hoàn thành bài tập!");
@@ -241,14 +246,14 @@ const MatchPlay = () => {
 
     // Request first question
     useEffect(() => {
-        if (matchMode === "REALTIME") {
-            socket.emit("requestCurrentQuestion", { matchId });
+        if (matchMode === "REALTIME" && matchId) {
+            socket.emit("requestCurrentQuestion", { matchId: matchId });
         }
     }, [matchMode, matchId]);
 
     // Socket events (Only for REALTIME)
     useEffect(() => {
-        if (matchMode !== "REALTIME" || !user) return;
+        if (matchMode !== "REALTIME" || !user || !matchId) return;
 
         const handleNextQuestion = ({ question, timer, isPaused: initialPaused }: { question: Question, timer: number, isPaused?: boolean }) => {
             setQuestion(question);
@@ -421,7 +426,7 @@ const MatchPlay = () => {
         const props = {
             question,
             socket,
-            matchId: Number(matchId),
+            matchId: matchId,
             userId: user?.id || 0,
             timer,
             mode: matchMode,
@@ -479,7 +484,7 @@ const MatchPlay = () => {
                         
                         {isHost && (
                             <button
-                                onClick={() => socket.emit("togglePause", { matchId })}
+                                onClick={() => socket.emit("togglePause", { matchId: matchId })}
                                 className="w-full py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 TIẾP TỤC TRẬN ĐẤU
@@ -527,7 +532,7 @@ const MatchPlay = () => {
                     {isHost && (
                         <div className="flex items-center gap-1 md:gap-2">
                             <button
-                                onClick={() => socket.emit("togglePause", { matchId })}
+                                onClick={() => socket.emit("togglePause", { matchId: matchId })}
                                 className={`px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl border font-black uppercase text-[9px] md:text-[10px] tracking-tight transition-all shadow-sm ${
                                     isPaused 
                                     ? "bg-green-500/20 border-green-500/30 text-green-500 hover:bg-green-500/30" 
@@ -538,7 +543,7 @@ const MatchPlay = () => {
                                 <span className="sm:hidden">{isPaused ? "▶️" : "⏸️"}</span>
                             </button>
                             <button
-                                onClick={() => socket.emit("skipQuestion", { matchId })}
+                                onClick={() => socket.emit("skipQuestion", { matchId: matchId })}
                                 className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-500/20 border border-slate-500/30 text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-tight hover:bg-slate-500/30 transition-all shadow-sm"
                             >
                                 <span className="sm:inline hidden">Bỏ qua câu</span>
@@ -647,7 +652,7 @@ const MatchPlay = () => {
                         </Button>
                         <Button
                             onClick={() => {
-                                socket.emit("endMatch", { matchId });
+                                socket.emit("endMatch", { matchId: matchId });
                                 setConfirmEndMatch(false);
                             }}
                             className="bg-red-600 hover:bg-red-700 text-white"
@@ -677,7 +682,7 @@ const MatchPlay = () => {
                         </Button>
                         <Button
                             onClick={() => {
-                                socket.emit("surrender", { matchId });
+                                socket.emit("surrender", { matchId: matchId });
                                 setConfirmSurrender(false);
                             }}
                             className="bg-orange-600 hover:bg-orange-700 text-white"

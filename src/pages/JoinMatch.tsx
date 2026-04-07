@@ -34,10 +34,10 @@ export default function JoinMatch() {
         try {
             // Check if the match exists before navigating
             const res = await apiClient.get(`${endpoints.matches}/${code.trim()}`);
-            const matchId = res.data.id;
+            const pin = res.data.pin;
             
-            if (matchId) {
-                navigate(`/match/${matchId}/lobby`);
+            if (pin) {
+                navigate(`/match/${pin}/lobby`);
             } else {
                 setError("Mã phòng không hợp lệ.");
             }

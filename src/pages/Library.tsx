@@ -38,7 +38,7 @@ const Library = () => {
         if (!checkAuth()) return;
         try {
             const res = await apiClient.post(endpoints.matches, { quizId });
-            navigate(`/match/${res.data.id}/lobby`);
+            navigate(`/match/${res.data.pin}/lobby`);
         } catch (err: any) {
             showAlert({
                 title: "Lỗi",
