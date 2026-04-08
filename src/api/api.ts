@@ -57,6 +57,12 @@ interface Endpoints {
     ai_job_approve_all: (id: number) => string;
     ai_agentic_save: string;
 
+    // Agentic Workspace Sessions
+    ai_agentic_sessions: string;
+    ai_agentic_session: (id: number) => string;
+    ai_agentic_session_delete: (id: number) => string;
+    ai_agentic_session_rename: (id: number) => string;
+
     // Classrooms
     classrooms: string;
     classroom: (id: number) => string;
@@ -153,6 +159,12 @@ const endpoints: Endpoints = {
     ai_job_question_delete: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}`,
     ai_job_approve_all: (id: number) => `${BASE_URL}/ai/jobs/${id}/approve-all`,
     ai_agentic_save: `${BASE_URL}/ai/agentic/save`,
+
+    // Agentic Workspace Sessions
+    ai_agentic_sessions: `${BASE_URL}/ai/agentic/sessions`,
+    ai_agentic_session: (id: number) => `${BASE_URL}/ai/agentic/sessions/${id}`,
+    ai_agentic_session_delete: (id: number) => `${BASE_URL}/ai/agentic/sessions/${id}`,
+    ai_agentic_session_rename: (id: number) => `${BASE_URL}/ai/agentic/sessions/${id}`,
 
     // Classrooms
     classrooms: `${BASE_URL}/classrooms`,

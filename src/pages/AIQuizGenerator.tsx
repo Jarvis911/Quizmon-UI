@@ -12,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
-    Sparkles, Upload, FileText, Loader2, Wand2, X, AlertCircle
+    Sparkles, Upload, FileText, Loader2, Wand2, X, AlertCircle, Image as ImageIcon
 } from "lucide-react";
 import AIGenerationLimit from "@/components/AIGenerationLimit";
 import { useEffect } from "react";
@@ -32,6 +32,7 @@ const AIQuizGenerator = () => {
     const { token } = useAuth();
     const [instruction, setInstruction] = useState("");
     const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [questionCount, setQuestionCount] = useState(10);
     const [selectedTypes, setSelectedTypes] = useState<string[]>(["BUTTONS"]);
     const [loading, setLoading] = useState(false);
@@ -51,6 +52,17 @@ const AIQuizGenerator = () => {
     const handleFileChange = (file: File | null) => {
         setPdfFile(file);
         if (file) setIsDirty(true);
+    };
+
+    const handleImageChange = (files: FileList | null) => {
+        if (!files) return;
+        const newFiles = Array.from(files);
+        setImageFiles((prev) => [...prev, ...newFiles]);
+        setIsDirty(true);
+    };
+
+    const removeImage = (index: number) => {
+        setImageFiles((prev) => prev.filter((_, i) => i !== index));
     };
 
     useEffect(() => {
@@ -94,8 +106,8 @@ const AIQuizGenerator = () => {
     };
 
     const handleGenerate = async () => {
-        if (!instruction && !pdfFile) {
-            setError("Vui lòng nhập yêu cầu hoặc tải lên file PDF");
+        if (!instruction && !pdfFile && imageFiles.length === 0) {
+            setError("Vui lòng nhập yêu cầu, tải lên file PDF hoặc tải lên hình ảnh");
             return;
         }
         if (selectedTypes.length === 0) {
@@ -113,6 +125,12 @@ const AIQuizGenerator = () => {
 
             if (finalInstruction) formData.append("instruction", finalInstruction);
             if (pdfFile) formData.append("pdfFile", pdfFile);
+            
+            // Append multiple images
+            imageFiles.forEach((file) => {
+                formData.append("imageFiles", file);
+            });
+
             formData.append("questionCount", String(questionCount));
             formData.append("questionTypes", JSON.stringify(selectedTypes));
 
@@ -254,6 +272,52 @@ const AIQuizGenerator = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Image Upload */}
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-1">
+                                    <ImageIcon className="w-3.5 h-3.5 text-primary" />
+                                    Hình ảnh bài tập/đề thi (tuỳ chọn)
+                                </Label>
+                                
+                                <div 
+                                    className="border-2 border-dashed border-foreground/10 rounded-2xl p-4 hover:border-primary/40 hover:bg-foreground/5 bg-foreground/5 transition-all cursor-pointer"
+                                    onClick={() => document.getElementById("image-input")?.click()}
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Upload className="w-4 h-4 text-muted-foreground opacity-50" />
+                                        <span className="text-[11px] font-bold text-foreground">Tải ảnh lên (PNG, JPG)</span>
+                                    </div>
+                                    <input
+                                        id="image-input"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="hidden"
+                                        onChange={(e) => handleImageChange(e.target.files)}
+                                    />
+                                </div>
+
+                                {imageFiles.length > 0 && (
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
+                                        {imageFiles.map((file, idx) => (
+                                            <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 shadow-sm bg-background">
+                                                <img 
+                                                    src={URL.createObjectURL(file)} 
+                                                    alt="preview" 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                                                    className="absolute top-1 right-1 p-1 bg-destructive/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Right Column: Settings */}
@@ -321,7 +385,7 @@ const AIQuizGenerator = () => {
                         {/* Generate Button */}
                         <Button
                             onClick={handleGenerate}
-                            disabled={loading || (!instruction && !pdfFile) || isAtLimit}
+                            disabled={loading || (!instruction && !pdfFile && imageFiles.length === 0) || isAtLimit}
                             className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 uppercase tracking-tighter disabled:opacity-50 disabled:scale-100"
                         >
                             {loading ? (
