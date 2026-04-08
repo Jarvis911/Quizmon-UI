@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
+import { sanitizeError } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -97,8 +98,7 @@ export default function OrganizationSettings() {
       setInviteEmail("");
       fetchMembers();
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || "Gửi lời mời thất bại.";
-      setMessage({ type: 'error', text: errorMsg });
+      setMessage({ type: 'error', text: sanitizeError(err, "Gửi lời mời thất bại.") });
     } finally {
       setIsUpdating(false);
     }
@@ -146,10 +146,10 @@ export default function OrganizationSettings() {
         message: "Đã xóa thành viên khỏi tổ chức.",
         type: "success"
       });
-    } catch (err) {
+    } catch (err: any) {
       showAlert({
         title: "Thất bại",
-        message: "Xóa thành viên thất bại. Bạn có thể là chủ sở hữu cuối cùng.",
+        message: sanitizeError(err, "Xóa thành viên thất bại. Vui lòng thử lại."),
         type: "error"
       });
     }
@@ -158,49 +158,49 @@ export default function OrganizationSettings() {
   if (!currentOrg) return <div className="p-10 text-center font-bold">Chưa chọn tổ chức nào.</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="max-w-5xl mx-auto p-4 md:p-10 space-y-6 md:space-y-10">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-4">
-            <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-10 h-10 object-contain drop-shadow-md" /> Cài đặt tổ chức
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground flex items-center gap-3 md:gap-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-md" /> Cài đặt tổ chức
           </h1>
-          <p className="text-muted-foreground font-bold mt-2">Quản lý thành viên và tùy chọn không gian làm việc của bạn.</p>
+          <p className="text-xs md:text-sm text-muted-foreground font-bold mt-1 md:mt-2">Quản lý thành viên và tùy chọn không gian làm việc của bạn.</p>
         </div>
         <Button
           onClick={() => setShowGuide(!showGuide)}
-          className={`flex items-center gap-2 border-2 border-primary/30 font-black h-12 px-6 rounded-2xl transition-all ${showGuide ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90' : 'text-primary bg-primary/10 hover:bg-primary/20 border-primary/20'}`}
+          className={`flex items-center justify-center gap-2 border-2 border-primary/30 font-black h-10 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl transition-all w-full md:w-auto text-sm md:text-base ${showGuide ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90' : 'text-primary bg-primary/10 hover:bg-primary/20 border-primary/20'}`}
         >
-          <HelpCircle size={20} />
+          <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
           {showGuide ? 'Đóng hướng dẫn' : 'Tổ chức là gì?'}
         </Button>
       </header>
 
       {/* Organization Guide Section */}
       {showGuide && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="bg-primary/5 border-2 border-primary/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
-            <h3 className="text-xl font-black text-primary mb-4 flex items-center gap-2">
-              <Building2 size={24} /> Tổ chức là gì?
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-primary/5 border-2 border-primary/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group">
+            <h3 className="text-lg md:text-xl font-black text-primary mb-3 md:mb-4 flex items-center gap-2">
+              <Building2 className="w-5 h-5 md:w-6 md:h-6" /> Tổ chức là gì?
             </h3>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
               Là một <strong className="font-black text-foreground">không gian làm việc chung</strong> (Team, Trường học, Công ty) giúp bạn quản lý bài trắc nghiệm và thành viên tại một nơi duy nhất.
             </p>
           </div>
 
-          <div className="bg-emerald-500/5 border-2 border-emerald-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
-            <h3 className="text-xl font-black text-emerald-500 mb-4 flex items-center gap-2">
-              <CreditCard size={24} /> Lợi ích dùng chung
+          <div className="bg-emerald-500/5 border-2 border-emerald-500/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group">
+            <h3 className="text-lg md:text-xl font-black text-emerald-500 mb-3 md:mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 md:w-6 md:h-6" /> Lợi ích dùng chung
             </h3>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
               <strong className="font-black text-foreground text-emerald-600 dark:text-emerald-400">Tiết kiệm chi phí</strong>: Khi Tổ chức được nâng cấp gói trả phí, <strong className="font-black text-foreground text-emerald-600 dark:text-emerald-400">tất cả thành viên</strong> trong đó đều được sử dụng các tính năng Premium mà không cần mua lẻ.
             </p>
           </div>
 
-          <div className="bg-amber-500/5 border-2 border-amber-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
-            <h3 className="text-xl font-black text-amber-500 mb-4 flex items-center gap-2">
-              <ShieldCheck size={24} /> Vai trò & Bảo mật
+          <div className="bg-amber-500/5 border-2 border-amber-500/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group">
+            <h3 className="text-lg md:text-xl font-black text-amber-500 mb-3 md:mb-4 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> Vai trò & Bảo mật
             </h3>
-            <ul className="text-sm font-medium text-muted-foreground space-y-2 relative z-10">
+            <ul className="text-xs md:text-sm font-medium text-muted-foreground space-y-1 md:space-y-2 relative z-10">
               <li>• <strong className="font-black text-foreground">Chủ sở hữu</strong>: Quản lý thành viên, tên tổ chức và thanh toán.</li>
               <li>• <strong className="font-black text-foreground">Thành viên</strong>: Tham gia tổ chức để cùng làm việc và hưởng gói Premium.</li>
             </ul>
@@ -208,32 +208,32 @@ export default function OrganizationSettings() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
         {/* Org Info */}
         <section className="lg:col-span-1 space-y-6">
-          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-8 shadow-xl">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-2">
+          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-xl">
+            <h2 className="text-lg md:text-xl font-black mb-4 md:mb-6 flex items-center gap-2">
               Thông tin chung
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">Tên tổ chức</label>
+                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">Tên tổ chức</label>
                 <Input
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="bg-white/5 border-white/10 rounded-xl h-12 font-bold focus:ring-primary"
+                  className="bg-white/5 border-white/10 rounded-xl h-10 md:h-12 font-bold focus:ring-primary text-sm md:text-base"
                 />
               </div>
               <Button
                 onClick={handleUpdateOrg}
-                className="w-full rounded-xl font-bold h-12"
+                className="w-full rounded-xl font-bold h-10 md:h-12 text-sm md:text-base"
                 disabled={isUpdating || name === currentOrg.name}
               >
-                {isUpdating ? <Loader2 className="animate-spin mr-2" /> : <CheckCircle2 className="mr-2" />}
+                {isUpdating ? <Loader2 className="animate-spin mr-2 w-4 h-4 md:w-5 md:h-5" /> : <CheckCircle2 className="mr-2 w-4 h-4 md:w-5 md:h-5" />}
                 Lưu thay đổi
               </Button>
               {message && (
-                <p className={`text-sm font-bold text-center mt-2 ${message.type === 'success' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                <p className={`text-xs md:text-sm font-bold text-center mt-2 ${message.type === 'success' ? 'text-emerald-500' : 'text-rose-500'}`}>
                   {message.text}
                 </p>
               )}
@@ -243,18 +243,18 @@ export default function OrganizationSettings() {
 
         {/* Member Management */}
         <section className="lg:col-span-2 space-y-6">
-          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-8 shadow-xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black flex items-center gap-2">
+          <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+              <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
                 Thành viên
               </h2>
-              <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-black uppercase tracking-tighter">
+              <span className="text-[10px] md:text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-black uppercase tracking-tighter w-fit">
                 {members.length} Thành viên
               </span>
             </div>
 
             {/* Invite Form */}
-            <form onSubmit={handleInvite} className="flex gap-2 mb-8">
+            <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-2 mb-6 md:mb-8">
               <div className="relative flex-1">
                 <div className="space-y-4">
                   <div className="relative">
@@ -265,10 +265,10 @@ export default function OrganizationSettings() {
                         setInviteEmail(e.target.value);
                         debouncedSearch(e.target.value);
                       }}
-                      className="h-14 rounded-2xl border-2 border-primary/20 bg-background/50 pl-12 font-bold focus-visible:ring-primary/30"
+                      className="h-12 md:h-14 rounded-xl md:rounded-2xl border-2 border-primary/20 bg-background/50 pl-10 md:pl-12 font-bold focus-visible:ring-primary/30 text-sm md:text-base"
                     />
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      <Mail size={20} />
+                    <div className="absolute left-3.5 md:left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <Mail className="w-4 h-4 md:w-5 md:h-5" />
                     </div>
 
                     {searchResults.length > 0 && (
@@ -292,40 +292,40 @@ export default function OrganizationSettings() {
                   </div>
                 </div>
               </div>
-              <Button type="submit" className="rounded-xl px-6 font-bold h-12" disabled={isUpdating || isSearching}>
-                {isUpdating ? <Loader2 className="animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+              <Button type="submit" className="rounded-xl px-6 font-bold h-12 md:h-14 w-full sm:w-auto text-sm md:text-base" disabled={isUpdating || isSearching}>
+                {isUpdating ? <Loader2 className="animate-spin mr-2 w-4 h-4 md:w-5 md:h-5" /> : <UserPlus className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />}
                 Mời
               </Button>
             </form>
 
             {/* Members List */}
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {isLoadingMembers ? (
                 <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>
               ) : (
                 members.map(member => (
-                  <div key={member.id} className="group flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary">
+                  <div key={member.id} className="group flex items-center justify-between p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl md:rounded-2xl transition-all gap-2">
+                    <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                      <div className="shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm md:text-base">
                         {member.user.username[0].toUpperCase()}
                       </div>
-                      <div>
-                        <p className="font-black text-foreground">{member.user.username}</p>
-                        <p className="text-xs text-muted-foreground font-bold">{member.user.email}</p>
+                      <div className="min-w-0">
+                        <p className="font-black text-foreground text-sm md:text-base truncate">{member.user.username}</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground font-bold truncate max-w-24 xs:max-w-32 sm:max-w-none">{member.user.email}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tighter text-primary bg-primary/10 px-2 py-1 rounded-lg">
-                        <ShieldCheck size={12} /> {member.role}
+                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                      <div className="flex items-center gap-1 text-[10px] md:text-xs font-black uppercase tracking-tighter text-primary bg-primary/10 px-2 py-1 rounded-lg">
+                        <ShieldCheck className="w-3 h-3 md:w-4 md:h-4" /> <span className="hidden sm:inline">{member.role}</span>
                       </div>
                       {member.user.id !== (user as any)?.id && ( // Can't remove yourself
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemoveMember(member.user.id)}
-                          className="opacity-0 group-hover:opacity-100 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"
+                          className="md:opacity-0 md:group-hover:opacity-100 text-rose-500 hover:bg-rose-500/10 rounded-lg md:rounded-xl transition-all h-8 w-8 md:h-10 md:w-10"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                         </Button>
                       )}
                     </div>

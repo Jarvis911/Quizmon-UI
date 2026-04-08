@@ -58,29 +58,32 @@ const YoutubePicker = ({ form }) => { // RHF from the parent component
       />
 
       {form.watch("videoUrl") && isValidUrl && (
-        <ReactPlayer
-          ref={playerRef} // Grant this ReactPlayer is playerRef to use later
-          url={form.watch("videoUrl")}
-          controls={false}
-          width="320px"
-          height="240px"
-          onReady={() => {
-            console.log("[YoutubePicker] onReady gọi");
-          }}
-          onDuration={(dur) => {
-            console.log("[YoutubePicker] onDuration gọi, duration =", dur);
-            setVideoDuration(dur);
-            if (form.getValues("startTime") > dur) {
-              form.setValue("startTime", 0);
-              console.log("[YoutubePicker] Reset startTime về 0 vì vượt duration");
-            }
-          }}
-          onError={(e) => {
-            console.error("[YoutubePicker] ReactPlayer error:", e);
-            setIsValidUrl(false);
-            setErrorMessage("Không thể load video. Vui lòng kiểm tra URL hoặc thử video khác.");
-          }}
-        />
+        <div className="relative w-full max-w-[320px] aspect-video mx-auto overflow-hidden rounded-lg bg-black">
+          <ReactPlayer
+            ref={playerRef} // Grant this ReactPlayer is playerRef to use later
+            url={form.watch("videoUrl")}
+            controls={false}
+            width="100%"
+            height="100%"
+            style={{ position: 'absolute', top: 0, left: 0 }}
+            onReady={() => {
+              console.log("[YoutubePicker] onReady gọi");
+            }}
+            onDuration={(dur) => {
+              console.log("[YoutubePicker] onDuration gọi, duration =", dur);
+              setVideoDuration(dur);
+              if (form.getValues("startTime") > dur) {
+                form.setValue("startTime", 0);
+                console.log("[YoutubePicker] Reset startTime về 0 vì vượt duration");
+              }
+            }}
+            onError={(e) => {
+              console.error("[YoutubePicker] ReactPlayer error:", e);
+              setIsValidUrl(false);
+              setErrorMessage("Không thể load video. Vui lòng kiểm tra URL hoặc thử video khác.");
+            }}
+          />
+        </div>
       )}
 
       {videoDuration > 0 && (

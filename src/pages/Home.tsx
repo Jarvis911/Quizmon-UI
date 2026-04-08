@@ -14,7 +14,7 @@ import QuizCard from "@/components/quiz/QuizCard";
 import QuizSection from "@/components/quiz/QuizSection";
 import KnowledgeGlobeSVG from "@/components/ui/KnowledgeGlobeSVG";
 import CategoryNav from "@/components/ui/CategoryNav";
-import { checkAuth } from "@/lib/utils";
+import { checkAuth, sanitizeError } from "@/lib/utils";
 import { getIconForCategory, defaultIcons } from "@/lib/categoryIcons";
 
 
@@ -98,10 +98,9 @@ const Home = () => {
             navigate(`/match/${res.data.pin}/lobby`);
         } catch (err: any) {
             console.error(err);
-            const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";
             showAlert({
                 title: "Lỗi",
-                message: errorMessage,
+                message: sanitizeError(err, "Không thể tạo trận đấu. Vui lòng thử lại sau."),
                 type: "error"
             });
         }
@@ -137,7 +136,7 @@ const Home = () => {
         } catch (err: any) {
             showAlert({
                 title: "Thất bại",
-                message: err.response?.data?.message || "Không thể giao bài tập",
+                message: sanitizeError(err, "Không thể giao bài tập"),
                 type: "error"
             });
         }
@@ -172,15 +171,15 @@ const Home = () => {
                         {/* Action 1: Create Manually */}
                         <div
                             onClick={() => navigate('/quiz')}
-                            className="group flex gap-4 justify-between items-center p-6 bg-white/70 hover:bg-white/90 backdrop-blur-3xl rounded-3xl border-2 border-blue-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
+                            className="group flex gap-3 md:gap-4 justify-between items-center p-4 md:p-6 bg-white/70 hover:bg-white/90 backdrop-blur-3xl rounded-2xl md:rounded-3xl border-2 border-blue-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
                         >
                             {/* Azure-style Blue Gradient Sweep */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-400/30 transition-colors" />
                             
                             <div className="flex-1 flex flex-col items-center text-center z-10">
-                                <h3 className="font-extrabold text-3xl text-slate-800 mb-2 tracking-tight">Tạo quiz</h3>
-                                <p className="text-sm text-slate-500 font-bold mb-6">Chơi miễn phí cho tối đa<br />300 người tham gia</p>
-                                <button className="bg-[#0078D4] text-white font-bold py-3 px-8 rounded-[4px] shadow-lg hover:bg-[#005a9e] transition-all w-fit uppercase text-xs tracking-widest">
+                                <h3 className="font-extrabold text-xl md:text-3xl text-slate-800 mb-1 md:mb-2 tracking-tight">Tạo quiz</h3>
+                                <p className="text-xs md:text-sm text-slate-500 font-bold mb-3 md:mb-6">Chơi miễn phí cho tối đa<br />300 người tham gia</p>
+                                <button className="bg-[#0078D4] text-white font-bold py-2 px-4 md:py-3 md:px-8 rounded-[4px] shadow-lg hover:bg-[#005a9e] transition-all w-fit uppercase text-[10px] md:text-xs tracking-widest">
                                     Bắt đầu ngay
                                 </button>
                             </div>
@@ -194,15 +193,15 @@ const Home = () => {
                         {/* Action 2: Create with AI */}
                         <div
                             onClick={() => navigate('/ai/generate')}
-                            className="group flex gap-4 justify-between items-center p-6 bg-white/70 hover:bg-white/90 backdrop-blur-3xl rounded-3xl border-2 border-emerald-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
+                            className="group flex gap-3 md:gap-4 justify-between items-center p-4 md:p-6 bg-white/70 hover:bg-white/90 backdrop-blur-3xl rounded-2xl md:rounded-3xl border-2 border-emerald-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
                         >
                             {/* Azure-style Green Gradient Sweep */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-emerald-400/30 transition-colors" />
 
                             <div className="flex-1 flex flex-col items-center text-center z-10">
-                                <h3 className="font-extrabold text-3xl text-slate-800 mb-2 tracking-tight">Tạo với AI</h3>
-                                <p className="text-sm text-slate-500 font-bold mb-6">Tự động tạo quiz từ<br />file PDF hoặc văn bản</p>
-                                <button className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-[4px] shadow-lg hover:bg-emerald-700 transition-all w-fit uppercase text-xs tracking-widest">
+                                <h3 className="font-extrabold text-xl md:text-3xl text-slate-800 mb-1 md:mb-2 tracking-tight">Tạo với AI</h3>
+                                <p className="text-xs md:text-sm text-slate-500 font-bold mb-3 md:mb-6">Tự động tạo quiz từ<br />file PDF hoặc văn bản</p>
+                                <button className="bg-emerald-600 text-white font-bold py-2 px-4 md:py-3 md:px-8 rounded-[4px] shadow-lg hover:bg-emerald-700 transition-all w-fit uppercase text-[10px] md:text-xs tracking-widest">
                                     Thử ngay
                                 </button>
                             </div>

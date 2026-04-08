@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import endpoints from "@/api/api.js";
 
 // UI shadcn
@@ -61,7 +61,7 @@ function LocationPicker({ setLocation }) {
   return null;
 }
 
-const LocationQuestionForm = ({ quizId, question, onSaved }) => {
+const LocationQuestionForm = ({ quizId, question, onSaved, onDelete }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [loading, setLoading] = useState(false);
@@ -237,9 +237,23 @@ const LocationQuestionForm = ({ quizId, question, onSaved }) => {
                )}/>
             </div>
 
-            <Button type="submit" className="w-full mt-auto">
-              {question ? "Cập nhật câu hỏi" : "Lưu câu hỏi"}
-            </Button>
+            <div className="flex gap-2 mt-auto">
+              <Button type="submit" className="flex-1">
+                {question ? "Cập nhật câu hỏi" : "Lưu câu hỏi"}
+              </Button>
+              {question && (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="destructive"
+                  className="shrink-0"
+                  onClick={onDelete}
+                  title="Xóa câu hỏi này"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Map chọn vị trí */}

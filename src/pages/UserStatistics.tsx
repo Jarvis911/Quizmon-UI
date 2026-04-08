@@ -409,23 +409,23 @@ const UserStats = () => {
                 {/* Dashboard Header - Match Classroom style */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight text-foreground flex items-center gap-3">
+                        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground flex items-center gap-2 md:gap-3">
                             <img
                                 src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png"
                                 alt="History"
-                                className="w-10 h-10 object-contain"
+                                className="w-8 h-8 md:w-10 md:h-10 object-contain"
                             />
                             Lịch sử đấu của tôi
                         </h1>
-                        <p className="text-muted-foreground font-bold mt-2 opacity-80 uppercase tracking-widest text-xs">
+                        <p className="text-muted-foreground font-bold mt-1 md:mt-2 opacity-80 uppercase tracking-widest text-[10px] md:text-xs">
                             Theo dõi tiến trình, thứ hạng và hiệu quả học tập của bạn.
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-4 bg-card/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 shadow-lg">
-                        <Calendar className="w-5 h-5 text-muted-foreground ml-2" />
+                    <div className="flex items-center gap-2 md:gap-4 bg-card/40 backdrop-blur-md p-1 md:p-2 rounded-xl md:rounded-2xl border border-white/10 shadow-lg">
+                        <Calendar className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground ml-2" />
                         <Select value={period} onValueChange={setPeriod}>
-                            <SelectTrigger className="w-[180px] border-none bg-transparent shadow-none focus:ring-0 font-bold">
+                            <SelectTrigger className="w-[140px] md:w-[180px] border-none bg-transparent shadow-none focus:ring-0 font-bold text-xs md:text-sm">
                                 <SelectValue placeholder="Khoảng thời gian" />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-white/20 backdrop-blur-lg">
@@ -437,21 +437,21 @@ const UserStats = () => {
                     </div>
                 </div>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                    <TabsList className="bg-card/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 w-fit">
-                        <TabsTrigger value="overview" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-8">
+                    <TabsList className="bg-card/40 backdrop-blur-md p-1 md:p-1.5 rounded-xl md:rounded-2xl border border-white/10 w-fit flex-wrap">
+                        <TabsTrigger value="overview" className="rounded-lg md:rounded-xl px-4 py-2 md:px-8 md:py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2 text-xs md:text-sm font-bold">
                             <img
                                 src="https://cdn-icons-png.flaticon.com/512/4825/4825706.png"
                                 alt="Overview"
-                                className="w-4 h-4 object-contain"
+                                className="w-3 h-3 md:w-4 md:h-4 object-contain"
                             />
                             Tổng Quan
                         </TabsTrigger>
-                        <TabsTrigger value="history" className="rounded-xl px-8 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
+                        <TabsTrigger value="history" className="rounded-lg md:rounded-xl px-4 py-2 md:px-8 md:py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2 text-xs md:text-sm font-bold">
                             <img
                                 src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png"
                                 alt="History"
-                                className="w-4 h-4 object-contain"
+                                className="w-3 h-3 md:w-4 md:h-4 object-contain"
                             />
                             Lịch Sử Đấu
                         </TabsTrigger>
@@ -460,53 +460,39 @@ const UserStats = () => {
                     <TabsContent value="overview" className="space-y-8 mt-0 focus-visible:ring-0">
                         {/* Metrics Grid */}
                         <div className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-2xl rounded-[3rem] overflow-hidden transition-all duration-500">
-                            {/* Section 1: Metrics Table */}
-                            <div className="overflow-x-auto">
-                                <table className="w-full border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-white/10 bg-white/5">
-                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Tổng Trận Đấu</th>
-                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Tỷ Lệ Thắng</th>
-                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Điểm Trung Bình</th>
-                                            <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center border-r border-white/10 last:border-r-0">Quiz Tham Gia</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{totalMatches}</span>
-                                                        <span className="text-xs font-bold text-muted-foreground">trận</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{(winRate * 100).toFixed(1)}%</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{averageScore}</span>
-                                                        <span className="text-xs font-bold text-muted-foreground">điểm</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-10 text-center border-r border-white/10 last:border-r-0 hover:bg-white/5 transition-colors">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-5xl font-black text-foreground drop-shadow-sm">{totalQuizzes}</span>
-                                                        <span className="text-xs font-bold text-muted-foreground">bộ</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            {/* Section 1: Metrics Grid */}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10 [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-white/10 lg:[&>*:nth-child(n+3)]:border-t-0">
+                                {/* Match Count */}
+                                <div className="p-4 md:p-8 lg:p-10 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center mb-1 md:mb-4">Tổng Trận Đấu</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl md:text-5xl font-black text-foreground drop-shadow-sm">{totalMatches}</span>
+                                        <span className="text-[9px] md:text-xs font-bold text-muted-foreground hidden sm:inline">trận</span>
+                                    </div>
+                                </div>
+                                {/* Win Rate */}
+                                <div className="p-4 md:p-8 lg:p-10 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center mb-1 md:mb-4">Tỷ Lệ Thắng</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl md:text-5xl font-black text-foreground drop-shadow-sm">{(winRate * 100).toFixed(0)}<span className="text-xl md:text-3xl">%</span></span>
+                                    </div>
+                                </div>
+                                {/* Avg Score */}
+                                <div className="p-4 md:p-8 lg:p-10 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center mb-1 md:mb-4">Điểm TB</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl md:text-5xl font-black text-foreground drop-shadow-sm">{averageScore}</span>
+                                        <span className="text-[9px] md:text-xs font-bold text-muted-foreground hidden sm:inline">điểm</span>
+                                    </div>
+                                </div>
+                                {/* Total Quizzes */}
+                                <div className="p-4 md:p-8 lg:p-10 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center mb-1 md:mb-4">Quiz T.Gia</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl md:text-5xl font-black text-foreground drop-shadow-sm">{totalQuizzes}</span>
+                                        <span className="text-[9px] md:text-xs font-bold text-muted-foreground hidden sm:inline">bộ</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="border-t border-white/10" />
@@ -514,46 +500,46 @@ const UserStats = () => {
                             {/* Section 2: Charts Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-10 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
                                 {/* Performance Trend */}
-                                <div className="lg:col-span-7 p-8 lg:p-10">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                                <div className="lg:col-span-7 p-4 md:p-8 lg:p-10">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
                                         <div>
-                                            <h3 className="text-2xl font-black flex items-center gap-3">
-                                                <div className="p-2 bg-primary/10 rounded-xl">
+                                            <h3 className="text-xl md:text-2xl font-black flex items-center gap-2 md:gap-3">
+                                                <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg md:rounded-xl">
                                                     <img
                                                         src="https://cdn-icons-png.flaticon.com/512/4825/4825706.png"
                                                         alt="Trend"
-                                                        className="w-6 h-6 object-contain"
+                                                        className="w-5 h-5 md:w-6 md:h-6 object-contain"
                                                     />
                                                 </div>
                                                 Xu Hướng Hiệu Suất
                                             </h3>
-                                            <p className="text-muted-foreground font-medium mt-1">Biến thiên điểm số qua các trận đấu gần nhất</p>
+                                            <p className="text-muted-foreground font-medium mt-1 text-xs md:text-sm">Biến thiên điểm số qua các trận đấu gần nhất</p>
                                         </div>
 
-                                        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-sm self-start sm:self-center">
+                                        <div className="flex bg-white/5 p-1 rounded-xl md:rounded-2xl border border-white/10 backdrop-blur-sm self-start sm:self-center">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className={`rounded-xl px-6 h-10 font-bold transition-all ${chartMode === 'line' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
+                                                className={`rounded-lg md:rounded-xl px-4 md:px-6 h-8 md:h-10 text-xs md:text-sm font-bold transition-all ${chartMode === 'line' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
                                                 onClick={() => setChartMode('line')}
                                             >
                                                 <img
                                                     src="https://cdn-icons-png.flaticon.com/512/4825/4825706.png"
                                                     alt="Line"
-                                                    className={`w-4 h-4 mr-2 object-contain ${chartMode === 'line' ? '' : 'opacity-50'}`}
+                                                    className={`w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2 object-contain ${chartMode === 'line' ? '' : 'opacity-50'}`}
                                                 />
                                                 Đường
                                             </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className={`rounded-xl px-6 h-10 font-bold transition-all ${chartMode === 'bar' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
+                                                className={`rounded-lg md:rounded-xl px-4 md:px-6 h-8 md:h-10 text-xs md:text-sm font-bold transition-all ${chartMode === 'bar' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'text-muted-foreground hover:text-foreground'}`}
                                                 onClick={() => setChartMode('bar')}
                                             >
                                                 <img
                                                     src="https://cdn-icons-png.flaticon.com/512/2496/2496781.png"
                                                     alt="Bar"
-                                                    className={`w-4 h-4 mr-2 object-contain ${chartMode === 'bar' ? '' : 'opacity-50'}`}
+                                                    className={`w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2 object-contain ${chartMode === 'bar' ? '' : 'opacity-50'}`}
                                                 />
                                                 Cột
                                             </Button>
@@ -563,19 +549,19 @@ const UserStats = () => {
                                 </div>
 
                                 {/* Rank Distribution */}
-                                <div className="lg:col-span-3 p-8 lg:p-10 bg-white/2">
-                                    <div className="mb-10">
-                                        <h3 className="text-2xl font-black flex items-center gap-3">
-                                            <div className="p-2 bg-yellow-500/10 rounded-xl">
+                                <div className="lg:col-span-3 p-4 md:p-8 lg:p-10 bg-white/2">
+                                    <div className="mb-6 md:mb-10">
+                                        <h3 className="text-xl md:text-2xl font-black flex items-center gap-2 md:gap-3">
+                                            <div className="p-1.5 md:p-2 bg-yellow-500/10 rounded-lg md:rounded-xl">
                                                 <img
                                                     src="https://cdn-icons-png.flaticon.com/512/861/861506.png"
                                                     alt="Achievement"
-                                                    className="w-6 h-6 object-contain"
+                                                    className="w-5 h-5 md:w-6 md:h-6 object-contain"
                                                 />
                                             </div>
                                             Thành Tích
                                         </h3>
-                                        <p className="text-muted-foreground font-medium mt-1">Phân bố thứ hạng vinh quang</p>
+                                        <p className="text-muted-foreground font-medium mt-1 text-xs md:text-sm">Phân bố thứ hạng vinh quang</p>
                                     </div>
 
                                     <div className="space-y-8">
@@ -589,16 +575,16 @@ const UserStats = () => {
                                                 <div key={rank} className="group cursor-default">
                                                     <div className="flex items-center justify-between mb-3">
                                                         <div className="flex items-center gap-4">
-                                                            <div className={`w-12 h-12 rounded-2xl ${colors}/10 flex items-center justify-center font-black text-xl shadow-inner ${colors.replace("bg-", "text-")} transition-transform group-hover:scale-110 duration-500`}>
+                                                            <div className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl ${colors}/10 flex items-center justify-center font-black text-sm md:text-xl shadow-inner ${colors.replace("bg-", "text-")} transition-transform group-hover:scale-110 duration-500`}>
                                                                 {rank}
                                                             </div>
                                                             <div>
-                                                                <div className="font-black text-lg">Hạng {rank === 1 ? "Quán Quân" : rank === 2 ? "Á Quân 1" : "Á Quân 2"}</div>
+                                                                <div className="font-black text-sm md:text-lg">Hạng {rank === 1 ? "Quán Quân" : rank === 2 ? "Á Quân 1" : "Á Quân 2"}</div>
                                                             </div>
                                                         </div>
                                                         <div className="text-right">
-                                                            <div className="font-black text-xl text-foreground">{count} trận</div>
-                                                            <div className="text-[10px] text-muted-foreground/60 font-mono tracking-wider">{percentage.toFixed(1)}%</div>
+                                                            <div className="font-black text-sm md:text-xl text-foreground">{count} trận</div>
+                                                            <div className="text-[9px] md:text-[10px] text-muted-foreground/60 font-mono tracking-wider">{percentage.toFixed(1)}%</div>
                                                         </div>
                                                     </div>
                                                     <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden p-1 border border-white/5">
@@ -645,92 +631,92 @@ const UserStats = () => {
                         ) : (
                             <div className="bg-card/40 backdrop-blur-md border-2 border-white/5 shadow-2xl rounded-[2.5rem] overflow-hidden transition-all duration-500">
                                 <div className="overflow-x-auto">
-                                    <table className="w-full border-collapse min-w-[800px]">
+                                    <table className="w-full border-collapse min-w-[600px] md:min-w-[800px]">
                                         <thead>
                                             <tr className="border-b border-white/10 bg-white/5">
                                                 <th 
-                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-40 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    className="p-3 md:p-6 text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-24 md:w-40 cursor-pointer hover:bg-white/5 transition-colors"
                                                     onClick={() => handleSort('rank')}
                                                 >
-                                                    <div className="flex items-center justify-center gap-2">
+                                                    <div className="flex items-center justify-center gap-1 md:gap-2">
                                                         Thứ hạng
-                                                        <ArrowUpDown size={12} className={sortConfig.key === 'rank' ? "text-primary" : "opacity-30"} />
+                                                        <ArrowUpDown size={10} className={sortConfig.key === 'rank' ? "text-primary" : "opacity-30"} />
                                                     </div>
                                                 </th>
                                                 <th 
-                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-left cursor-pointer hover:bg-white/5 transition-colors"
+                                                    className="p-3 md:p-6 text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-left cursor-pointer hover:bg-white/5 transition-colors"
                                                     onClick={() => handleSort('quizName')}
                                                 >
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-1 md:gap-2">
                                                         Bộ Quiz
-                                                        <ArrowUpDown size={12} className={sortConfig.key === 'quizName' ? "text-primary" : "opacity-30"} />
+                                                        <ArrowUpDown size={10} className={sortConfig.key === 'quizName' ? "text-primary" : "opacity-30"} />
                                                     </div>
                                                 </th>
                                                 <th 
-                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-40 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    className="p-3 md:p-6 text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-24 md:w-40 cursor-pointer hover:bg-white/5 transition-colors"
                                                     onClick={() => handleSort('score')}
                                                 >
-                                                    <div className="flex items-center justify-center gap-2">
+                                                    <div className="flex items-center justify-center gap-1 md:gap-2">
                                                         Điểm số
-                                                        <ArrowUpDown size={12} className={sortConfig.key === 'score' ? "text-primary" : "opacity-30"} />
+                                                        <ArrowUpDown size={10} className={sortConfig.key === 'score' ? "text-primary" : "opacity-30"} />
                                                     </div>
                                                 </th>
                                                 <th 
-                                                    className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-left w-56 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    className="p-3 md:p-6 text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-left w-36 md:w-56 cursor-pointer hover:bg-white/5 transition-colors"
                                                     onClick={() => handleSort('createdAt')}
                                                 >
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-1 md:gap-2">
                                                         Thời gian
-                                                        <ArrowUpDown size={12} className={sortConfig.key === 'createdAt' ? "text-primary" : "opacity-30"} />
+                                                        <ArrowUpDown size={10} className={sortConfig.key === 'createdAt' ? "text-primary" : "opacity-30"} />
                                                     </div>
                                                 </th>
-                                                <th className="p-6 text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-32">Tác vụ</th>
+                                                <th className="p-3 md:p-6 text-[10px] md:text-xs font-black uppercase text-muted-foreground/60 tracking-wider font-mono text-center w-20 md:w-32">Tác vụ</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {filteredMatches.map((match: RecentMatch) => (
                                                 <tr key={match.id} className="border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-all duration-300 group">
-                                                    <td className="p-6 text-center">
+                                                    <td className="p-3 md:p-6 text-center">
                                                         {getRankBadge(match.rank)}
                                                     </td>
-                                                    <td className="p-6">
+                                                    <td className="p-3 md:p-6">
                                                         <div className="flex flex-col">
-                                                            <span className="text-lg font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">{match.quizName}</span>
-                                                            <div className="flex items-center gap-1.5 opacity-40">
-                                                                <Target className="w-3 h-3" />
-                                                                <span className="text-[10px] font-black uppercase tracking-widest leading-none">ID: {match.quizId}</span>
+                                                            <span className="text-sm md:text-lg font-black text-foreground group-hover:text-primary transition-colors line-clamp-2 md:line-clamp-1">{match.quizName}</span>
+                                                            <div className="flex items-center gap-1 md:gap-1.5 opacity-40">
+                                                                <Target className="w-2 h-2 md:w-3 md:h-3" />
+                                                                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest leading-none">ID: {match.quizId}</span>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="p-6 text-center">
+                                                    <td className="p-3 md:p-6 text-center">
                                                         <div className="flex flex-col items-center">
-                                                            <span className="text-2xl font-black text-foreground group-hover:text-primary group-hover:scale-110 transition-all">{match.score}</span>
-                                                            <span className="text-[10px] font-black uppercase text-muted-foreground/60">Điểm</span>
+                                                            <span className="text-lg md:text-2xl font-black text-foreground group-hover:text-primary group-hover:scale-110 transition-all">{match.score}</span>
+                                                            <span className="text-[8px] md:text-[10px] font-black uppercase text-muted-foreground/60">Điểm</span>
                                                         </div>
                                                     </td>
-                                                    <td className="p-6">
+                                                    <td className="p-3 md:p-6">
                                                         <div className="flex flex-col">
-                                                            <div className="flex items-center gap-2 text-foreground font-bold">
-                                                                <Clock className="w-3.5 h-3.5 text-primary" />
+                                                            <div className="flex items-center gap-1.5 md:gap-2 text-foreground font-bold text-xs md:text-sm">
+                                                                <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-primary" />
                                                                 {formatDate(match.createdAt).split(" ")[1]}
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-muted-foreground/60 font-mono text-[10px] mt-1">
-                                                                <Calendar size={12} className="opacity-50" />
+                                                            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground/60 font-mono text-[9px] md:text-[10px] mt-0.5 md:mt-1">
+                                                                <Calendar size={10} className="md:w-3 md:h-3 opacity-50" />
                                                                 {formatDate(match.createdAt).split(" ")[0]}
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="p-6 text-center">
+                                                    <td className="p-3 md:p-6 text-center">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="w-12 h-12 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm"
+                                                            className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleDownloadExcel(match.id);
                                                             }}
                                                         >
-                                                            <FileSpreadsheet className="w-6 h-6" />
+                                                            <FileSpreadsheet className="w-4 h-4 md:w-6 md:h-6" />
                                                         </Button>
                                                     </td>
                                                 </tr>

@@ -10,20 +10,9 @@ import { io, Socket } from "socket.io-client";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-type QuizQuestion = {
-    id?: string;
-    questionText: string;
-    questionType: string;
-    optionsData: any;
-};
-
-type QuizData = {
-    title: string;
-    description?: string;
-    suggestedCategory?: string;
-    questions: QuizQuestion[];
-};
+import { MessageSquare, Layout as LayoutIcon } from "lucide-react";
+import { QuizData, Question as QuizQuestion } from "@/components/agent/LiveCanvas";
+import { sanitizeError } from "@/lib/utils";
 
 type AgentUpdatePayload = {
     suggestedTitle?: string;
@@ -51,6 +40,7 @@ const AgenticQuizWorkspace = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [categories, setCategories] = useState<any[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+    const [activeTab, setActiveTab] = useState<"chat" | "canvas">("chat");
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -103,10 +93,11 @@ const AgenticQuizWorkspace = () => {
         });
 
         newSocket.on("error", (err) => {
-            showAlert({ title: "Lỗi", message: err.message, type: "error" });
+            const displayError = sanitizeError(err, "Không thể kết nối với Agent. Vui lòng thử lại.");
+            showAlert({ title: "Lỗi", message: displayError, type: "error" });
             setMessages((prev) => [
                 ...prev,
-                { role: "agent", text: `Mình gặp lỗi khi xử lý: ${err?.message || "Không rõ nguyên nhân"}. Bạn thử lại giúp mình nhé.` }
+                { role: "agent", text: `Mình gặp lỗi khi xử lý: ${displayError}. Bạn thử lại giúp mình nhé.` }
             ]);
             setIsGenerating(false);
         });
@@ -157,7 +148,7 @@ const AgenticQuizWorkspace = () => {
         } catch (err: any) {
             showAlert({ 
                 title: "Lỗi", 
-                message: err.response?.data?.message || "Không thể lưu quiz. Vui lòng thử lại.", 
+                message: sanitizeError(err, "Không thể lưu quiz. Vui lòng thử lại."), 
                 type: "error" 
             });
         } finally {
@@ -166,32 +157,48 @@ const AgenticQuizWorkspace = () => {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden">
+        <div className="flex flex-col h-screen lg:h-[calc(100vh-64px)] overflow-hidden bg-background">
             {/* Header */}
-            <header className="h-16 border-b border-white/10 flex items-center justify-between px-6 bg-white/10 backdrop-blur-xl shrink-0 z-20">
-                <div className="flex items-center gap-4">
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => navigate(-1)}
-                        className="rounded-xl hover:bg-white/5"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-lg font-black tracking-tight flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                            Không gian làm việc Agent
-                        </h1>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
-                            Bản vẽ Trực tiếp & Cố vấn AI
-                        </p>
+            <header className="h-auto lg:h-16 border-b border-white/10 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-6 py-3 lg:py-0 bg-white/10 backdrop-blur-xl shrink-0 z-20 gap-3">
+                <div className="flex items-center justify-between w-full lg:w-auto gap-4">
+                    <div className="flex items-center gap-2 lg:gap-4">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => navigate(-1)}
+                            className="rounded-xl hover:bg-white/5 h-9 w-9"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </Button>
+                        <div>
+                            <h1 className="text-sm lg:text-lg font-black tracking-tight flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-primary animate-pulse" />
+                                <span className="hidden sm:inline">Không gian Agent</span>
+                                <span className="sm:hidden">Agent</span>
+                            </h1>
+                            <p className="hidden xs:block text-[8px] lg:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                                Canvas & AI
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {/* Mobile Save Button (Visible only on very small screens if needed, otherwise in the second row) */}
+                    <div className="lg:hidden flex items-center gap-2">
+                        <Button 
+                            size="sm"
+                            className="bg-primary text-primary-foreground font-black px-4 rounded-xl shadow-lg shadow-primary/20 text-xs gap-1.5 h-9"
+                            onClick={handleSave}
+                            disabled={isSaving || isGenerating || !selectedCategoryId}
+                        >
+                            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                            Lưu
+                        </Button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between lg:justify-end w-full lg:w-auto gap-3">
                     <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                        <SelectTrigger className="w-[180px] h-10 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
+                        <SelectTrigger className="flex-1 lg:w-[180px] h-9 lg:h-10 rounded-xl bg-white/5 border-white/10 text-[11px] lg:text-xs font-bold">
                             <SelectValue placeholder="Chọn danh mục" />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-white/10 bg-card/95 backdrop-blur-3xl shadow-2xl">
@@ -204,7 +211,7 @@ const AgenticQuizWorkspace = () => {
                     </Select>
 
                     <Button 
-                        className="bg-primary text-primary-foreground font-black px-6 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all gap-2"
+                        className="hidden lg:flex bg-primary text-primary-foreground font-black px-6 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all gap-2"
                         onClick={handleSave}
                         disabled={isSaving || isGenerating || !selectedCategoryId}
                     >
@@ -215,18 +222,42 @@ const AgenticQuizWorkspace = () => {
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 flex overflow-hidden">
+            <main className="flex-1 flex overflow-hidden relative pb-16 lg:pb-0">
                 {/* Left Pane: Chat */}
-                <aside className="w-[400px] border-r border-white/5 bg-white/5 backdrop-blur-3xl flex flex-col relative z-10 shadow-2xl">
+                <aside className={`
+                    ${activeTab === 'chat' ? 'flex' : 'hidden'} 
+                    lg:flex lg:w-[400px] border-r border-white/5 bg-white/5 backdrop-blur-3xl flex-col relative z-10 shadow-2xl w-full
+                `}>
                     <AgentChat messages={messages} onSend={handleSendMessage} isGenerating={isGenerating} />
                 </aside>
 
                 {/* Right Pane: Live Canvas */}
-                <section className="flex-1 overflow-y-auto bg-transparent relative custom-scrollbar p-8">
-                    <div className="max-w-4xl mx-auto">
+                <section className={`
+                    ${activeTab === 'canvas' ? 'flex' : 'hidden'} 
+                    lg:flex flex-1 overflow-y-auto bg-transparent relative custom-scrollbar p-4 lg:p-8 w-full
+                `}>
+                    <div className="max-w-4xl mx-auto w-full">
                         <LiveCanvas quizData={quizData} isGenerating={isGenerating} />
                     </div>
                 </section>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around px-6 z-30">
+                    <button 
+                        onClick={() => setActiveTab('chat')}
+                        className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'chat' ? 'text-primary' : 'text-muted-foreground opacity-50'}`}
+                    >
+                        <MessageSquare className={`w-5 h-5 ${activeTab === 'chat' ? 'fill-primary/20' : ''}`} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">Hội thoại</span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('canvas')}
+                        className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'canvas' ? 'text-primary' : 'text-muted-foreground opacity-50'}`}
+                    >
+                        <LayoutIcon className={`w-5 h-5 ${activeTab === 'canvas' ? 'fill-primary/20' : ''}`} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">Bản vẽ</span>
+                    </button>
+                </nav>
             </main>
         </div>
     );

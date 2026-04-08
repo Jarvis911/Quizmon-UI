@@ -3,15 +3,17 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles, CheckCircle2, Circle, Pencil, MoreVertical, Trash2, Loader2 } from "lucide-react";
 
-interface Question {
-    id: string;
+export interface Question {
+    id?: string;
     questionText: string;
     questionType: string;
     optionsData: any;
 }
 
-interface QuizData {
+export interface QuizData {
     title: string;
+    description?: string;
+    suggestedCategory?: string;
     questions: Question[];
 }
 
@@ -32,13 +34,13 @@ const LiveCanvas = ({ quizData, isGenerating }: LiveCanvasProps) => {
     return (
         <div className="space-y-8 pb-32">
             {/* Quiz Info */}
-            <div className="text-center space-y-3 mb-12">
-                <h2 className="text-4xl font-black tracking-tighter text-foreground drop-shadow-sm">
+            <div className="text-center space-y-3 mb-8 lg:mb-12">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter text-foreground drop-shadow-sm px-4">
                     {quizData.title}
                 </h2>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[9px] lg:text-[10px] font-black uppercase tracking-widest border border-primary/20">
                     <Sparkles className="w-3 h-3" />
-                    Xem trước bản vẽ trực tiếp
+                    Bản vẽ trực tiếp
                 </div>
             </div>
 
@@ -56,8 +58,8 @@ const LiveCanvas = ({ quizData, isGenerating }: LiveCanvasProps) => {
                 )}
 
                 {quizData.questions.map((q, idx) => (
-                    <Card key={q.id || idx} className="p-8 rounded-4xl bg-white/40 backdrop-blur-3xl border border-white/20 shadow-2xl group transition-all hover:scale-[1.01] hover:border-primary/20">
-                        <div className="flex items-start justify-between mb-8">
+                    <Card key={q.id || idx} className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl lg:rounded-4xl bg-white/40 backdrop-blur-3xl border border-white/20 shadow-2xl group transition-all hover:scale-[1.01] hover:border-primary/20">
+                        <div className="flex items-start justify-between mb-4 lg:mb-8">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center text-lg font-black tabular-nums shadow-lg shadow-primary/20">
                                     {idx + 1}
@@ -74,7 +76,7 @@ const LiveCanvas = ({ quizData, isGenerating }: LiveCanvasProps) => {
                             </div>
                         </div>
 
-                        <h3 className="text-2xl font-black text-foreground mb-8 tracking-tight leading-tight">
+                        <h3 className="text-base sm:text-lg lg:text-2xl font-black text-foreground mb-6 lg:mb-8 tracking-tight leading-tight">
                             {q.questionText}
                         </h3>
 

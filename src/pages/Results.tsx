@@ -15,6 +15,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useModal } from "@/context/ModalContext";
+import { sanitizeError } from "@/lib/utils";
 import Fuse from "fuse.js";
 
 type SortOption = 
@@ -111,7 +112,7 @@ const Results = () => {
         } catch (err: any) {
             showAlert({
                 title: "Lỗi",
-                message: err.response?.data?.message || "Không thể tạo trận đấu",
+                message: sanitizeError(err, "Không thể tạo trận đấu"),
                 type: "error"
             });
         }
@@ -187,7 +188,7 @@ const Results = () => {
                 </div>
 
                 {/* Results List */}
-                <div className="space-y-0 border border-white/10 rounded-4xl overflow-hidden bg-card/40 backdrop-blur-3xl shadow-2xl shadow-black/20">
+                <div className="space-y-0 border border-white/10 rounded-4xl overflow-hidden bg-card dark:bg-slate-900 shadow-2xl shadow-black/20">
                     {isLoading ? (
                         <div className="p-20 text-center">
                             <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />

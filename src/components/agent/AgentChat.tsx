@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Sparkles, User, Loader2, Bot } from "lucide-react";
+import { Send, Sparkles, User, Loader2 } from "lucide-react";
 
 export interface Message {
     role: "user" | "agent";
@@ -37,8 +37,8 @@ const AgentChat = ({ messages, onSend, isGenerating }: AgentChatProps) => {
                 {messages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                         <div className={`max-w-[85%] flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center border ${msg.role === "user" ? "bg-primary/20 border-primary/20" : "bg-card border-white/10 shadow-lg"}`}>
-                                {msg.role === "user" ? <User className="w-4 h-4 text-primary" /> : <Bot className="w-4 h-4 text-primary" />}
+                            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center border ${msg.role === "user" ? "bg-primary/20 border-primary/20" : "bg-card border-white/10 shadow-lg overflow-hidden p-1"}`}>
+                                {msg.role === "user" ? <User className="w-4 h-4 text-primary" /> : <img src="/quizmon-icon.png" alt="Agent Icon" className="w-full h-full object-contain" />}
                             </div>
                             <div className={`p-4 rounded-2xl text-sm font-medium leading-relaxed tracking-tight shadow-sm
                                 ${msg.role === "user" 
@@ -53,8 +53,8 @@ const AgentChat = ({ messages, onSend, isGenerating }: AgentChatProps) => {
                 {isGenerating && (
                     <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="max-w-[85%] flex gap-3">
-                            <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-card border border-white/10 shadow-lg">
-                                <Bot className="w-4 h-4 text-primary animate-pulse" />
+                            <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-card border border-white/10 shadow-lg overflow-hidden p-1 animate-pulse">
+                                <img src="/quizmon-icon.png" alt="Agent Icon" className="w-full h-full object-contain" />
                             </div>
                             <div className="p-4 rounded-2xl bg-white/40 border border-white/10 rounded-tl-none backdrop-blur-md">
                                 <div className="flex gap-1">

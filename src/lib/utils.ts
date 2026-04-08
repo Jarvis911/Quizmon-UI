@@ -18,3 +18,25 @@ export function checkAuth(): boolean {
     }
     return true;
 }
+
+/**
+ * Sanitizes error messages by filtering out technical details and returning a user-friendly fallback.
+ * Original error is logged to the console for development debugging.
+ */
+export function sanitizeError(err: any, fallback: string): string {
+    console.error("Original Error Trace:", err);
+    
+    const rawMessage = err.response?.data?.message || err.response?.data?.error || err.message || "";
+    
+    if (!rawMessage) return fallback;
+
+    // Detect patterns that suggest a technical/developer error
+    // (e.g., specific API names, bracketed details, URLs, or generic system errors)
+    const isTechnical = /\[|\]|http|google|generative|503|404|stack|trace|internal|network|failed to respond|unavailable/i.test(rawMessage);
+
+    if (isTechnical) {
+        return fallback;
+    }
+
+    return rawMessage;
+}

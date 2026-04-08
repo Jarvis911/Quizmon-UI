@@ -29,7 +29,7 @@ const AIGenerationLimit: React.FC<AIGenerationLimitProps> = ({ used, limit, rene
                     </div>
                     <div className="flex items-baseline gap-2">
                         {isUnlimited ? (
-                             <span className="text-2xl font-black text-primary italic">Không giới hạn</span>
+                            <span className="text-2xl font-black text-primary italic">Không giới hạn</span>
                         ) : (
                             <>
                                 <span className="text-2xl font-black text-foreground">{used}</span>

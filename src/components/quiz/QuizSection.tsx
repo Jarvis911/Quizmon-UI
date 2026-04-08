@@ -80,7 +80,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
                         {quizzes.map((quiz) => (
                             <div 
                                 key={quiz.id} 
-                                className="flex-[0_0_75%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_18%] min-w-0"
+                                className="flex-[0_0_42%] sm:flex-[0_0_32%] md:flex-[0_0_22%] lg:flex-[0_0_18%] xl:flex-[0_0_15%] min-w-0 max-w-[240px] md:max-w-none"
                             >
                                 <QuizCard 
                                     quiz={quiz} 

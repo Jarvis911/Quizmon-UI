@@ -1,9 +1,7 @@
-import React from 'react';
-import { Star, Play, Edit3, BookOpen } from 'lucide-react';
+import { Star, Play, Pencil } from 'lucide-react';
 import { SiGoogleclassroom } from 'react-icons/si';
 import { MdImageNotSupported } from "react-icons/md";
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Quiz } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
@@ -12,6 +10,7 @@ interface QuizCardProps {
     onPlay: (id: string | number) => void;
     onEdit?: (id: string | number) => void;
     onAssign?: (id: string | number) => void;
+    onDelete?: (id: string | number) => void;
     isAiGenerated?: boolean;
     difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
 }
@@ -21,6 +20,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     onPlay,
     onEdit,
     onAssign,
+    onDelete,
     isAiGenerated = false,
     difficulty
 }) => {
@@ -65,8 +65,8 @@ const QuizCard: React.FC<QuizCardProps> = ({
                     )}
                 </div>
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
+                {/* Hover Overlay (Desktop) */}
+                <div className="hidden lg:flex absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center p-2">
                     <div className="flex flex-col gap-1.5 w-full animate-in zoom-in-95 duration-300">
                         <Button
                             onClick={() => onPlay(quiz.id)}
@@ -75,46 +75,90 @@ const QuizCard: React.FC<QuizCardProps> = ({
                             <Play className="w-3 h-3 mr-1 fill-current" /> CHƠI NGAY
                         </Button>
 
-                        {isOwner && (
+                        {(isOwner || (user && onAssign)) && (
                             <div className="flex flex-row gap-1 w-full">
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => onEdit?.(quiz.id)}
-                                    className="flex-1 h-8 px-1 rounded-lg bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[9px] uppercase tracking-tighter"
-                                >
-                                    <Edit3 className="w-3 h-3 mr-1" /> SỬA
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => onAssign?.(quiz.id)}
-                                    className="flex-1 h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
-                                >
-                                    <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
-                                </Button>
+                                {isOwner && (
+                                    <>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={() => onEdit?.(quiz.id)}
+                                            className="flex-1 h-8 px-1 rounded-lg bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[9px] uppercase tracking-tighter"
+                                        >
+                                            <Pencil className="w-3 h-3 mr-1" /> SỬA
+                                        </Button>
+                                    </>
+                                )}
+                                {!isOwner && user && onAssign && (
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => onAssign?.(quiz.id)}
+                                        className="w-full h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
+                                    >
+                                        <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
+                                    </Button>
+                                )}
                             </div>
+                        )}
+                        {isOwner && onAssign && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => onAssign?.(quiz.id)}
+                                className="w-full h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
+                            >
+                                <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
+                            </Button>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Content Container */}
-            <div className="p-3 flex flex-col grow">
-                <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm md:text-base line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+            <div className="p-2 md:p-3 flex flex-col grow">
+                <h3 className="font-black text-slate-800 dark:text-slate-100 text-xs md:text-sm line-clamp-2 md:line-clamp-2 mb-1 md:mb-2 group-hover:text-primary transition-colors leading-tight">
                     {quiz.title}
                 </h3>
 
-                <div className="mt-auto flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1">
-                        <span className="text-amber-500 font-bold text-xs">4.2</span>
-                        <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                <div className="mt-auto flex items-center justify-between gap-1 md:gap-2">
+                    <div className="flex items-center gap-0.5 md:gap-1">
+                        <span className="text-amber-500 font-bold text-[10px] md:text-xs">4.2</span>
+                        <Star className="w-3 h-3 md:w-4 md:h-4 fill-amber-500 text-amber-500" />
                     </div>
 
-                    <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase truncate max-w-[100px]">
-                        Bởi {quiz.creator?.username || 'Ẩn danh'}
+                    <div className="text-[8px] md:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase truncate max-w-[60px] md:max-w-[100px]">
+                        B. {quiz.creator?.username || 'Ẩn'}
                     </div>
+                </div>
+
+                {/* Mobile Action Buttons */}
+                <div className="flex lg:hidden flex-row gap-1 w-full mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <Button
+                        onClick={() => onPlay(quiz.id)}
+                        className="flex-1 h-7 p-0 md:h-8 md:px-2 min-w-0 justify-center rounded-md bg-primary hover:bg-primary/90 shadow-sm"
+                    >
+                        <Play className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0 fill-current" /> <span className="hidden md:inline font-black text-[10px] uppercase tracking-tight truncate">CHƠI</span>
+                    </Button>
+
+                    {isOwner && (
+                            <Button
+                                variant="outline"
+                                onClick={() => onEdit?.(quiz.id)}
+                                className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md"
+                            >
+                                <Pencil className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">SỬA</span>
+                            </Button>
+                    )}
+                    {user && onAssign && (
+                            <Button
+                                variant="outline"
+                                onClick={() => onAssign?.(quiz.id)}
+                                className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            >
+                                <SiGoogleclassroom className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">GIAO</span>
+                            </Button>
+                    )}
                 </div>
             </div>
         </div>
+
     );
 };
 

@@ -4,6 +4,7 @@ import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { sanitizeError } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Clock, AlertCircle, Sparkles, ChevronRight, ArrowLeft } from "lucide-react";
 import { SiGoogleclassroom } from "react-icons/si";
@@ -26,7 +27,7 @@ const HomeworkStart = () => {
                 setHomework(res.data);
                 setQuiz(res.data.quiz);
             } catch (err: any) {
-                setError(err.response?.data?.message || "Không thể tải thông tin bài tập.");
+                setError(sanitizeError(err, "Không thể tải thông tin bài tập."));
             } finally {
                 setLoading(false);
             }

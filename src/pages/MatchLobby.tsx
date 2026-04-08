@@ -356,12 +356,12 @@ const MatchLobby = () => {
     return (
         <div ref={rootRef} className="min-h-screen bg-background text-foreground font-quicksand overflow-x-hidden">
             {/* ── Fixed Header ── */}
-            <header className="sticky top-0 z-50 w-full bg-card/60 backdrop-blur-2xl border-b border-white/10 px-6 py-4 flex items-center justify-between shadow-sm">
-                <div className="cursor-pointer flex items-center h-10 lg:h-12" onClick={() => navigate('/')}>
+            <header className="sticky top-0 z-50 w-full bg-card/60 backdrop-blur-2xl border-b border-white/10 px-3 py-2 md:px-6 md:py-4 flex items-center justify-between shadow-sm">
+                <div className="cursor-pointer flex items-center h-8 md:h-10 lg:h-12" onClick={() => navigate('/')}>
                     <img src="/quizmon.png" alt="Quizmon Logo" className="h-full w-auto object-contain drop-shadow-sm" />
                 </div>
 
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-3 md:gap-8">
                     <div className="hidden md:flex flex-col items-center">
                         <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest leading-none mb-1">Mã tham gia</span>
                         <span className="text-2xl font-black text-primary tracking-wider font-mono leading-none">
@@ -369,44 +369,44 @@ const MatchLobby = () => {
                         </span>
                     </div>
 
-                    <div className="h-10 w-[1px] bg-white/10" />
+                    <div className="hidden md:block h-10 w-[1px] bg-white/10" />
 
-                    <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
-                        <Users className="w-5 h-5 text-primary" />
-                        <span className="text-xl font-black">{players.length}</span>
+                    <div className="flex items-center gap-2 md:gap-3 bg-white/5 px-3 md:px-4 py-1.5 md:py-2 rounded-xl md:rounded-2xl border border-white/5">
+                        <Users className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+                        <span className="text-base md:text-xl font-black">{players.length}</span>
                     </div>
 
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => toggleFullscreen(!showFullscreen)}
-                        className="rounded-xl hover:bg-white/10"
+                        className="rounded-lg md:rounded-xl hover:bg-white/10 h-8 w-8 md:h-10 md:w-10"
                     >
-                        {showFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                        {showFullscreen ? <Minimize className="w-4 h-4 md:w-5 md:h-5" /> : <Maximize className="w-4 h-4 md:w-5 md:h-5" />}
                     </Button>
                 </div>
             </header>
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
+            <div className="relative z-10 max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
                 {error && (
-                    <Alert variant="destructive" className="mb-6 max-w-xl mx-auto shadow-2xl border-none bg-destructive/10 backdrop-blur-md">
-                        <AlertDescription className="font-bold">{error}</AlertDescription>
+                    <Alert variant="destructive" className="mb-4 md:mb-6 max-w-xl mx-auto shadow-2xl border-none bg-destructive/10 backdrop-blur-md">
+                        <AlertDescription className="font-bold text-sm md:text-base">{error}</AlertDescription>
                     </Alert>
                 )}
 
                 {/* ── Main Grid ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8">
                     {/* ══════ Left Column ══════ */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-6 md:space-y-8">
                         {/* ── Connection Area: PIN & QR Code ── */}
-                        <div className="flex flex-col md:flex-row items-stretch gap-4 bg-card/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden group/join animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4 bg-card/40 backdrop-blur-3xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-4 md:p-6 shadow-2xl overflow-hidden group/join animate-in fade-in slide-in-from-top-4 duration-500">
                             {/* Visual PIN Display */}
                             <button
                                 onClick={copyRoomCode}
-                                className="flex-1 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 transition-all duration-300 hover:scale-[1.02] relative"
+                                className="flex-1 flex flex-col items-center justify-center gap-1 md:gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-6 transition-all duration-300 hover:scale-[1.02] relative"
                             >
-                                <span className="text-foreground/40 text-[10px] font-black uppercase tracking-widest">Mã phòng</span>
-                                <span className="text-5xl md:text-6xl font-black text-primary tracking-wider font-mono drop-shadow-sm">
+                                <span className="text-foreground/40 text-[8px] md:text-[10px] font-black uppercase tracking-widest hidden md:block">Mã phòng</span>
+                                <span className="text-5xl sm:text-6xl md:text-7xl font-black text-primary tracking-wider font-mono drop-shadow-sm min-h-[4rem]">
                                     {match?.pin || pin}
                                 </span>
                                 <span className="text-[10px] text-foreground/50 font-bold mt-1">
@@ -415,29 +415,29 @@ const MatchLobby = () => {
                             </button>
 
                             {/* QR Code & Share Link Section */}
-                            <div className="flex-1 flex flex-row items-center gap-6 bg-white/5 border border-white/10 rounded-3xl p-6">
+                            <div className="flex-1 flex flex-row items-center gap-4 md:gap-6 bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-6">
                                 {/* QR Code Canvas */}
-                                <div className="relative p-2 bg-white rounded-2xl shrink-0 shadow-lg flex items-center justify-center">
+                                <div className="relative p-2 bg-white rounded-xl md:rounded-2xl shrink-0 shadow-lg flex items-center justify-center">
                                     <QRCodeCanvas
                                         value={joinLink}
-                                        size={100}
+                                        size={90}
                                         level="H"
                                         includeMargin={false}
-                                        className="w-20 h-20 md:w-24 md:h-24 rounded-lg"
+                                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg"
                                     />
                                 </div>
 
                                 {/* Link & Instructions */}
-                                <div className="flex-1 flex flex-col justify-center gap-3 text-left">
+                                <div className="flex-1 flex flex-col justify-center gap-2 md:gap-3 text-left">
                                     <div className="space-y-1">
-                                        <h3 className="text-base font-black text-foreground">Tham gia nhanh</h3>
-                                        <p className="text-[11px] text-foreground/60 font-medium leading-tight">Quét mã QR hoặc sao chép đường dẫn trực tiếp.</p>
+                                        <h3 className="text-sm md:text-base font-black text-foreground">Tham gia nhanh</h3>
+                                        <p className="text-[10px] md:text-[11px] text-foreground/60 font-medium leading-tight">Quét mã QR hoặc sao chép đường dẫn trực tiếp.</p>
                                     </div>
 
                                     <Button
                                         onClick={copyJoinLink}
                                         size="sm"
-                                        className="w-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 font-black rounded-xl transition-all flex items-center justify-center gap-2"
+                                        className="w-full h-8 md:h-9 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 font-black rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
                                     >
                                         SAO CHÉP LINK
                                     </Button>
@@ -446,12 +446,12 @@ const MatchLobby = () => {
                         </div>
 
                         {/* ── Player List ── */}
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between px-2">
-                                <h2 className="text-2xl font-black text-foreground flex items-center gap-3">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/4960/4960731.png" className="w-8 h-8 object-contain" alt="Người chơi" />
+                        <div className="space-y-4 md:space-y-6">
+                            <div className="flex items-center justify-between px-1 md:px-2">
+                                <h2 className="text-lg md:text-2xl font-black text-foreground flex items-center gap-2 md:gap-3">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/4960/4960731.png" className="w-6 h-6 md:w-8 md:h-8 object-contain" alt="Người chơi" />
                                     Người chơi
-                                    <span className="text-sm font-black bg-primary/30 text-primary-foreground rounded-full px-4 py-1 ring-2 ring-primary/20">
+                                    <span className="text-xs md:text-sm font-black bg-primary/30 text-primary-foreground rounded-full px-2 py-0.5 md:px-4 md:py-1 ring-1 md:ring-2 ring-primary/20">
                                         {players.length}/20
                                     </span>
                                 </h2>
@@ -462,12 +462,12 @@ const MatchLobby = () => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="bg-card/70 border-white/20 text-foreground hover:bg-card/90 backdrop-blur-md font-extrabold shadow-lg rounded-xl"
+                                            className="bg-card/70 border-white/20 text-foreground hover:bg-card/90 backdrop-blur-md font-extrabold shadow-lg rounded-lg md:rounded-xl text-[10px] md:text-xs h-7 md:h-9 px-2 md:px-3"
                                         >
                                             Tuỳ chỉnh hồ sơ
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="bg-card/95 backdrop-blur-2xl border-white/10 max-w-sm rounded-3xl">
+                                    <DialogContent className="bg-card/95 backdrop-blur-2xl border-white/10 max-w-sm rounded-[2rem] p-4 md:p-6 w-[95vw]">
                                         <DialogHeader>
                                             <DialogTitle className="text-2xl font-black">Tuỳ chỉnh hồ sơ</DialogTitle>
                                         </DialogHeader>
@@ -516,29 +516,29 @@ const MatchLobby = () => {
                             </div>
 
                             {/* Player Cards Grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
                                 {players.map((p, idx) => (
                                     <div
                                         key={p.userId}
-                                        className="group relative bg-card/70 hover:bg-card/90 backdrop-blur-xl border border-white/20 rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20"
+                                        className="group relative bg-card/70 hover:bg-card/90 backdrop-blur-xl border border-white/20 rounded-xl md:rounded-2xl p-3 md:p-5 flex flex-col items-center gap-2 md:gap-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/20"
                                         style={{ animationDelay: `${idx * 0.05}s` }}
                                     >
                                         {match && p.userId === match.hostId && (
-                                            <span className="absolute -top-3 -right-3 text-3xl animate-bounce drop-shadow-md">👑</span>
+                                            <span className="absolute -top-2 -right-2 md:-top-3 md:-right-3 text-2xl md:text-3xl animate-bounce drop-shadow-md">👑</span>
                                         )}
-                                        <Avatar className="w-16 h-16 ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all shadow-lg overflow-hidden">
+                                        <Avatar className="w-12 h-12 md:w-16 md:h-16 ring-2 md:ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all shadow-lg overflow-hidden">
                                             {p.avatarUrl ? (
                                                 <AvatarImage src={getAvatarUrl(p.avatarUrl)} alt={p.displayName || p.username} className="object-cover" />
                                             ) : null}
-                                            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-black">
+                                            <AvatarFallback className="bg-primary text-primary-foreground text-sm md:text-xl font-black">
                                                 {(p.displayName || p.username || "?")[0].toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <span className="text-foreground font-bold truncate max-w-full text-center">
+                                        <span className="text-foreground font-bold truncate max-w-full text-center text-[10px] md:text-sm">
                                             {p.displayName || p.username}
                                         </span>
                                         {p.userId === user.id && (
-                                            <span className="text-[10px] uppercase tracking-wider font-black bg-primary/20 text-primary px-3 py-1 rounded-full">
+                                            <span className="text-[8px] md:text-[10px] uppercase tracking-wider font-black bg-primary/20 text-primary px-2 py-0.5 md:px-3 md:py-1 rounded-full">
                                                 Bạn
                                             </span>
                                         )}
@@ -549,12 +549,12 @@ const MatchLobby = () => {
                                 {[...Array(Math.max(0, 4 - players.length))].map((_, i) => (
                                     <div
                                         key={`empty-${i}`}
-                                        className="bg-card/30 border-2 border-dashed border-white/20 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[140px]"
+                                        className="bg-card/30 border-2 border-dashed border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 flex flex-col items-center justify-center gap-2 md:gap-3 min-h-[100px] md:min-h-[140px]"
                                     >
-                                        <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-                                            <span className="text-foreground/50 text-3xl font-black">?</span>
+                                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5">
+                                            <span className="text-foreground/30 text-xl md:text-3xl font-black">?</span>
                                         </div>
-                                        <span className="text-foreground/60 text-xs font-black uppercase tracking-widest">Đang chờ...</span>
+                                        <span className="text-foreground/40 text-[8px] md:text-xs font-black uppercase tracking-widest text-center">Đang chờ...</span>
                                     </div>
                                 ))}
                             </div>
@@ -562,12 +562,12 @@ const MatchLobby = () => {
                     </div>
 
                     {/* ══════ Right Column: Sidebar ══════ */}
-                    <div className="space-y-4 lg:sticky lg:top-28 self-start">
+                    <div className="flex flex-col gap-4 md:gap-6 lg:sticky lg:top-28 w-full lg:self-start">
                         {/* 1. Quiz Info Card - Compact */}
                         {quiz && (
-                            <Card className="bg-card/70 backdrop-blur-xl border-white/20 text-foreground overflow-hidden shadow-2xl transition-all hover:shadow-primary/10 rounded-[2rem]">
+                            <Card className="order-2 lg:order-1 bg-card/70 backdrop-blur-xl border-white/20 text-foreground overflow-hidden shadow-2xl transition-all hover:shadow-primary/10 rounded-3xl md:rounded-[2rem]">
                                 {quiz.image ? (
-                                    <div className="relative h-32 overflow-hidden group">
+                                    <div className="relative h-24 md:h-32 overflow-hidden group">
                                         <img
                                             src={quiz.image}
                                             alt={quiz.title}
@@ -576,25 +576,25 @@ const MatchLobby = () => {
                                         <div className="absolute inset-0 bg-linear-to-t from-card/80 via-transparent to-transparent" />
                                     </div>
                                 ) : (
-                                    <div className="h-16 bg-primary/20 flex items-center justify-center">
-                                        <span className="text-3xl">📚</span>
+                                    <div className="h-12 md:h-16 bg-primary/20 flex items-center justify-center">
+                                        <span className="text-2xl md:text-3xl">📚</span>
                                     </div>
                                 )}
-                                <CardHeader className="pb-2 pt-4 px-5 border-b border-white/5">
-                                    <CardTitle className="text-lg font-black tracking-tight line-clamp-1">{quiz.title}</CardTitle>
+                                <CardHeader className="pb-1 pt-3 md:pb-2 md:pt-4 px-4 md:px-5 border-b border-white/5">
+                                    <CardTitle className="text-base md:text-lg font-black tracking-tight line-clamp-1">{quiz.title}</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-3 py-3 px-5">
-                                    <CardDescription className="text-foreground/60 text-xs font-medium leading-relaxed line-clamp-2">
+                                <CardContent className="space-y-2 md:space-y-3 py-2 md:py-3 px-4 md:px-5">
+                                    <CardDescription className="text-foreground/60 text-[10px] md:text-xs font-medium leading-relaxed line-clamp-2">
                                         {quiz.description || "Hãy tham gia cùng mọi người để trải nghiệm bài trắc nghiệm này."}
                                     </CardDescription>
-                                    <div className="grid grid-cols-2 gap-3 pt-1">
-                                        <div className="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                                            <p className="text-[9px] uppercase font-bold text-foreground/40 mb-0.5">Câu hỏi</p>
-                                            <p className="font-black text-primary text-sm">{quiz.questions?.length || 0}</p>
+                                    <div className="grid grid-cols-2 gap-2 md:gap-3 pt-1">
+                                        <div className="bg-white/5 p-1.5 md:p-2 rounded-lg md:rounded-xl border border-white/5 text-center">
+                                            <p className="text-[8px] md:text-[9px] uppercase font-bold text-foreground/40 mb-0.5">Câu hỏi</p>
+                                            <p className="font-black text-primary text-xs md:text-sm">{quiz.questions?.length || 0}</p>
                                         </div>
-                                        <div className="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                                            <p className="text-[9px] uppercase font-bold text-foreground/40 mb-0.5">Chủ đề</p>
-                                            <p className="font-black text-foreground truncate px-1 text-sm">{quiz.category?.name || "N/A"}</p>
+                                        <div className="bg-white/5 p-1.5 md:p-2 rounded-lg md:rounded-xl border border-white/5 text-center">
+                                            <p className="text-[8px] md:text-[9px] uppercase font-bold text-foreground/40 mb-0.5">Chủ đề</p>
+                                            <p className="font-black text-foreground truncate px-1 text-xs md:text-sm">{quiz.category?.name || "N/A"}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -603,19 +603,26 @@ const MatchLobby = () => {
 
                         {/* 2. Host Controls */}
                         {isHost && (
-                            <div className="space-y-3">
+                            <div className="order-1 lg:order-2 flex gap-2 md:gap-3 w-full">
+                                <Button
+                                    onClick={startGame}
+                                    disabled={players.length < 1}
+                                    className="flex-1 h-12 md:h-14 text-sm md:text-lg font-black bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl md:rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                                >
+                                    BẮT ĐẦU!
+                                </Button>
+
                                 {/* Settings Dialog */}
                                 <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                                     <DialogTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="w-full h-12 bg-card/70 border-white/20 text-foreground hover:bg-card/90 backdrop-blur-md font-black shadow-lg shadow-black/10 rounded-2xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02]"
+                                            className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-card/70 border-white/20 text-foreground hover:bg-card/90 backdrop-blur-md shadow-lg shadow-black/10 rounded-xl md:rounded-2xl flex items-center justify-center p-0 transition-all hover:scale-[1.02]"
                                         >
-                                            <Settings className="w-4 h-4 text-primary" />
-                                            Thay đổi cài đặt
+                                            <Settings className="w-5 h-5 text-primary" />
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="bg-card/95 backdrop-blur-2xl border-white/10 max-w-md rounded-[2.5rem]">
+                                    <DialogContent className="bg-card/95 backdrop-blur-2xl border-white/10 max-w-md w-[95vw] p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem]">
                                         <DialogHeader>
                                             <DialogTitle className="text-2xl font-black">Cài đặt trận đấu</DialogTitle>
                                         </DialogHeader>
@@ -690,42 +697,32 @@ const MatchLobby = () => {
                                     </DialogContent>
                                 </Dialog>
 
-                                {/* Start & Cancel Game */}
-                                <div className="flex gap-3">
-                                    <Button
-                                        onClick={startGame}
-                                        disabled={players.length < 1}
-                                        className="flex-1 h-14 text-lg font-black bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
-                                    >
-                                        BẮT ĐẦU!
-                                    </Button>
-                                    <Button
-                                        onClick={cancelRoom}
-                                        variant="destructive"
-                                        className="h-14 px-5 font-black rounded-2xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-[10px]"
-                                    >
-                                        HỦY
-                                    </Button>
-                                </div>
+                                <Button
+                                    onClick={cancelRoom}
+                                    variant="destructive"
+                                    className="w-12 h-12 md:w-14 md:h-14 shrink-0 font-black rounded-xl md:rounded-2xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-[9px] md:text-[10px] p-0"
+                                >
+                                    HỦY
+                                </Button>
                             </div>
                         )}
 
                         {/* Non-host waiting message */}
                         {!isHost && (
-                            <div className="space-y-3">
+                            <div className="order-1 lg:order-2 flex flex-col sm:flex-row gap-2 md:gap-3">
                                 <Button
                                     onClick={leaveRoom}
                                     variant="outline"
-                                    className="w-full h-14 text-lg font-bold bg-white/5 border-white/10 text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xl"
+                                    className="order-2 sm:order-1 h-12 md:h-14 text-sm md:text-base font-bold bg-white/5 border-white/10 text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 rounded-xl md:rounded-2xl transition-all shadow-xl px-6 shrink-0"
                                 >
-                                    Thoát phòng
+                                    Thoát
                                 </Button>
-                                <div className="flex items-center justify-center gap-3 bg-primary/20 backdrop-blur-md rounded-2xl p-4 border-2 border-primary/40 shadow-inner">
+                                <div className="order-1 sm:order-2 flex flex-1 items-center justify-center gap-2 md:gap-3 bg-primary/20 backdrop-blur-md rounded-xl md:rounded-2xl p-3 md:p-4 border border-primary/40 shadow-inner">
                                     <div className="relative">
-                                        <div className="w-3 h-3 rounded-full bg-green-500 animate-ping absolute" />
-                                        <div className="w-3 h-3 rounded-full bg-green-500 relative" />
+                                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 animate-ping absolute" />
+                                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 relative" />
                                     </div>
-                                    <span className="text-[11px] font-black text-primary tracking-wide uppercase drop-shadow-sm">Đang chờ Host bắt đầu...</span>
+                                    <span className="text-[10px] md:text-[11px] font-black text-primary tracking-wide uppercase drop-shadow-sm">Đang chờ Host bắt đầu...</span>
                                 </div>
                             </div>
                         )}
@@ -737,31 +734,27 @@ const MatchLobby = () => {
                         navigate('/');
                     }
                 }}>
-                    <DialogContent className="sm:max-w-xl border-white/10 bg-card/95 backdrop-blur-2xl rounded-[2.5rem] p-8 shadow-2xl overflow-hidden">
-                        <DialogHeader className="space-y-4">
-                            <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-2">
-                                <span className="text-4xl">⚠️</span>
-                            </div>
-                            <DialogTitle className="text-3xl font-black text-foreground">Phát hiện trận đấu đang diễn ra!</DialogTitle>
-                            <DialogDescription className="text-lg text-foreground/70 font-medium leading-relaxed">
-                                Bạn đang có một phòng thi đấu khác chưa kết thúc (Phòng: <span className="font-black text-primary px-2 py-1 bg-primary/10 rounded-lg">{alreadyInMatchPin || alreadyInMatchId}</span>).
-                                <br /><br />
-                                Bạn muốn tiếp tục thi đấu ở phòng cũ, hay rời bỏ để tham gia phòng mới này?
+                    <DialogContent showCloseButton={false} className="w-[95vw] sm:max-w-sm border-white/10 bg-card/95 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl overflow-hidden text-center">
+                        <DialogHeader className="space-y-2">
+                            <DialogTitle className="text-xl md:text-2xl font-black text-foreground">Trận đấu đang diễn ra!</DialogTitle>
+                            <DialogDescription className="text-sm md:text-base text-foreground/70 font-medium leading-relaxed">
+                                Bạn có một phòng đang hoạt động (Phòng: <span className="font-black text-primary px-1.5 py-0.5 bg-primary/10 rounded-lg mx-1">{alreadyInMatchPin || alreadyInMatchId}</span>).
+                                <br />Tạo phòng mới sẽ xóa dữ liệu ở phòng cũ. Bạn muốn làm gì?
                             </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter className="flex flex-col sm:flex-row gap-4 mt-8">
+                        <DialogFooter className="flex flex-col gap-3 mt-6">
+                            <Button
+                                onClick={handleResign}
+                                className="w-full h-12 text-sm md:text-base font-black shadow-xl text-white bg-destructive hover:bg-destructive/90 rounded-xl transition-all"
+                            >
+                                Rời bỏ và làm mới
+                            </Button>
                             <Button
                                 variant="outline"
                                 onClick={handleReconnect}
-                                className="flex-1 h-14 text-lg font-black bg-white/5 border-white/10 text-foreground hover:bg-white/10 rounded-2xl transition-all shadow-lg"
+                                className="w-full h-12 text-sm md:text-base font-black bg-white/5 border-white/10 text-foreground hover:bg-white/10 rounded-xl transition-all shadow-lg"
                             >
                                 Quay về phòng cũ
-                            </Button>
-                            <Button
-                                onClick={handleResign}
-                                className="flex-1 h-14 text-lg font-black shadow-xl text-white bg-destructive hover:bg-destructive/90 rounded-2xl transition-all"
-                            >
-                                Rời bỏ & Vào phòng mới
                             </Button>
                         </DialogFooter>
                     </DialogContent>

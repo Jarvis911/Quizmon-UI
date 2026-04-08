@@ -63,48 +63,54 @@ function PromoBannerItem({ promo, onDismiss }: { promo: Promotion; onDismiss: (i
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="relative max-w-7xl mx-auto px-2 md:px-4 py-1.5 md:py-2 flex flex-row flex-nowrap items-center justify-between gap-2 overflow-hidden">
         {/* Left: icon + text */}
-        <div className="flex items-center gap-3 text-center sm:text-left">
-          <div>
-            <span className="font-black text-sm text-white drop-shadow-sm">{promo.title}</span>
+        <div className="flex items-center gap-1.5 shrink min-w-0">
+          <div className="min-w-0 truncate">
+            <span className="font-black text-[10px] sm:text-[11px] md:text-sm text-white drop-shadow-sm truncate">{promo.title}</span>
             {promo.subtitle && (
-              <span className="text-white/80 font-semibold text-xs ml-2">{promo.subtitle}</span>
+              <span className="hidden md:inline text-white/80 font-semibold text-xs ml-2 truncate">{promo.subtitle}</span>
             )}
           </div>
         </div>
 
-        {/* Center: countdown */}
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-white/70" />
-          <div className="flex gap-1.5 items-center">
-            {remaining.days > 0 && (
-              <CountdownUnit value={remaining.days} label="ngày" color={color} />
-            )}
-            <CountdownUnit value={remaining.hours} label="giờ" color={color} />
-            <span className="text-white/50 font-bold text-sm">:</span>
-            <CountdownUnit value={remaining.minutes} label="phút" color={color} />
-            <span className="text-white/50 font-bold text-sm">:</span>
-            <CountdownUnit value={remaining.seconds} label="giây" color={color} />
+        {/* Center & Right wrapper */}
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          {/* Center: countdown */}
+          <div className="flex items-center gap-1 md:gap-2">
+            <Clock className="hidden md:block w-4 h-4 text-white/70" />
+            <div className="flex gap-0.5 md:gap-1.5 items-center">
+              {remaining.days > 0 && (
+                <>
+                  <CountdownUnit value={remaining.days} label="ngày" color={color} />
+                  <span className="text-white/50 font-bold text-[9px] md:text-sm">:</span>
+                </>
+              )}
+              <CountdownUnit value={remaining.hours} label="giờ" color={color} />
+              <span className="text-white/50 font-bold text-[9px] md:text-sm">:</span>
+              <CountdownUnit value={remaining.minutes} label="phút" color={color} />
+              <span className="text-white/50 font-bold text-[9px] md:text-sm">:</span>
+              <CountdownUnit value={remaining.seconds} label="giây" color={color} />
+            </div>
           </div>
-        </div>
 
-        {/* Right: CTA + close */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate("/billing")}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-sm text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-            style={{ background: color }}
-          >
-            Xem ngay <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDismiss(promo.id)}
-            className="text-white/60 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-            aria-label="Đóng banner"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {/* Right: CTA + close */}
+          <div className="flex items-center gap-1.5 md:gap-3">
+            <button
+              onClick={() => navigate("/billing")}
+              className="flex items-center gap-0.5 md:gap-1 px-2 md:px-4 py-1 md:py-1.5 rounded-md md:rounded-xl font-black text-[9px] md:text-sm text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+              style={{ background: color }}
+            >
+              <span className="hidden sm:inline">Xem ngay</span><span className="sm:hidden">Xem</span> <ArrowRight className="w-2.5 h-2.5 md:w-4 md:h-4" />
+            </button>
+            <button
+              onClick={() => onDismiss(promo.id)}
+              className="text-white/60 hover:text-white transition-colors p-0.5 md:p-1 rounded-sm hover:bg-white/10 shrink-0"
+              aria-label="Đóng banner"
+            >
+              <X className="w-3.5 h-3.5 md:w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -115,7 +121,7 @@ function CountdownUnit({ value, label, color }: { value: number; label: string; 
   return (
     <div className="flex flex-col items-center">
       <span
-        className="font-black text-sm min-w-[28px] text-center px-1.5 py-0.5 rounded-md"
+        className="font-black text-[9px] md:text-sm min-w-[14px] md:min-w-[28px] text-center px-0.5 md:px-1.5 py-0 md:py-0.5 rounded-[2px] md:rounded-md leading-tight"
         style={{ background: `rgba(255,255,255,0.2)`, color: "#fff" }}
       >
         {String(value).padStart(2, "0")}

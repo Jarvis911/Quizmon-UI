@@ -15,6 +15,7 @@ interface Endpoints {
     quiz: (id: number) => string;
     quiz_rating: (id: number) => string;
     quiz_isRated: (id: number) => string;
+    quiz_delete: (id: number | string) => string;
 
     // Question
     question_buttons: string;
@@ -29,6 +30,7 @@ interface Endpoints {
     question_range: (id: number) => string;
     question_location: (id: number) => string;
     question_typeanswer: (id: number) => string;
+    question_delete: (id: number | string) => string;
 
     // Match
     matches: string;
@@ -109,6 +111,7 @@ const endpoints: Endpoints = {
     quiz: (id: number) => `${BASE_URL}/quiz/${id}`,
     quiz_rating: (id: number) => `${BASE_URL}/quiz/${id}/rating`,
     quiz_isRated: (id: number) => `${BASE_URL}/quiz/${id}/rated`,
+    quiz_delete: (id: number | string) => `${BASE_URL}/quiz/${id}`,
 
     // Question
     question_buttons: `${BASE_URL}/question/buttons`,
@@ -124,6 +127,7 @@ const endpoints: Endpoints = {
     question_range: (id: number) => `${BASE_URL}/question/range/${id}`,
     question_location: (id: number) => `${BASE_URL}/question/location/${id}`,
     question_typeanswer: (id: number) => `${BASE_URL}/question/typeanswer/${id}`,
+    question_delete: (id: number | string) => `${BASE_URL}/question/${id}`,
 
     // Match
     matches: `${BASE_URL}/match`,

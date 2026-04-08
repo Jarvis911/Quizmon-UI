@@ -43,6 +43,22 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {/* Main Navigation - Mobile Only */}
+          <div className="block lg:hidden mb-6 space-y-2 border-b border-white/10 pb-6">
+            <div className="px-2 mb-4">
+              <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Menu Chính</p>
+            </div>
+            <Button variant="ghost" onClick={() => { navigate("/"); onClose(); }} className="w-full justify-start h-12 rounded-2xl font-bold hover:bg-white/10 text-foreground text-left px-4">
+              <img src="https://cdn-icons-png.flaticon.com/512/2544/2544087.png" alt="Home" className="w-5 h-5 mr-3 object-contain" /> Trang chủ
+            </Button>
+            <Button variant="ghost" onClick={() => { navigate("/classrooms"); onClose(); }} className="w-full justify-start h-12 rounded-2xl font-bold hover:bg-white/10 text-foreground text-left px-4">
+              <img src="https://cdn-icons-png.flaticon.com/512/8388/8388104.png" alt="Classroom" className="w-5 h-5 mr-3 object-contain" /> Lớp học
+            </Button>
+            <Button variant="ghost" onClick={() => { navigate("/library"); onClose(); }} className="w-full justify-start h-12 rounded-2xl font-bold hover:bg-white/10 text-foreground text-left px-4">
+              <img src="https://cdn-icons-png.flaticon.com/512/3038/3038168.png" alt="Library" className="w-5 h-5 mr-3 object-contain" /> Thư viện
+            </Button>
+          </div>
+
           <div className="px-2 mb-4">
             <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Danh sách tổ chức</p>
           </div>

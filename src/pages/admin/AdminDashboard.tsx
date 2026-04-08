@@ -28,25 +28,25 @@ export default function AdminDashboard() {
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
             <div>
-                <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Tổng quan Dashboard</h1>
-                <p className="text-slate-500 dark:text-slate-400 font-medium">Chào mừng trở lại! Dưới đây là các số liệu quan trọng nhất.</p>
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Tổng quan Dashboard</h1>
+                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium">Chào mừng trở lại! Dưới đây là các số liệu quan trọng nhất.</p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
                 {cards.map((s, i) => (
-                    <div key={i} className="group relative rounded-4xl border border-white/10 bg-card/40 dark:bg-slate-900/40 p-8 shadow-xl backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
+                    <div key={i} className="group relative rounded-3xl md:rounded-4xl border border-white/10 bg-card/40 dark:bg-slate-900/40 p-6 md:p-8 shadow-xl backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <s.icon className="h-24 w-24" />
+                            <s.icon className="h-16 w-16 md:h-24 md:w-24" />
                         </div>
-                        <div className="flex items-center justify-between space-y-0 pb-4">
-                            <h3 className="tracking-tight text-sm font-black uppercase text-slate-500 dark:text-slate-400">{s.label}</h3>
-                            <div className={`p-3 rounded-2xl bg-white/50 dark:bg-white/5 shadow-inner`}>
-                                <s.icon className={`h-6 w-6 ${s.color}`} />
+                        <div className="flex items-center justify-between space-y-0 pb-2 md:pb-4">
+                            <h3 className="tracking-tight text-[10px] md:text-sm font-black uppercase text-slate-500 dark:text-slate-400">{s.label}</h3>
+                            <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/50 dark:bg-white/5 shadow-inner`}>
+                                <s.icon className={`h-4 w-4 md:h-6 md:w-6 ${s.color}`} />
                             </div>
                         </div>
-                        <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{s.value}</div>
+                        <div className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{s.value}</div>
                     </div>
                 ))}
             </div>

@@ -46,7 +46,7 @@ const questionSchema = z.object({
 });
 
 // If there is a question data, initialize with the question data
-const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
+const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDelete }) => {
   const { token } = useAuth();
   const { showAlert } = useModal();
   const [imageSrc, setImageSrc] = useState(null);
@@ -244,20 +244,24 @@ const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
         >
           {/* If media */}
           <div className="flex flex-col gap-3">
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-2 md:gap-4 w-full">
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
+                className="flex-1 md:flex-none h-8 md:h-10 text-[10px] sm:text-xs md:text-sm px-2 md:px-4"
                 onClick={() => form.setValue("mediaType", "IMAGE")}
               >
-                <ImageIcon className="mr-2" /> Thêm ảnh
+                <ImageIcon className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 shrink-0" /> <span className="truncate">Thêm ảnh</span>
               </Button>
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
+                className="flex-1 md:flex-none h-8 md:h-10 text-[10px] sm:text-xs md:text-sm px-2 md:px-4"
                 onClick={() => form.setValue("mediaType", "YOUTUBE")}
               >
-                <Youtube className="mr-2" /> Thêm video
+                <Youtube className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 shrink-0" /> <span className="truncate">Thêm video</span>
               </Button>
             </div>
 
@@ -398,9 +402,24 @@ const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange }) => {
               </Button>
             </div>
 
-            <Button type="submit" className="w-full">
-              {question ? "Cập nhật câu hỏi" : "Lưu câu hỏi"}
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1">
+                {question ? "Cập nhật câu hỏi" : "Lưu câu hỏi"}
+              </Button>
+              {question && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={onDelete}
+                  title="Xóa câu hỏi này"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
           </div>
         </form>
       </Form>

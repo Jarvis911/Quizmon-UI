@@ -141,7 +141,7 @@ export default function BillingPage() {
         billingCycle: "MONTHLY",
       });
       showAlert({
-        title: "🎉 Chúc mừng!",
+        title: "Chúc mừng!",
         message: "Bạn đã kích hoạt gói dịch vụ miễn phí thành công!",
         type: "success",
       });
@@ -188,28 +188,28 @@ export default function BillingPage() {
     );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 md:p-10 space-y-12">
+    <div className="max-w-6xl mx-auto p-4 md:p-10 space-y-8 md:space-y-12">
       {/* Promo Banner */}
       <PromoBanner />
 
-      <header className="text-center space-y-6">
-        <h1 className="text-5xl font-black tracking-tighter text-foreground drop-shadow-sm flex items-center justify-center gap-4">
+      <header className="text-center space-y-4 md:space-y-6">
+        <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-foreground drop-shadow-sm flex items-center justify-center gap-2 md:gap-4">
           <img
             src="https://cdn-icons-png.flaticon.com/512/3211/3211596.png"
             alt="Billing"
-            className="w-12 h-12 object-contain"
+            className="w-8 h-8 md:w-12 md:h-12 object-contain"
           />
           Gói dịch vụ & <span className="text-primary italic">Thanh toán</span>
         </h1>
-        <p className="text-xl text-muted-foreground font-bold max-w-2xl mx-auto">
+        <p className="text-sm md:text-xl text-muted-foreground font-bold max-w-2xl mx-auto">
           Nâng cấp sức mạnh cho lớp học của bạn với AI và không giới hạn lượt chơi.
         </p>
         <div className="flex justify-center">
           <Button
             onClick={() => setShowGuide(!showGuide)}
-            className={`flex items-center gap-2 border-2 border-primary/30 font-black h-12 px-6 rounded-2xl transition-all ${showGuide ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90' : 'text-primary bg-primary/10 hover:bg-primary/20 border-primary/20'}`}
+            className={`flex items-center gap-2 border-2 border-primary/30 font-black h-10 px-4 md:h-12 md:px-6 rounded-xl md:rounded-2xl transition-all text-xs md:text-base ${showGuide ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90' : 'text-primary bg-primary/10 hover:bg-primary/20 border-primary/20'}`}
           >
-            <HelpCircle size={20} />
+            <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
             {showGuide ? 'Đóng hướng dẫn' : 'Cách hoạt động?'}
           </Button>
         </div>
@@ -217,30 +217,30 @@ export default function BillingPage() {
 
       {/* Billing Guide Section */}
       {showGuide && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="bg-primary/5 border-2 border-primary/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
-            <h3 className="text-xl font-black text-primary mb-4 flex items-center gap-2">
-              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-6 h-6 object-contain" /> Nâng cấp theo Tổ chức
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-primary/5 border-2 border-primary/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group">
+            <h3 className="text-lg md:text-xl font-black text-primary mb-2 md:mb-4 flex items-center gap-2">
+              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-5 h-5 md:w-6 md:h-6 object-contain" /> Nâng cấp theo Tổ chức
             </h3>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
               Gói dịch vụ được áp dụng cho <strong className="font-black text-foreground">Tổ chức đang hoạt động</strong>. Hãy đảm bảo bạn đã chọn đúng tổ chức trước khi thanh toán.
             </p>
           </div>
 
-          <div className="bg-emerald-500/5 border-2 border-emerald-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
-            <h3 className="text-xl font-black text-emerald-500 mb-4 flex items-center gap-2">
-              <Sparkles size={24} /> Sức mạnh AI Pro
+          <div className="bg-emerald-500/5 border-2 border-emerald-500/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group">
+            <h3 className="text-lg md:text-xl font-black text-emerald-500 mb-2 md:mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 md:w-6 md:h-6" /> Sức mạnh AI Pro
             </h3>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
               Mở khóa <strong className="font-black text-foreground">không giới hạn</strong> lượt tạo Quiz bằng AI và tăng số lượng học sinh tham gia trận đấu lên đến hàng nghìn người.
             </p>
           </div>
 
-          <div className="bg-amber-500/5 border-2 border-amber-500/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
-            <h3 className="text-xl font-black text-amber-500 mb-4 flex items-center gap-2">
-              <Users size={24} /> Một người mua, cả đội dùng
+          <div className="bg-amber-500/5 border-2 border-amber-500/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group">
+            <h3 className="text-lg md:text-xl font-black text-amber-500 mb-2 md:mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 md:w-6 md:h-6" /> Một người mua, cả đội dùng
             </h3>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed relative z-10">
               Khi tổ chức được nâng cấp, <strong className="font-black text-foreground">mọi thành viên</strong> trong tổ chức đó đều được hưởng quyền lợi Premium mà không cần mua riêng lẻ.
             </p>
           </div>
@@ -250,19 +250,19 @@ export default function BillingPage() {
       {/* Organization Context / Guidance */}
       <section className="flex justify-center">
         {currentOrg ? (
-          <div className="w-full max-w-2xl bg-primary/5 backdrop-blur-md border-2 border-primary/20 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 shadow-xl shadow-primary/5">
-            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
-              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-10 h-10 object-contain drop-shadow-md" />
+          <div className="w-full max-w-2xl bg-primary/5 backdrop-blur-md border-2 border-primary/20 rounded-3xl p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 md:gap-6 shadow-xl shadow-primary/5">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-6 h-6 md:w-10 md:h-10 object-contain drop-shadow-md" />
             </div>
             <div className="flex-1 text-center md:text-left space-y-1">
-              <p className="text-xs font-black uppercase tracking-widest text-primary/60">Tổ chức đang chọn</p>
-              <h3 className="text-2xl font-black text-foreground">{currentOrg.name}</h3>
-              <p className="text-sm font-bold text-muted-foreground">Mọi giao dịch thanh toán sẽ được áp dụng cho tổ chức này.</p>
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary/60">Tổ chức đang chọn</p>
+              <h3 className="text-xl md:text-2xl font-black text-foreground">{currentOrg.name}</h3>
+              <p className="text-xs md:text-sm font-bold text-muted-foreground">Mọi giao dịch thanh toán sẽ được áp dụng cho tổ chức này.</p>
             </div>
             <div className="shrink-0 flex gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="rounded-xl font-bold border-primary/20 hover:bg-primary/10">
+                  <Button variant="outline" className="rounded-lg md:rounded-xl font-bold border-primary/20 hover:bg-primary/10 text-xs md:text-sm h-9 md:h-10">
                     Đổi tổ chức
                   </Button>
                 </DropdownMenuTrigger>
@@ -283,28 +283,28 @@ export default function BillingPage() {
                     onClick={() => setIsCreateModalOpen(true)}
                     className="rounded-xl font-bold text-primary cursor-pointer"
                   >
-                    Tạo tổ chức mới
+                     Tạo tổ chức mới
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-2xl bg-amber-500/10 backdrop-blur-md border-2 border-amber-500/20 rounded-3xl p-8 flex flex-col items-center text-center gap-6 shadow-xl shadow-amber-500/5">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
-              <AlertCircle className="text-amber-500 w-8 h-8" />
+          <div className="w-full max-w-2xl bg-amber-500/10 backdrop-blur-md border-2 border-amber-500/20 rounded-3xl p-6 md:p-8 flex flex-col items-center text-center gap-4 md:gap-6 shadow-xl shadow-amber-500/5">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
+              <AlertCircle className="text-amber-500 w-6 h-6 md:w-8 md:h-8" />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-black text-foreground">Chưa chọn tổ chức</h3>
-              <p className="text-muted-foreground font-bold">
+            <div className="space-y-1 md:space-y-2">
+              <h3 className="text-xl md:text-2xl font-black text-foreground">Chưa chọn tổ chức</h3>
+              <p className="text-muted-foreground font-bold text-xs md:text-sm">
                 Bạn cần phải tạo hoặc chọn một tổ chức để có thể đăng ký các gói dịch vụ.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full sm:w-auto">
               {organizations.length > 0 ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className="rounded-2xl font-black px-8 py-6 bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20">
+                    <Button className="rounded-xl md:rounded-2xl font-black px-6 py-4 md:px-8 md:py-6 bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 text-xs md:text-sm">
                       Chọn tổ chức sẵn có
                     </Button>
                   </DropdownMenuTrigger>
@@ -324,12 +324,12 @@ export default function BillingPage() {
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
                 variant={organizations.length > 0 ? "outline" : "default"}
-                className={`rounded-2xl font-black px-8 py-6 ${organizations.length === 0
+                className={`rounded-xl md:rounded-2xl font-black px-6 py-4 md:px-8 md:py-6 text-xs md:text-sm ${organizations.length === 0
                   ? "bg-primary hover:bg-primary/90 text-white"
                   : "border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
                   }`}
               >
-                Tạo tổ chức mới <ArrowRight className="ml-2 w-5 h-5" />
+                Tạo tổ chức mới <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
               </Button>
             </div>
           </div>
@@ -377,8 +377,8 @@ export default function BillingPage() {
 
       {/* Payment Method Selector */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-black text-foreground text-center">Chọn phương thức thanh toán</h2>
-        <div className="flex justify-center gap-4 flex-wrap">
+        <h2 className="text-xl md:text-2xl font-black text-foreground text-center">Chọn phương thức thanh toán</h2>
+        <div className="flex justify-center gap-3 md:gap-4 flex-wrap">
           {PAYMENT_METHODS.map((pm) => {
             const isSelected = selectedPayment === pm.key;
             return (
@@ -387,7 +387,7 @@ export default function BillingPage() {
                 onClick={() => pm.available && setSelectedPayment(pm.key)}
                 disabled={!pm.available}
                 className={`
-                  relative flex items-center gap-3 px-6 py-4 rounded-2xl border-2 font-bold text-sm transition-all duration-200
+                  relative flex items-center gap-2 md:gap-3 px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl border-2 font-bold text-xs md:text-sm transition-all duration-200
                   ${isSelected
                     ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 scale-105"
                     : pm.available
@@ -396,14 +396,14 @@ export default function BillingPage() {
                   }
                 `}
               >
-                <img src={pm.icon} alt={pm.label} className="w-6 h-6 rounded-md object-contain" />
+                <img src={pm.icon} alt={pm.label} className="w-5 h-5 md:w-6 md:h-6 rounded-sm md:rounded-md object-contain" />
                 <span className="text-foreground">{pm.label}</span>
                 {!pm.available && (
-                  <span className="absolute -top-2 -right-2 bg-muted text-muted-foreground text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-muted text-muted-foreground text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 md:px-2 py-0.5 rounded-full">
                     Sắp ra mắt
                   </span>
                 )}
-                {isSelected && <Check className="w-4 h-4 text-primary ml-1" />}
+                {isSelected && <Check className="w-3 h-3 md:w-4 md:h-4 text-primary ml-1" />}
               </button>
             );
           })}
@@ -419,7 +419,7 @@ export default function BillingPage() {
           return (
             <div
               key={plan.id}
-              className={`relative flex flex-col p-8 bg-card/40 backdrop-blur-xl border-2 rounded-5xl shadow-xl transition-all hover:-translate-y-2 ${activeSub?.planId === plan.id
+              className={`relative flex flex-col p-6 md:p-8 bg-card/40 backdrop-blur-xl border-2 rounded-[2rem] md:rounded-5xl shadow-xl transition-all hover:-translate-y-2 ${activeSub?.planId === plan.id
                 ? "border-primary ring-4 ring-primary/10"
                 : promo
                   ? "border-orange-400/50 ring-2 ring-orange-400/10"
@@ -428,7 +428,7 @@ export default function BillingPage() {
             >
               {/* Current plan badge */}
               {activeSub?.planId === plan.id && (
-                <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+                <span className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 md:px-4 py-1 md:py-1.5 rounded-full shadow-lg whitespace-nowrap">
                   Gói hiện tại
                 </span>
               )}
@@ -436,7 +436,7 @@ export default function BillingPage() {
               {/* Promotion badge */}
               {promo && activeSub?.planId !== plan.id && (
                 <span
-                  className="absolute -top-4 left-1/2 -translate-x-1/2 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1"
+                  className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 md:px-4 py-1 md:py-1.5 rounded-full shadow-lg flex items-center gap-1 whitespace-nowrap"
                   style={{ background: promo.bannerColor || "#0078D4" }}
                 >
                   <Gift className="w-3 h-3" />
@@ -445,44 +445,44 @@ export default function BillingPage() {
               )}
 
               {/* Price section */}
-              <div className="mb-8">
-                <h3 className="text-2xl font-black text-foreground mb-1">{plan.name}</h3>
+              <div className="mb-6 md:mb-8">
+                <h3 className="text-xl md:text-2xl font-black text-foreground mb-1">{plan.name}</h3>
                 <div className="flex items-baseline gap-1 flex-wrap">
                   {promo ? (
                     <>
-                      <span className="text-lg line-through text-muted-foreground/50 font-bold">
+                      <span className="text-sm md:text-lg line-through text-muted-foreground/50 font-bold">
                         {`${plan.priceMonthly.toLocaleString("vi-VN")}₫`}
                       </span>
-                      <span className="text-3xl font-black" style={{ color: promo.bannerColor || "#0078D4" }}>
+                      <span className="text-2xl md:text-3xl font-black" style={{ color: promo.bannerColor || "#0078D4" }}>
                         {isFree ? "MIỄN PHÍ" : `${effectivePrice.toLocaleString("vi-VN")}₫`}
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className="text-3xl font-black">
+                      <span className="text-2xl md:text-3xl font-black">
                         {selectedPayment === "MOMO"
                           ? `${plan.priceMonthly.toLocaleString("vi-VN")}₫`
                           : `$${plan.priceMonthly}`}
                       </span>
-                      <span className="text-muted-foreground font-bold">/tháng</span>
+                      <span className="text-xs md:text-sm text-muted-foreground font-bold">/tháng</span>
                     </>
                   )}
                 </div>
                 {promo && (
-                  <p className="text-[11px] font-bold mt-1" style={{ color: promo.bannerColor || "#0078D4" }}>
+                  <p className="text-[10px] md:text-[11px] font-bold mt-1" style={{ color: promo.bannerColor || "#0078D4" }}>
                     ⏰ Hết hạn: {new Date(promo.expiresAt).toLocaleDateString("vi-VN")}
                   </p>
                 )}
               </div>
 
               {/* Features list */}
-              <ul className="flex-1 space-y-4 mb-10">
+              <ul className="flex-1 space-y-3 md:space-y-4 mb-6 md:mb-10">
                 {plan.features.map((feat, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm font-bold">
+                  <li key={i} className="flex items-start gap-2 text-xs md:text-sm font-bold">
                     {feat.enabled ? (
-                      <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                      <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500 mt-0.5 shrink-0" />
                     ) : (
-                      <X className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
+                      <X className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500 mt-0.5 shrink-0" />
                     )}
                     <span className={feat.enabled ? "text-foreground" : "text-muted-foreground line-through opacity-50"}>
                       {feat.featureKey === "MAX_CLASSROOMS"
@@ -506,7 +506,7 @@ export default function BillingPage() {
               {isFree ? (
                 <Button
                   id={`free-plan-${plan.id}`}
-                  className="w-full py-6 rounded-2xl font-black text-lg text-white shadow-[0_8px_0_0_rgba(0,0,0,0.15)]"
+                  className="w-full py-4 md:py-6 rounded-xl md:rounded-2xl font-black text-sm md:text-lg text-white shadow-[0_8px_0_0_rgba(0,0,0,0.15)]"
                   style={{ background: promo!.bannerColor || "#0078D4" }}
                   disabled={activeSub?.planId === plan.id || freeCheckoutLoading !== null}
                   onClick={() => {
@@ -520,18 +520,18 @@ export default function BillingPage() {
                   }}
                 >
                   {freeCheckoutLoading === plan.id &&
-                    <Loader2 className="animate-spin mr-2" />
+                    <Loader2 className="animate-spin mr-2 w-4 h-4 md:w-5 md:h-5" />
                   }
                   {!currentOrg
-                    ? "Chọn tổ chức để nhận"
+                    ? "Chọn tổ chức"
                     : activeSub?.planId === plan.id
-                      ? "Đang sử dụng"
+                      ? "Đang dùng"
                       : "Nhận miễn phí!"}
                 </Button>
               ) : (
                 <Button
                   id={`buy-plan-${plan.id}`}
-                  className={`w-full py-6 rounded-2xl font-black text-lg ${activeSub?.planId === plan.id ? "bg-muted text-muted-foreground" : "shadow-[0_8px_0_0_rgba(0,0,0,0.1)]"
+                  className={`w-full py-4 md:py-6 rounded-xl md:rounded-2xl font-black text-sm md:text-lg ${activeSub?.planId === plan.id ? "bg-muted text-muted-foreground" : "shadow-[0_8px_0_0_rgba(0,0,0,0.1)]"
                     }`}
                   disabled={activeSub?.planId === plan.id || checkoutLoading !== null}
                   onClick={() => {
@@ -544,8 +544,8 @@ export default function BillingPage() {
                     handleSubscribe(plan.id);
                   }}
                 >
-                  {checkoutLoading === plan.id ? <Loader2 className="animate-spin mr-2" /> : null}
-                  {!currentOrg ? "Chọn tổ chức để mua" : activeSub?.planId === plan.id ? "Đang sử dụng" : "Nâng cấp ngay"}
+                  {checkoutLoading === plan.id ? <Loader2 className="animate-spin mr-2 w-4 h-4 md:w-5 md:h-5" /> : null}
+                  {!currentOrg ? "Chọn tổ chức" : activeSub?.planId === plan.id ? "Đang sử dụng" : "Nâng cấp ngay"}
                 </Button>
               )}
             </div>
@@ -572,18 +572,18 @@ function UsageCard({
   renewalDate?: string;
 }) {
   return (
-    <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-4xl p-6 shadow-lg flex flex-col gap-4">
-      <div className="flex items-center gap-6">
-        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center shadow-inner">{icon}</div>
+    <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-3xl md:rounded-4xl p-4 md:p-6 shadow-lg flex flex-col gap-3 md:gap-4">
+      <div className="flex items-center gap-4 md:gap-6">
+        <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center shadow-inner shrink-0">{icon}</div>
         <div>
-          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
-          <div className="flex items-baseline gap-2">
+          <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-0.5 md:mb-1">{label}</p>
+          <div className="flex items-baseline gap-1 md:gap-2">
             {limit === null ? (
-              <span className="text-3xl font-black text-primary italic">Không giới hạn</span>
+               <span className="text-xl md:text-3xl font-black text-primary italic">Không giới hạn</span>
             ) : (
               <>
-                <span className="text-3xl font-black text-foreground">{value}</span>
-                {limit !== undefined && <span className="text-muted-foreground font-bold">/ {limit}</span>}
+                 <span className="text-xl md:text-3xl font-black text-foreground">{value}</span>
+                 {limit !== undefined && <span className="text-xs md:text-base text-muted-foreground font-bold">/ {limit}</span>}
               </>
             )}
           </div>
@@ -591,8 +591,8 @@ function UsageCard({
       </div>
       {renewalDate && (
         <div className="pt-2 border-t border-white/5">
-          <p className="text-[10px] font-bold text-muted-foreground flex items-center gap-2">
-            <Calendar className="w-3 h-3" />
+          <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground flex items-center gap-1.5 md:gap-2">
+            <Calendar className="w-2.5 h-2.5 md:w-3 md:h-3" />
             Làm mới vào: {new Date(renewalDate).toLocaleDateString("vi-VN")}
           </p>
         </div>

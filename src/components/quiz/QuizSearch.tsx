@@ -115,7 +115,7 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
                         }
                     }}
                     placeholder={isNavbar ? "Tìm kiếm..." : "Tìm kiếm Quiz (Ví dụ: Toán học, Lịch sử...)"}
-                    className={`transition-all duration-300 bg-card/90 backdrop-blur-xl border-2 border-white/10 shadow-xl focus-visible:ring-0 focus:border-primary font-bold placeholder:text-muted-foreground placeholder:font-normal ${isNavbar
+                    className={`transition-all duration-300 bg-card border-2 border-white/10 shadow-xl focus-visible:ring-0 focus:border-primary font-bold placeholder:text-muted-foreground placeholder:font-normal ${isNavbar
                             ? `h-10 pl-10 rounded-full ${isExpanded ? "w-full opacity-100 pr-10" : "w-0 opacity-0 border-transparent shadow-none"}`
                             : "w-full pl-12 pr-12 h-14 text-lg rounded-2xl"
                         }`}
@@ -132,8 +132,13 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
 
             {/* Results Dropdown */}
             {isOpen && isExpanded && (query.trim() || results.length > 0) && (
-                <div className={`absolute top-full mt-3 left-0 right-0 max-h-[450px] overflow-y-auto bg-card border-2 border-white/10 rounded-3xl shadow-2xl z-100 animate-in fade-in slide-in-from-top-2 duration-300 ${isNavbar ? "md:w-[400px] w-[calc(100vw-2rem)]" : "w-full"
-                    }`}>
+                <div className={`
+                    ${isNavbar 
+                        ? "fixed top-20 left-2 right-2 md:absolute md:top-full md:left-0 md:right-auto md:mt-3 md:w-[400px]" 
+                        : "absolute top-full mt-3 left-0 right-0 w-full"
+                    } 
+                    max-h-[65vh] md:max-h-[450px] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl shadow-xl z-[100] animate-in fade-in slide-in-from-top-2 duration-300
+                `}>
                     <div className="p-2 space-y-1">
                         {results.length > 0 ? (
                             <>
@@ -176,7 +181,7 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="flex items-center gap-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity pr-1">
+                                        <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 group-hover/item:opacity-100 transition-opacity pr-1">
                                             <Button
                                                 size="sm"
                                                 variant="outline"

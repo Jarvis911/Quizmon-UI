@@ -63,14 +63,14 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f8fafc] p-6 relative overflow-hidden">
       {/* Back to Home Navigation */}
-      <div className="absolute top-8 left-8 z-20">
+      <div className="absolute top-4 left-4 sm:top-8 sm:left-8 z-20">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
           className="group flex items-center gap-2 font-black text-slate-400 hover:text-primary transition-colors"
         >
           <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform" />
-          Trở về trang chủ
+          <span className="hidden sm:inline">Trở về trang chủ</span>
         </Button>
       </div>
 
@@ -106,8 +106,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                 <input
-                  type="email"
-                  placeholder="name@example.com"
+                  type="text"
                   className="w-full bg-slate-50 border-2 border-slate-50 py-4 pl-12 pr-4 rounded-2xl text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

@@ -390,7 +390,7 @@ const MatchPlay = () => {
                 <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
                     <div className="bg-card/40 backdrop-blur-3xl rounded-4xl shadow-2xl overflow-hidden border border-white/10 p-10 max-w-md w-full text-center animate-in zoom-in-95 duration-500">
                         <div className="w-24 h-24 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-4 ring-primary/10">
-                            <span className="text-5xl font-black">🎉</span>
+                            <span className="text-5xl font-black"></span>
                         </div>
                         <h2 className="text-3xl font-black text-foreground mb-2 drop-shadow-sm">Hoàn thành!</h2>
                         <p className="text-foreground/60 font-bold mb-8 uppercase tracking-widest text-xs">Số điểm đạt được</p>
@@ -612,7 +612,7 @@ const MatchPlay = () => {
 
                 {/* ── Scoreboard Sidebar ── */}
                 {showScoreboard && sortedScores.length > 0 && (
-                    <div className="w-64 shrink-0 animate-in slide-in-from-right-8 duration-500">
+                    <div className="w-full lg:w-64 shrink-0 animate-in slide-in-from-right-8 duration-500">
                         <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sticky top-4 shadow-xl">
                             <h3 className="text-foreground/40 text-[10px] font-black uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
                                 Bảng xếp hạng

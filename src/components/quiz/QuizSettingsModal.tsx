@@ -1,11 +1,12 @@
 import { useState, useCallback, ChangeEvent, DragEvent, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/client";
 import Cropper, { Area } from "react-easy-crop";
-import { Upload, Loader2, Settings } from "lucide-react";
+import { Upload, Loader2, Settings, Trash2 } from "lucide-react";
 import { MdImageNotSupported } from "react-icons/md";
 import endpoints from "@/api/api";
 import { useModal } from "@/context/ModalContext";
@@ -60,6 +61,7 @@ interface QuizSettingsModalProps {
 const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettingsModalProps) => {
     const { token } = useAuth();
     const { showAlert } = useModal();
+    const navigate = useNavigate();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -211,6 +213,36 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
 
     const handleZoomChange = (e: ChangeEvent<HTMLInputElement>) => {
         setZoom(Number(e.target.value));
+    };
+
+    const handleDeleteQuiz = () => {
+        showAlert({
+            title: "Xác nhận xóa Quiz",
+            message: "Bạn có chắc chắn muốn xóa bài trắc nghiệm này? Toàn bộ dữ liệu sẽ bị xóa vĩnh viễn.",
+            type: "warning",
+            onConfirm: async () => {
+                try {
+                    setLoading(true);
+                    await apiClient.delete(endpoints.quiz_delete(quiz.id));
+                    onOpenChange(false);
+                    navigate("/library");
+                    showAlert({
+                        title: "Thành công",
+                        message: "Đã xóa bài trắc nghiệm.",
+                        type: "success"
+                    });
+                } catch (err) {
+                    console.error("Delete Quiz Error:", err);
+                    showAlert({
+                        title: "Lỗi",
+                        message: "Không thể xóa bài trắc nghiệm.",
+                        type: "error"
+                    });
+                } finally {
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     return (
@@ -390,15 +422,29 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                                 </div>
                             </div>
                             
-                            <div className="flex justify-end gap-2 pt-4 border-t">
-                                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
-                                    Hủy
+                            <div className="flex flex-col sm:flex-row sm:justify-between items-stretch sm:items-center pt-4 border-t gap-3 sm:gap-2">
+                                <Button 
+                                    type="button" 
+                                    variant="destructive" 
+                                    className="gap-2 w-full sm:w-auto order-last sm:order-first"
+                                    onClick={handleDeleteQuiz}
+                                    disabled={loading}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Xóa Quiz
                                 </Button>
-                                <Button type="submit" disabled={loading}>
-                                    {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                    Lưu thay đổi
-                                </Button>
+                                <div className="flex gap-2 w-full sm:w-auto">
+                                    <Button type="button" variant="outline" className="flex-1 sm:flex-none" onClick={() => onOpenChange(false)} disabled={loading}>
+                                        Hủy
+                                    </Button>
+                                    <Button type="submit" className="flex-1 sm:flex-none" disabled={loading}>
+                                        {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                        Lưu thay đổi
+                                    </Button>
+                                </div>
                             </div>
+
+
                         </form>
                     </Form>
                 </div>

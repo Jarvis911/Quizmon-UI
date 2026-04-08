@@ -21,6 +21,7 @@ import BillingSuccess from "./pages/BillingSuccess";
 import BillingCancel from "./pages/BillingCancel";
 import ProfileSettings from "./pages/ProfileSettings";
 import Library from "./pages/Library";
+import NotFound from "./pages/NotFound";
 
 // Admin Imports
 import AdminLayout from "./components/admin/AdminLayout";
@@ -130,7 +131,8 @@ const router = createBrowserRouter([
                     { path: "ai", element: <AdminAI /> },
                     { path: "promotions", element: <AdminPromotions /> },
                 ]
-            }
+            },
+            { path: "*", element: <NotFound /> }
         ]
     }
 ]);

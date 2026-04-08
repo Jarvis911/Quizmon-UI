@@ -17,6 +17,7 @@ import {
 import AIGenerationLimit from "@/components/AIGenerationLimit";
 import { useEffect } from "react";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { sanitizeError } from "@/lib/utils";
 
 const QUESTION_TYPES = [
     { value: "BUTTONS", label: "Trắc nghiệm (1 đáp án)", description: "Chọn 1 đáp án đúng" },
@@ -127,18 +128,14 @@ const AIQuizGenerator = () => {
                 navigate(`/ai/review/${res.data.id}`);
             });
         } catch (err: any) {
-            setError(
-                err.response?.data?.message ||
-                err.response?.data?.error ||
-                "Lỗi tạo quiz. Vui lòng thử lại."
-            );
+            setError(sanitizeError(err, "Lỗi tạo quiz. Vui lòng thử lại."));
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex justify-center px-4 py-4 min-h-[calc(100vh-80px)] items-center relative">
+        <div className="flex justify-center px-4 py-4 min-h-[calc(100vh-96px)] lg:min-h-[calc(100vh-80px)] items-center relative">
             {/* Loading Overlay */}
             {loading && (
                 <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
@@ -158,7 +155,7 @@ const AIQuizGenerator = () => {
             <div className="w-full max-w-5xl">
                 {/* Header */}
                 <div className="text-center mb-6 mt-4">
-                    <h1 className="text-4xl font-black text-foreground tracking-tighter mb-2 drop-shadow-md">
+                    <h1 className="text-3xl lg:text-4xl font-black text-foreground tracking-tighter mb-2 drop-shadow-md">
                         Tạo Quiz với AI
                     </h1>
                     <p className="text-muted-foreground font-bold max-w-lg mx-auto leading-relaxed text-sm">
@@ -168,7 +165,7 @@ const AIQuizGenerator = () => {
                         <Button
                             variant="outline"
                             onClick={() => navigate("/ai/agentic-workspace")}
-                            className="h-12 px-8 rounded-2xl border-2 border-primary/20 bg-primary/5 text-primary font-black hover:bg-primary/10 hover:border-primary/40 transition-all flex items-center gap-2 group shadow-xl shadow-primary/5"
+                            className="h-10 sm:h-12 px-4 sm:px-8 rounded-2xl border-2 border-primary/20 bg-primary/5 text-primary text-xs sm:text-sm font-black hover:bg-primary/10 hover:border-primary/40 transition-all flex items-center gap-2 group shadow-xl shadow-primary/5"
                         >
                             <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
                             Trải nghiệm Agent Workspace (Beta)
@@ -186,7 +183,7 @@ const AIQuizGenerator = () => {
                 </div>
 
                 {/* Main Card */}
-                <div className="bg-card/60 backdrop-blur-3xl rounded-4xl shadow-2xl border border-white/10 p-6 lg:p-8 relative overflow-hidden group">
+                <div className="bg-card/60 backdrop-blur-3xl rounded-3xl sm:rounded-4xl shadow-2xl border border-white/10 p-4 sm:p-6 lg:p-8 relative overflow-hidden group">
                     <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">

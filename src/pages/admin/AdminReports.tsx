@@ -34,17 +34,17 @@ export default function AdminReports() {
     if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
             <div className="relative">
-                <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Báo cáo kiểm duyệt</h1>
-                <p className="text-slate-500 dark:text-slate-400 font-medium">Xử lý các khiếu nại của người dùng về nội dung và hành vi trên hệ thống.</p>
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Báo cáo kiểm duyệt</h1>
+                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium">Xử lý các khiếu nại của người dùng về nội dung và hành vi.</p>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 bg-card/40 dark:bg-slate-900/40 p-6 rounded-4xl border border-white/10 backdrop-blur-md shadow-xl">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 bg-card/40 dark:bg-slate-900/40 p-4 md:p-6 rounded-3xl md:rounded-4xl border border-white/10 backdrop-blur-md shadow-xl">
                 <div className="flex-1">
                     <select 
-                        className="w-full h-12 px-6 rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                        className="w-full h-11 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
                     >
@@ -56,7 +56,7 @@ export default function AdminReports() {
                 </div>
                 <div className="flex-1">
                     <select 
-                        className="w-full h-12 px-6 rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                        className="w-full h-11 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
                         value={type}
                         onChange={(e) => setType(e.target.value)}
                     >
@@ -68,67 +68,69 @@ export default function AdminReports() {
                 </div>
             </div>
 
-            <div className="rounded-[2.5rem] border border-white/10 bg-card/30 dark:bg-slate-900/30 overflow-hidden backdrop-blur-md shadow-2xl">
-                <table className="w-full text-sm text-left border-collapse">
-                    <thead className="bg-white/10 dark:bg-white/5 border-b border-white/5">
-                        <tr>
-                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
-                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Loại</th>
-                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID Mục tiêu</th>
-                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Lý do</th>
-                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Trạng thái</th>
-                            <th className="px-8 py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {reports.map((report) => (
-                            <tr key={report.id} className="hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
-                                <td className="px-8 py-5 font-bold text-slate-500">{report.id}</td>
-                                <td className="px-8 py-5">
-                                    <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] rounded-full font-black uppercase tracking-wider border border-primary/10">
-                                        {report.reportType === 'QUIZ_CONTENT' ? 'QUIZ' : report.reportType === 'USER_BEHAVIOR' ? 'USER' : 'SYSTEM'}
-                                    </span>
-                                </td>
-                                <td className="px-8 py-5 text-primary dark:text-blue-400 font-mono font-bold tracking-tighter">{report.targetId}</td>
-                                <td className="px-8 py-5 max-w-xs truncate font-medium text-slate-600 dark:text-slate-300">{report.reason}</td>
-                                <td className="px-8 py-5">
-                                    <span className={`px-4 py-1 rounded-full font-black text-[10px] uppercase tracking-wider shadow-sm ${
-                                        report.status === 'PENDING' ? 'bg-amber-500/20 text-amber-600 border border-amber-500/20' :
-                                        report.status === 'RESOLVED' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
-                                        'bg-slate-500/20 text-slate-500 border border-slate-500/20'
-                                    }`}>
-                                        {report.status === 'PENDING' ? 'CHỜ XỬ LÝ' : report.status === 'RESOLVED' ? 'ĐÃ GIẢI QUYẾT' : 'ĐÃ BỎ QUA'}
-                                    </span>
-                                </td>
-                                <td className="px-8 py-5 text-right space-x-2">
-                                    {report.status === 'PENDING' && (
-                                        <div className="flex justify-end gap-2">
-                                            <button 
-                                                onClick={() => handleResolve(report.id, 'RESOLVED')}
-                                                title="Đánh dấu đã giải quyết"
-                                                className="text-emerald-500 hover:text-emerald-700 p-2.5 rounded-2xl hover:bg-emerald-500/10 transition-all"
-                                            >
-                                                <Check className="w-5 h-5" />
-                                            </button>
-                                            <button 
-                                                onClick={() => handleResolve(report.id, 'DISMISSED')}
-                                                title="Bỏ qua"
-                                                className="text-slate-500 hover:text-slate-700 p-2.5 rounded-2xl hover:bg-slate-500/10 transition-all"
-                                            >
-                                                <X className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                        {reports.length === 0 && (
+            <div className="rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-card/30 dark:bg-slate-900/30 overflow-hidden backdrop-blur-md shadow-2xl">
+                <div className="overflow-x-auto scrollbar-hide">
+                    <table className="w-full text-xs md:text-sm text-left border-collapse min-w-[800px] md:min-w-0">
+                        <thead className="bg-white/10 dark:bg-white/5 border-b border-white/5">
                             <tr>
-                                <td colSpan={6} className="px-8 py-20 text-center text-slate-500 font-bold">Không có báo cáo nào cần xem xét.</td>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Loại</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID Mục tiêu</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Lý do</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Trạng thái</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Hành động</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {reports.map((report) => (
+                                <tr key={report.id} className="hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
+                                    <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-slate-500">{report.id}</td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5">
+                                        <span className="px-2 md:px-3 py-1 bg-primary/10 text-primary text-[9px] md:text-[10px] rounded-full font-black uppercase tracking-wider border border-primary/10">
+                                            {report.reportType === 'QUIZ_CONTENT' ? 'QUIZ' : report.reportType === 'USER_BEHAVIOR' ? 'USER' : 'SYSTEM'}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5 text-primary dark:text-blue-400 font-mono font-bold tracking-tighter">{report.targetId}</td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5 max-w-[150px] md:max-w-xs truncate font-medium text-slate-600 dark:text-slate-300">{report.reason}</td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5">
+                                        <span className={`px-3 md:px-4 py-1 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-wider shadow-sm ${
+                                            report.status === 'PENDING' ? 'bg-amber-500/20 text-amber-600 border border-amber-500/20' :
+                                            report.status === 'RESOLVED' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
+                                            'bg-slate-500/20 text-slate-500 border border-slate-500/20'
+                                        }`}>
+                                            {report.status === 'PENDING' ? 'CHỜ XỬ LÝ' : report.status === 'RESOLVED' ? 'ĐÃ GIẢI QUYẾT' : 'ĐÃ BỎ QUA'}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5 text-right space-x-2">
+                                        {report.status === 'PENDING' && (
+                                            <div className="flex justify-end gap-1.5 md:gap-2">
+                                                <button 
+                                                    onClick={() => handleResolve(report.id, 'RESOLVED')}
+                                                    title="Đánh dấu đã giải quyết"
+                                                    className="text-emerald-500 hover:text-emerald-700 p-2 md:p-2.5 rounded-xl md:rounded-2xl hover:bg-emerald-500/10 transition-all"
+                                                >
+                                                    <Check className="w-4 h-4 md:w-5 md:h-5" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleResolve(report.id, 'DISMISSED')}
+                                                    title="Bỏ qua"
+                                                    className="text-slate-500 hover:text-slate-700 p-2 md:p-2.5 rounded-xl md:rounded-2xl hover:bg-slate-500/10 transition-all"
+                                                >
+                                                    <X className="w-4 h-4 md:w-5 md:h-5" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            {reports.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="px-4 md:px-8 py-10 md:py-20 text-center text-slate-500 font-bold">Không có báo cáo nào cần xem xét.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

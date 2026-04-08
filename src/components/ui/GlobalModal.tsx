@@ -23,15 +23,15 @@ const GlobalModal = () => {
   const getIcon = () => {
     switch (type) {
       case "success":
-        return <CheckCircle2 className="w-12 h-12 text-emerald-500" />;
+        return <CheckCircle2 className="w-8 h-8 md:w-12 md:h-12 text-emerald-500" />;
       case "error":
-        return <XCircle className="w-12 h-12 text-rose-500" />;
+        return <XCircle className="w-8 h-8 md:w-12 md:h-12 text-rose-500" />;
       case "warning":
-        return <AlertCircle className="w-12 h-12 text-amber-500" />;
+        return <AlertCircle className="w-8 h-8 md:w-12 md:h-12 text-amber-500" />;
       case "confirm":
-        return <HelpCircle className="w-12 h-12 text-primary" />;
+        return <HelpCircle className="w-8 h-8 md:w-12 md:h-12 text-primary" />;
       default:
-        return <Info className="w-12 h-12 text-blue-500" />;
+        return <Info className="w-8 h-8 md:w-12 md:h-12 text-blue-500" />;
     }
   };
 
@@ -39,15 +39,15 @@ const GlobalModal = () => {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md w-[90vw] md:w-full rounded-3xl p-6 md:p-6">
         <AlertDialogHeader className="items-center text-center sm:text-center">
-          <div className="mb-4 p-4 rounded-3xl bg-slate-50 border-2 border-slate-100/50 shadow-inner group-hover:scale-110 transition-transform">
+          <div className="mb-2 md:mb-4 p-3 md:p-4 rounded-2xl md:rounded-3xl bg-slate-50 border-2 border-slate-100/50 shadow-inner transition-transform">
             {getIcon()}
           </div>
-          <AlertDialogTitle className="text-3xl font-black text-slate-900 leading-tight">
+          <AlertDialogTitle className="text-xl md:text-3xl font-black text-slate-900 leading-tight">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-lg font-bold text-slate-500 mt-2 opacity-90 leading-relaxed">
+          <AlertDialogDescription className="text-sm md:text-lg font-bold text-slate-500 mt-1 md:mt-2 opacity-90 leading-relaxed">
             {message}
           </AlertDialogDescription>
         </AlertDialogHeader>

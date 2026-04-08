@@ -180,21 +180,21 @@ export default function AdminPromotions() {
     );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white flex items-center gap-3 tracking-tight">
+          <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white flex items-center gap-3 tracking-tight">
             Quản lý Khuyến Mãi
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">
-            Tạo và quản lý các chiến dịch quảng bá. <span className="font-bold text-indigo-500">Publish</span> để hiển thị banner trên giao diện người dùng.
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium mt-1 md:mt-2">
+            Tạo và quản lý các chiến dịch quảng bá.
           </p>
         </div>
         <Button
           id="create-promotion-btn"
           onClick={openCreate}
-          className="rounded-2xl font-black px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all flex items-center gap-2 h-auto"
+          className="rounded-xl md:rounded-2xl font-black px-6 md:px-8 py-3 md:py-4 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all flex items-center gap-2 h-auto text-sm md:text-base w-full md:w-auto justify-center"
         >
           <Plus className="w-5 h-5" />
           Tạo khuyến mãi
@@ -203,24 +203,24 @@ export default function AdminPromotions() {
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border-2 border-white/10 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-              <h2 className="text-xl font-black text-foreground">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border-2 border-white/10 rounded-2xl md:rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]">
+            <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-white/10 bg-white/5">
+              <h2 className="text-lg md:text-xl font-black text-foreground">
                 {editingId ? "Chỉnh sửa khuyến mãi" : "Tạo khuyến mãi mới"}
               </h2>
               <button
                 onClick={() => setShowForm(false)}
-                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-white/10"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-white/10"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-4 md:p-6 space-y-4 overflow-y-auto">
               {/* Title */}
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
                   Tiêu đề banner *
                 </label>
                 <input
@@ -228,13 +228,13 @@ export default function AdminPromotions() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="VD: Gói Giáo Viên - MIỄN PHÍ!"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
 
               {/* Subtitle */}
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
                   Subtitle
                 </label>
                 <input
@@ -242,20 +242,20 @@ export default function AdminPromotions() {
                   value={form.subtitle}
                   onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
                   placeholder="VD: Ưu đãi áp dụng đến hết tháng 9"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
 
               {/* Plan */}
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
                   Gói được khuyến mãi *
                 </label>
                 <select
                   id="promo-plan"
                   value={form.planId}
                   onChange={(e) => setForm({ ...form, planId: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 cursor-pointer"
+                  className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 cursor-pointer text-sm md:text-base appearance-none"
                 >
                   <option value="">-- Chọn gói --</option>
                   {plans.map((p) => (
@@ -267,10 +267,10 @@ export default function AdminPromotions() {
               </div>
 
               {/* Price row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
-                    Giá KM hàng tháng (₫)
+                  <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                    Giá hàng tháng (₫)
                   </label>
                   <input
                     id="promo-price-monthly"
@@ -278,12 +278,12 @@ export default function AdminPromotions() {
                     min="0"
                     value={form.discountedPriceMonthly}
                     onChange={(e) => setForm({ ...form, discountedPriceMonthly: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50"
+                    className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
-                    Giá KM hàng năm (₫)
+                  <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                    Giá hàng năm (₫)
                   </label>
                   <input
                     id="promo-price-yearly"
@@ -291,14 +291,14 @@ export default function AdminPromotions() {
                     min="0"
                     value={form.discountedPriceYearly}
                     onChange={(e) => setForm({ ...form, discountedPriceYearly: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50"
+                    className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm"
                   />
                 </div>
               </div>
 
               {/* Expires At */}
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
                   Ngày hết hạn *
                 </label>
                 <input
@@ -306,14 +306,14 @@ export default function AdminPromotions() {
                   type="datetime-local"
                   value={form.expiresAt}
                   onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50"
+                  className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm"
                 />
               </div>
 
               {/* Banner Color + Badge */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
                     Màu banner
                   </label>
                   <div className="flex gap-2 items-center">
@@ -321,32 +321,32 @@ export default function AdminPromotions() {
                       type="color"
                       value={form.bannerColor}
                       onChange={(e) => setForm({ ...form, bannerColor: e.target.value })}
-                      className="w-12 h-12 rounded-xl border-2 border-white/10 bg-transparent cursor-pointer"
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-xl border-2 border-white/10 bg-transparent cursor-pointer"
                     />
-                    <span className="text-sm font-bold text-muted-foreground">{form.bannerColor}</span>
+                    <span className="text-xs md:text-sm font-bold text-muted-foreground">{form.bannerColor}</span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
+                  <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1.5">
                     Badge text
                   </label>
                   <input
                     value={form.badgeText}
                     onChange={(e) => setForm({ ...form, badgeText: e.target.value })}
                     placeholder="KHUYẾN MÃI"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50"
+                    className="w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm"
                   />
                 </div>
               </div>
 
               {/* Published toggle */}
               <div
-                className="flex items-center gap-3 p-4 rounded-2xl cursor-pointer"
+                className="flex items-center gap-3 p-3 md:p-4 rounded-xl md:rounded-2xl cursor-pointer"
                 style={{ background: form.isPublished ? `${form.bannerColor}22` : "rgba(255,255,255,0.02)", border: `2px solid ${form.isPublished ? form.bannerColor + "55" : "rgba(255,255,255,0.05)"}` }}
                 onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
               >
                 <div
-                  className="w-10 h-6 rounded-full relative transition-all"
+                  className="w-10 h-6 rounded-full shrink-0 relative transition-all"
                   style={{ background: form.isPublished ? form.bannerColor : "rgba(255,255,255,0.1)" }}
                 >
                   <div
@@ -354,54 +354,51 @@ export default function AdminPromotions() {
                     style={{ left: form.isPublished ? "22px" : "4px" }}
                   />
                 </div>
-                <div>
-                  <p className="font-black text-sm text-foreground">Publish lên banner</p>
-                  <p className="text-xs text-muted-foreground font-semibold">
-                    {form.isPublished ? "Sẽ hiển thị banner trên trang chủ và trang billing." : "Chưa hiển thị cho người dùng."}
+                <div className="min-w-0 flex-1">
+                  <p className="font-black text-xs md:text-sm text-foreground">Publish lên banner</p>
+                  <p className="text-[10px] text-muted-foreground font-semibold truncate md:whitespace-normal">
+                    {form.isPublished ? "Sẽ hiển thị banner trên hệ thống." : "Chưa hiển thị cho người dùng."}
                   </p>
                 </div>
               </div>
 
-              {/* Banner Preview */}
+              {/* Banner Preview - Hide on very small screens or make it compact */}
               {form.title && (
-                <div className="rounded-2xl overflow-hidden border border-white/10">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 pt-2">
+                <div className="rounded-xl overflow-hidden border border-white/10">
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 pt-2">
                     Xem trước banner
                   </p>
                   <div
-                    className="p-3 flex items-center justify-between gap-3"
+                    className="p-2 md:p-3 flex items-center justify-between gap-2 md:gap-3"
                     style={{ background: `${form.bannerColor}22`, borderTop: `2px solid ${form.bannerColor}44` }}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center"
+                        className="w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center shrink-0"
                         style={{ background: form.bannerColor }}
                       >
-                        <Sparkles className="w-4 h-4 text-white" />
+                        <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-white" />
                       </div>
-                      <div>
-                        <span className="font-black text-sm">{form.title}</span>
-                        {form.subtitle && (
-                          <span className="text-xs text-muted-foreground font-semibold ml-2">{form.subtitle}</span>
-                        )}
+                      <div className="truncate">
+                        <span className="font-black text-[10px] md:text-sm">{form.title}</span>
                       </div>
                     </div>
                     <div
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-xs font-black"
+                      className="shrink-0 flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl text-white text-[9px] md:text-xs font-black"
                       style={{ background: form.bannerColor }}
                     >
-                      Xem ngay <ArrowRight className="w-3 h-3" />
+                      <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3 px-6 py-4 border-t border-white/10">
+            <div className="flex gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 border-t border-white/10 bg-white/5 mt-auto">
               <Button
                 variant="outline"
                 onClick={() => setShowForm(false)}
-                className="flex-1 rounded-2xl font-black"
+                className="flex-1 rounded-xl md:rounded-2xl font-black h-10 md:h-12 text-xs md:text-base"
               >
                 Hủy
               </Button>
@@ -409,31 +406,30 @@ export default function AdminPromotions() {
                 id="save-promotion-btn"
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 rounded-2xl font-black"
+                className="flex-1 rounded-xl md:rounded-2xl font-black h-10 md:h-12 text-xs md:text-base"
               >
-                {saving ? <Loader2 className="animate-spin mr-2" /> : <Check className="mr-2 w-4 h-4" />}
-                {editingId ? "Cập nhật" : "Tạo mới"}
+                {saving ? <Loader2 className="animate-spin mr-2" /> : <Check className="mr-2 w-3 h-3 md:w-4 md:h-4" />}
+                Lưu
               </Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Promotions Table */}
+      {/* Promotions List */}
       {promotions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Gift className="w-16 h-16 text-muted-foreground/30 mb-4" />
-          <p className="text-xl font-black text-muted-foreground">Chưa có khuyến mãi nào</p>
-          <p className="text-sm text-muted-foreground/60 mt-1">Tạo khuyến mãi đầu tiên để bắt đầu chiến dịch.</p>
+          <Gift className="w-12 md:w-16 h-12 md:h-16 text-muted-foreground/30 mb-4" />
+          <p className="text-lg md:text-xl font-black text-muted-foreground">Chưa có khuyến mãi nào</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           {promotions.map((promo) => {
             const expired = isExpired(promo.expiresAt);
             return (
               <div
                 key={promo.id}
-                className={`relative p-8 rounded-[2.5rem] border border-white/10 bg-card/40 dark:bg-slate-900/40 backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${promo.isPublished && !expired
+                className={`relative p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-card/40 dark:bg-slate-900/40 backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 transition-all duration-300 hover:border-indigo-500/30 ${promo.isPublished && !expired
                   ? "border-emerald-500/30 shadow-lg shadow-emerald-500/5"
                   : expired
                     ? "opacity-60 grayscale-[0.5]"
@@ -442,25 +438,27 @@ export default function AdminPromotions() {
               >
                 {/* Color indicator */}
                 <div
-                  className="w-2 h-full absolute left-0 top-0 bottom-0 rounded-l-3xl"
+                  className="w-1.5 md:w-2 h-full absolute left-0 top-0 bottom-0 rounded-l-3xl"
                   style={{ background: promo.bannerColor || "#0078D4" }}
                 />
 
-                <div className="flex-1 pl-2 space-y-1">
+                <div className="flex-1 pl-2 space-y-1 w-full">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-black text-foreground text-lg">{promo.title}</span>
-                    {promo.isPublished && !expired && (
-                      <span className="text-[10px] font-black uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
-                        Live
-                      </span>
-                    )}
-                    {expired && (
-                      <span className="text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
-                        Hết hạn
-                      </span>
-                    )}
+                    <span className="font-black text-foreground text-sm md:text-lg truncate max-w-[200px] md:max-w-none">{promo.title}</span>
+                    <div className="flex gap-1">
+                      {promo.isPublished && !expired && (
+                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          Live
+                        </span>
+                      )}
+                      {expired && (
+                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
+                          Hết hạn
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-4 text-xs font-bold text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row flex-wrap sm:gap-x-4 sm:gap-y-1 text-[10px] md:text-xs font-bold text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Gift className="w-3 h-3" />
                       {promo.plan.name}
@@ -470,20 +468,18 @@ export default function AdminPromotions() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      Hết hạn: {new Date(promo.expiresAt).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      Hết hạn: {new Date(promo.expiresAt).toLocaleDateString("vi-VN")}
                     </span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Publish toggle */}
+                <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end pt-2 md:pt-0 border-t border-white/5 md:border-none">
                   <button
                     id={`toggle-publish-${promo.id}`}
                     onClick={() => handleTogglePublish(promo)}
                     disabled={togglingId === promo.id || expired}
-                    title={promo.isPublished ? "Unpublish khỏi banner" : "Publish lên banner"}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all ${promo.isPublished
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] md:text-xs font-black transition-all ${promo.isPublished
                       ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                       : "bg-white/5 text-muted-foreground hover:bg-white/10"
                       } disabled:opacity-40 disabled:cursor-not-allowed`}
@@ -495,27 +491,23 @@ export default function AdminPromotions() {
                     ) : (
                       <EyeOff className="w-3 h-3" />
                     )}
-                    {promo.isPublished ? "Published" : "Unpublished"}
+                    <span className="hidden sm:inline">{promo.isPublished ? "Published" : "Unpublished"}</span>
                   </button>
 
-                  {/* Edit */}
                   <button
                     id={`edit-promo-${promo.id}`}
                     onClick={() => openEdit(promo)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
-                    title="Chỉnh sửa"
+                    className="p-2 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
 
-                  {/* Delete */}
                   <button
                     id={`delete-promo-${promo.id}`}
                     onClick={() => handleDelete(promo.id)}
-                    className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
-                    title="Xóa"
+                    className="p-2 md:p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
                 </div>
               </div>

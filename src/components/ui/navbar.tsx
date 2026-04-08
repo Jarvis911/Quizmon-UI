@@ -12,6 +12,7 @@ import endpoints, { getAvatarUrl } from "../../api/api";
 import { SiGoogleclassroom } from "react-icons/si";
 import QuizSearch from "../quiz/QuizSearch";
 import { Quiz } from "../../types";
+import { sanitizeError } from "../../lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ import {
   DropdownMenuPortal,
   DropdownMenuSubContent
 } from "./dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
 
 import OrgSwitcher from "../OrgSwitcher";
 import { useOrganization } from "../../context/OrganizationContext";
@@ -38,6 +40,8 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
   const [unreadCount, setUnreadCount] = useState(0);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [showMobileNotifs, setShowMobileNotifs] = useState(false);
+  const [showMobileThemes, setShowMobileThemes] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -120,7 +124,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
 
   // Determine variant based on route
   const isCompactVariant = useMemo(() => {
-    return location.pathname.startsWith('/quiz');
+    return location.pathname.startsWith('/quiz') || location.pathname.startsWith('/admin');
   }, [location.pathname]);
 
   useEffect(() => {
@@ -173,20 +177,58 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
       navigate(`/match/${res.data.id}/lobby`);
     } catch (err: any) {
       console.error(err);
-      const errorMessage = err.response?.data?.message || "Không thể tạo trận đấu. Vui lòng thử lại sau.";
       showAlert({
         title: "Lỗi",
-        message: errorMessage,
+        message: sanitizeError(err, "Không thể tạo trận đấu. Vui lòng thử lại sau."),
         type: "error"
       });
     }
   };
+
+  const renderNotificationContent = () => (
+    <>
+      <div className="flex items-center justify-between pl-4 pr-12 md:px-4 py-3 md:py-3 border-b border-foreground/10 bg-muted/30">
+        <span className="font-semibold text-sm">Thông báo</span>
+        {unreadCount > 0 && (
+          <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead} className="h-auto p-0 text-xs text-primary hover:text-primary/80 hover:bg-transparent px-1">
+            <Check className="w-3 h-3 mr-1" /> Đánh dấu đã đọc
+          </Button>
+        )}
+      </div>
+      <div className="max-h-60 md:max-h-80 overflow-y-auto w-full">
+        {notifications.length === 0 ? (
+          <div className="p-4 md:p-6 text-center text-sm text-foreground/50 w-full">
+            Chưa có thông báo nào.
+          </div>
+        ) : (
+          notifications.map((notif) => (
+            <div
+              key={notif.id}
+              onClick={() => handleNotificationClick(notif)}
+              className={`flex flex-col items-start gap-1 p-2 md:p-3 cursor-pointer transition-colors border-b border-foreground/5 last:border-0 hover:bg-muted/50 w-full ${!notif.isRead ? 'bg-primary/5' : ''}`}
+            >
+              <div className="flex gap-2 w-full justify-between items-start">
+                <span className={`text-sm leading-tight text-left break-words line-clamp-3 ${!notif.isRead ? 'font-semibold text-foreground' : 'text-foreground/80'}`}>
+                  {notif.message}
+                </span>
+                {!notif.isRead && <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />}
+              </div>
+              <span className="text-[10px] text-foreground/50 mt-1 text-left">
+                {new Date(notif.createdAt).toLocaleString('vi-VN')}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+    </>
+  );
+
   return (
     <nav
       className={`fixed top-0 left-0 w-full flex justify-center z-50 transition-all duration-300
         ${scrolled ? "shadow-md backdrop-blur-2xl bg-background/80 border-b border-foreground/5 py-1" : "bg-transparent py-2"}`}
     >
-      <div className={`w-full max-w-7xl flex items-center justify-between px-4 md:px-8 transition-all duration-300 ${isCompactVariant ? "h-12" : scrolled ? "h-14 lg:h-16" : "h-20 lg:h-24"}`}>
+      <div className={`w-full max-w-7xl flex items-center justify-between px-4 md:px-8 transition-all duration-300 ${location.pathname.startsWith('/admin') ? "h-16" : isCompactVariant ? "h-12" : scrolled ? "h-14 lg:h-16" : "h-20 lg:h-24"}`}>
         {/* Left - Logo */}
         <div className="flex items-center gap-2 md:gap-4">
         {token && !isCompactVariant && (
@@ -244,9 +286,8 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           {/* Join Form */}
           <div className={`flex flex-row gap-2 max-w-md ml-auto justify-end transition-opacity duration-300 ${isSearchExpanded ? 'opacity-0 pointer-events-none w-0' : 'opacity-100'}`}>
             <Button
-              className="text-sm md:text-base font-black px-6 whitespace-nowrap"
+              className="text-[10px] sm:text-xs md:text-base font-black px-2.5 sm:px-4 md:px-6 h-7 sm:h-8 md:h-10 whitespace-nowrap"
               variant="outline"
-              size="default"
               onClick={handleJoinCode}>Tham gia đấu</Button>
           </div>
         </div>
@@ -257,67 +298,63 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
 
         {token ? (
           <div className="flex items-center gap-3">
-            {/* Notification Bell */}
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <div className="relative cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors">
-                  <img 
-                    src="https://cdn-icons-png.flaticon.com/512/1156/1156949.png" 
-                    alt="Notifications" 
-                    className="w-6 h-6 object-contain transition-colors brightness-100 invert" 
-                  />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-background">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 p-0 shadow-xl overflow-hidden rounded-xl border-white/20 bg-background/95 backdrop-blur-xl">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/10 bg-muted/30">
-                  <span className="font-semibold text-sm">Thông báo</span>
-                  {unreadCount > 0 && (
-                    <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead} className="h-auto p-0 text-xs text-primary hover:text-primary/80 hover:bg-transparent px-1">
-                      <Check className="w-3 h-3 mr-1" /> Đánh dấu đã đọc
-                    </Button>
-                  )}
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="p-6 text-center text-sm text-foreground/50">
-                      Chưa có thông báo nào.
-                    </div>
-                  ) : (
-                    notifications.map((notif) => (
-                      <div
-                        key={notif.id}
-                        onClick={() => handleNotificationClick(notif)}
-                        className={`flex flex-col items-start gap-1 p-3 cursor-pointer transition-colors border-b border-foreground/5 last:border-0 hover:bg-muted/50 ${!notif.isRead ? 'bg-primary/5' : ''}`}
-                      >
-                        <div className="flex gap-2 w-full justify-between items-start">
-                          <span className={`text-sm leading-tight ${!notif.isRead ? 'font-semibold text-foreground' : 'text-foreground/80'}`}>
-                            {notif.message}
-                          </span>
-                          {!notif.isRead && <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />}
-                        </div>
-                        <span className="text-[10px] text-foreground/50 mt-1">
-                          {new Date(notif.createdAt).toLocaleString('vi-VN')}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Notification Bell (Desktop Only) */}
+            <div className="hidden md:block">
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <div className="relative cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors">
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/1156/1156949.png" 
+                      alt="Notifications" 
+                      className="w-6 h-6 object-contain transition-colors brightness-100 invert" 
+                    />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-background">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 p-0 shadow-xl overflow-hidden rounded-xl border-white/20 bg-background/95 backdrop-blur-xl">
+                  {renderNotificationContent()}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
+            {/* Avatar Dropdown */}
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Avatar className="cursor-pointer ring-2 ring-white/50 hover:ring-white transition-all shadow-md">
-                  <AvatarImage className="object-cover" src={getAvatarUrl(user?.avatarUrl)} alt="@user" />
-                  <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="cursor-pointer ring-2 ring-white/50 hover:ring-white transition-all shadow-md">
+                    <AvatarImage className="object-cover" src={getAvatarUrl(user?.avatarUrl)} alt="@user" />
+                    <AvatarFallback className={undefined}>{user?.username?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                  {unreadCount > 0 && (
+                    <span className="md:hidden absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background pointer-events-none" />
+                  )}
+                </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10">
+              <DropdownMenuContent align="end" className="w-[85vw] max-w-64 bg-card/95 backdrop-blur-xl border-white/10">
+                
+                {/* Mobile Notification Trigger */}
+                <div className="md:hidden">
+                  <DropdownMenuItem onClick={() => setShowMobileNotifs(true)} className="cursor-pointer font-bold text-foreground focus:bg-primary/10">
+                    <div className="flex items-center w-full">
+                      <img 
+                        src="https://cdn-icons-png.flaticon.com/512/1156/1156949.png" 
+                        alt="Notifications Mobile" 
+                        className="w-5 h-5 mr-3 object-contain brightness-100 invert" 
+                      />
+                      Thông báo
+                      {unreadCount > 0 && (
+                        <span className="ml-auto bg-red-500 text-white rounded-full px-2 py-0.5 text-[10px] font-black mr-2 shadow-sm">
+                          {unreadCount > 9 ? '9+' : unreadCount} mới
+                        </span>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/10 my-1" />
+                </div>
                 <DropdownMenuItem onClick={handleNavigateUserStatistics} className="cursor-pointer font-bold text-foreground hover:bg-primary/10" inset={undefined}>
                   <img 
                     src="https://cdn-icons-png.flaticon.com/512/2972/2972415.png" 
@@ -373,31 +410,47 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
 
 
                 <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer font-bold text-foreground">
+                
+                {/* Mobile Theme Trigger */}
+                <div className="md:hidden">
+                  <DropdownMenuItem onClick={() => setShowMobileThemes(true)} className="cursor-pointer font-bold text-foreground">
                     <img 
                       src="https://cdn-icons-png.flaticon.com/512/3308/3308315.png" 
                       alt="Theme" 
                       className="w-5 h-5 mr-2 object-contain" 
                     />
                     Đổi Giao Diện
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      {BACKGROUND_THEMES.map((theme) => (
-                        <DropdownMenuItem
-                          key={theme.id}
-                          onClick={() => handleThemeChange(theme.id)}
-                          className={`cursor-pointer mb-1 flex items-center gap-2 ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : ''}`}
-                          inset={undefined}
-                        >
-                          <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
-                          {theme.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
+                  </DropdownMenuItem>
+                </div>
+
+                {/* Desktop Theme SubMenu */}
+                <div className="hidden md:block">
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="cursor-pointer font-bold text-foreground">
+                      <img 
+                        src="https://cdn-icons-png.flaticon.com/512/3308/3308315.png" 
+                        alt="Theme" 
+                        className="w-5 h-5 mr-2 object-contain" 
+                      />
+                      Đổi Giao Diện
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        {BACKGROUND_THEMES.map((theme) => (
+                          <DropdownMenuItem
+                            key={theme.id}
+                            onClick={() => handleThemeChange(theme.id)}
+                            className={`cursor-pointer mb-1 flex items-center gap-2 ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : ''}`}
+                            inset={undefined}
+                          >
+                            <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
+                            {theme.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -413,6 +466,36 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
         )}
       </div>
       </div>
+
+      {/* Mobile Modals Overlay */}
+      <Dialog open={showMobileNotifs} onOpenChange={setShowMobileNotifs}>
+        <DialogContent className="w-[95vw] max-w-sm rounded-2xl p-0 overflow-hidden bg-background/95 backdrop-blur-xl border-white/20">
+          {renderNotificationContent()}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMobileThemes} onOpenChange={setShowMobileThemes}>
+        <DialogContent className="w-[90vw] max-w-sm rounded-2xl p-6 bg-background/95 backdrop-blur-xl border-white/20">
+          <DialogHeader className="mb-4">
+            <DialogTitle>Đổi Giao Diện</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            {BACKGROUND_THEMES.map((theme) => (
+              <button
+                key={theme.id}
+                onClick={() => {
+                  handleThemeChange(theme.id);
+                  setShowMobileThemes(false);
+                }}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : 'hover:bg-foreground/5'}`}
+              >
+                <div className={`w-6 h-6 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
+                {theme.name}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   )
 }

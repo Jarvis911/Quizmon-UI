@@ -65,7 +65,7 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
     }
   }, [timer, isSubmitted, mode, selectedIds]);
 
-  const wrapperClass = `w-full max-w-5xl mx-auto flex flex-row gap-6 p-4 relative transition-all duration-300 ${isWrong ? "animate-shake" : ""}`;
+  const wrapperClass = `w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-6 p-4 relative transition-all duration-300 ${isWrong ? "animate-shake" : ""}`;
 
   return (
     <div className={wrapperClass}>
