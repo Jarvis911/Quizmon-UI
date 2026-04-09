@@ -141,11 +141,7 @@ const CreateQuizForm = () => {
                 formData.append("file", croppedBlob, "image.jpg");
             }
 
-            const res = await apiClient.post(endpoints.quizzes, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const res = await apiClient.post(endpoints.quizzes, formData);
 
             console.log("Quiz created:", res.data.id);
             form.reset();

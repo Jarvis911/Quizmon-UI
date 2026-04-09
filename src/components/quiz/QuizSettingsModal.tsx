@@ -181,11 +181,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                 }
             }
 
-            const res = await apiClient.put(endpoints.quiz(quiz.id), formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const res = await apiClient.put(endpoints.quiz(quiz.id), formData);
 
             onOpenChange(false);
         } catch (err) {

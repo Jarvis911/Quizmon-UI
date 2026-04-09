@@ -185,11 +185,7 @@ const ReorderQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDelet
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        const res = await apiClient.put(endpoints.question_reorder(question.id), formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.put(endpoints.question_reorder(question.id), formData);
 
         showAlert({
           title: "Thành công",
@@ -198,11 +194,7 @@ const ReorderQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDelet
         });
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await apiClient.post(endpoints.question_reorders, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.post(endpoints.question_reorders, formData);
         showAlert({
           title: "Thành công",
           message: "Tạo câu hỏi sắp xếp thành công!",

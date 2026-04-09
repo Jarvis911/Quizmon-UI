@@ -1,5 +1,5 @@
 import { useState, FormEvent, HTMLAttributes } from "react";
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { BASE_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useEffect } from "react";
@@ -61,7 +61,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f8fafc] p-6 relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f8fafc] p-4 sm:p-6 relative overflow-hidden">
       {/* Back to Home Navigation */}
       <div className="absolute top-4 left-4 sm:top-8 sm:left-8 z-20">
         <Button 
@@ -83,31 +83,31 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
       {/* Brand Logo */}
       <div 
         onClick={() => navigate("/")}
-        className="mb-10 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+        className="mb-6 sm:mb-10 cursor-pointer transition-transform hover:scale-105 active:scale-95"
       >
-        <img src="/quizmon.png" alt="Quizmon Logo" className="h-16 w-auto object-contain drop-shadow-sm" />
+        <img src="/quizmon.png" alt="Quizmon Logo" className="h-10 sm:h-16 w-auto object-contain drop-shadow-sm" />
       </div>
 
       {/* Main Login Card */}
-      <div className="w-full max-w-md bg-white rounded-4xl p-10 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black tracking-tight text-slate-800">
+      <div className="w-full max-w-md bg-white rounded-3xl sm:rounded-4xl p-6 sm:p-10 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
+        <div className="mb-6 sm:mb-8 text-center">
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-800">
             Chào mừng trở lại!
           </h1>
-          <p className="text-slate-500 font-bold mt-2">
+          <p className="text-sm sm:text-slate-500 font-bold mt-1 sm:mt-2">
             Đăng nhập để tiếp tục học tập.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">Email / Tài khoản</label>
+            <div className="space-y-1 sm:space-y-2">
+              <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 px-1">Email / Tài khoản</label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 sm:size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
-                  className="w-full bg-slate-50 border-2 border-slate-50 py-4 pl-12 pr-4 rounded-2xl text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
+                  className="w-full bg-slate-50 border-2 border-slate-50 py-3 sm:py-4 pl-10 sm:pl-12 pr-4 rounded-xl sm:rounded-2xl text-base sm:text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -115,17 +115,17 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               <div className="flex items-center justify-between px-1">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Mật khẩu</label>
-                <a href="#" className="text-xs font-black text-primary hover:underline">Quên mật khẩu?</a>
+                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400">Mật khẩu</label>
+                <a href="#" className="text-[10px] sm:text-xs font-black text-primary hover:underline">Quên mật khẩu?</a>
               </div>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 sm:size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="w-full bg-slate-50 border-2 border-slate-50 py-4 pl-12 pr-4 rounded-2xl text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
+                  className="w-full bg-slate-50 border-2 border-slate-50 py-3 sm:py-4 pl-10 sm:pl-12 pr-4 rounded-xl sm:rounded-2xl text-base sm:text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -142,11 +142,11 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 
           <Button 
             type="submit" 
-            className="w-full py-7 rounded-2xl text-xl font-black shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all"
+            className="w-full py-5 sm:py-7 rounded-xl sm:rounded-2xl text-base sm:text-xl font-black shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all"
             disabled={isLoading}
           >
             {isLoading ? "Đang xử lý..." : "Đăng nhập ngay!"}
-            <ArrowRight className="ml-2 size-6" />
+            <ArrowRight className="ml-2 size-5 sm:size-6" />
           </Button>
 
           <div className="relative py-4">
@@ -162,9 +162,9 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
             type="button"
             variant="outline" 
             onClick={handleGoogleLogin}
-            className="w-full py-7 rounded-2xl font-black text-lg border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200 transition-all gap-3 text-slate-600"
+            className="w-full py-5 sm:py-7 rounded-xl sm:rounded-2xl font-black text-sm sm:text-lg border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200 transition-all gap-3 text-slate-600"
           >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-6" alt="Google" />
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-5 sm:size-6" alt="Google" />
             Tiếp tục với Google
           </Button>
         </form>

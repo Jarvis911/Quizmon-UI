@@ -32,9 +32,13 @@ import {
     Settings,
     Search,
     Timer,
-    Music
+    Music,
+    Volume2,
+    VolumeX
 } from "lucide-react";
+import ReactPlayer from "react-player";
 import { useFullscreen } from "react-use";
+import FloatingElements from "@/components/ui/FloatingElements";
 
 interface MatchResponse {
     id: number;
@@ -118,6 +122,21 @@ const MatchLobby = () => {
 
     // Copy room code
     const [copied, setCopied] = useState(false);
+
+    // Local Volume Settings
+    const [volume, setVolume] = useState(() => {
+        const saved = localStorage.getItem("gameVolume");
+        return saved !== null ? parseFloat(saved) : 0.05;
+    });
+    const [isMuted, setIsMuted] = useState(() => {
+        return localStorage.getItem("gameMuted") === "true";
+    });
+
+    useEffect(() => {
+        localStorage.setItem("gameVolume", volume.toString());
+        localStorage.setItem("gameMuted", isMuted.toString());
+    }, [volume, isMuted]);
+
 
     const rootRef = useRef<HTMLDivElement>(null);
     const [showFullscreen, toggleFullscreen] = useState(false);
@@ -354,7 +373,8 @@ const MatchLobby = () => {
     if (!user) return null;
 
     return (
-        <div ref={rootRef} className="min-h-screen bg-background text-foreground font-quicksand overflow-x-hidden">
+        <div ref={rootRef} className="min-h-screen bg-background text-foreground font-quicksand overflow-x-hidden relative">
+            <FloatingElements />
             {/* ── Fixed Header ── */}
             <header className="sticky top-0 z-50 w-full bg-card/60 backdrop-blur-2xl border-b border-white/10 px-3 py-2 md:px-6 md:py-4 flex items-center justify-between shadow-sm">
                 <div className="cursor-pointer flex items-center h-8 md:h-10 lg:h-12" onClick={() => navigate('/')}>
@@ -384,10 +404,46 @@ const MatchLobby = () => {
                     >
                         {showFullscreen ? <Minimize className="w-4 h-4 md:w-5 md:h-5" /> : <Maximize className="w-4 h-4 md:w-5 md:h-5" />}
                     </Button>
+
+                    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 shadow-sm">
+                        <button
+                            onClick={() => setIsMuted(!isMuted)}
+                            className="p-1.5 md:p-2 rounded-lg hover:bg-white/10 transition-all text-foreground/60 hover:text-foreground"
+                            title={isMuted ? "Bật âm thanh" : "Tắt âm thanh"}
+                        >
+                            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
+                        </button>
+                        <div className="w-16 md:w-24 px-2 mr-1 hidden sm:block">
+                            <Slider
+                                value={[isMuted ? 0 : volume * 100]}
+                                onValueChange={([v]) => {
+                                    setVolume(v / 100);
+                                    if (v > 0) setIsMuted(false);
+                                }}
+                                min={0}
+                                max={100}
+                                step={1}
+                            />
+                        </div>
+                    </div>
                 </div>
+
             </header>
 
+            {/* Hidden Background Music Player */}
+            <div className="hidden">
+                <ReactPlayer
+                    url={musicUrl || "/audio/background.mp3"}
+                    playing={true}
+                    loop={true}
+                    volume={isMuted ? 0 : volume}
+                    width={0}
+                    height={0}
+                />
+            </div>
+
             <div className="relative z-10 max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
+
                 {error && (
                     <Alert variant="destructive" className="mb-4 md:mb-6 max-w-xl mx-auto shadow-2xl border-none bg-destructive/10 backdrop-blur-md">
                         <AlertDescription className="font-bold text-sm md:text-base">{error}</AlertDescription>

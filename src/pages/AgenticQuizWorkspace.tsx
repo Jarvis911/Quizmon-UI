@@ -7,13 +7,13 @@ import { ChevronLeft, Sparkles, Loader2, Save } from "lucide-react";
 import AgentChat, { Message as AgentMessage } from "@/components/agent/AgentChat";
 import LiveCanvas from "@/components/agent/LiveCanvas";
 import { io, Socket } from "socket.io-client";
-import apiClient from "@/api/client";
+import apiClient, { BASE_URL } from "@/api/client";
 import endpoints from "@/api/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageSquare, Layout as LayoutIcon } from "lucide-react";
 import { QuizData, Question as QuizQuestion } from "@/components/agent/LiveCanvas";
 import { sanitizeError } from "@/lib/utils";
-import { History, Plus, Trash2, MoreVertical, Search, Edit2 } from "lucide-react";
+import { History, Plus, Trash2, MoreVertical, Search, Edit2, PanelLeftOpen, PanelLeftClose, X } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -38,8 +38,8 @@ const AgenticQuizWorkspace = () => {
     const { showAlert, showConfirm } = useModal();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [quizData, setQuizData] = useState<QuizData>({
-        title: "Quiz Mới Tuyệt Vời",
-        description: "Quiz Mới Tuyệt Vời",
+        title: "Tạo quiz cùng Quizmon Agent",
+        description: "Tạo quiz cùng Quizmon Agent",
         questions: []
     });
     const [messages, setMessages] = useState<AgentMessage[]>([
@@ -55,7 +55,7 @@ const AgenticQuizWorkspace = () => {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-    const [showHistory, setShowHistory] = useState(true);
+    const [showHistory, setShowHistory] = useState(window.innerWidth >= 1024);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -84,13 +84,16 @@ const AgenticQuizWorkspace = () => {
     };
 
     useEffect(() => {
-        const newSocket = io(import.meta.env.VITE_API_URL || "http://localhost:3000", {
+        const newSocket = io(BASE_URL, {
             auth: { token },
             transports: ["websocket"]
         });
 
         newSocket.on("connect", () => {
             console.log("Connected to Agentic AI Socket");
+        });
+        
+        newSocket.on("connect_error", (err) => {
         });
 
         newSocket.on("agentUpdate", (data: AgentUpdatePayload) => {
@@ -164,12 +167,12 @@ const AgenticQuizWorkspace = () => {
 
     const selectSession = async (session: Session) => {
         if (session.id === currentSessionId) return;
-        
+
         setIsGenerating(true);
         try {
             const res = await apiClient.get(endpoints.ai_agentic_session(session.id));
             const { messages: dbMessages } = res.data;
-            
+
             // Map DB messages to UI format
             const uiMessages: AgentMessage[] = dbMessages.map((m: any) => ({
                 role: m.role === 'user' ? 'user' : 'agent',
@@ -198,7 +201,10 @@ const AgenticQuizWorkspace = () => {
 
             setMessages(uiMessages);
             setCurrentSessionId(session.id);
-            if (window.innerWidth < 1024) setActiveTab('chat');
+            if (window.innerWidth < 1024) {
+                setActiveTab('chat');
+                setShowHistory(false);
+            }
         } catch (err) {
             showAlert({ title: "Lỗi", message: "Không thể tải hội thoại.", type: "error" });
         } finally {
@@ -254,10 +260,10 @@ const AgenticQuizWorkspace = () => {
             showAlert({ title: "Thành công", message: "Đã lưu quiz thành công!", type: "success" });
             navigate(`/quiz/${res.data.id}/editor`);
         } catch (err: any) {
-            showAlert({ 
-                title: "Lỗi", 
-                message: sanitizeError(err, "Không thể lưu quiz. Vui lòng thử lại."), 
-                type: "error" 
+            showAlert({
+                title: "Lỗi",
+                message: sanitizeError(err, "Không thể lưu quiz. Vui lòng thử lại."),
+                type: "error"
             });
         } finally {
             setIsSaving(false);
@@ -265,23 +271,31 @@ const AgenticQuizWorkspace = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen lg:h-[calc(100vh-64px)] overflow-hidden bg-background">
+        <div className="flex flex-col h-screen overflow-hidden bg-background">
             {/* Header */}
             <header className="h-auto lg:h-16 border-b border-white/10 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-6 py-3 lg:py-0 bg-white/10 backdrop-blur-xl shrink-0 z-20 gap-3">
                 <div className="flex items-center justify-between w-full lg:w-auto gap-4">
                     <div className="flex items-center gap-2 lg:gap-4">
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => navigate(-1)}
                             className="rounded-xl hover:bg-white/5 h-9 w-9"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShowHistory(!showHistory)}
+                            className="rounded-xl hover:bg-white/5 h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+                            title={showHistory ? "Ẩn lịch sử" : "Hiện lịch sử"}
+                        >
+                            {showHistory ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+                        </Button>
                         <div>
                             <h1 className="text-sm lg:text-lg font-black tracking-tight flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-primary animate-pulse" />
-                                <span className="hidden sm:inline">Không gian Agent</span>
+                                <span className="hidden sm:inline">Quizmon Agent</span>
                                 <span className="sm:hidden">Agent</span>
                             </h1>
                             <p className="hidden xs:block text-[8px] lg:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
@@ -289,10 +303,10 @@ const AgenticQuizWorkspace = () => {
                             </p>
                         </div>
                     </div>
-                    
+
                     {/* Mobile Save Button (Visible only on very small screens if needed, otherwise in the second row) */}
                     <div className="lg:hidden flex items-center gap-2">
-                        <Button 
+                        <Button
                             size="sm"
                             className="bg-primary text-primary-foreground font-black px-4 rounded-xl shadow-lg shadow-primary/20 text-xs gap-1.5 h-9"
                             onClick={handleSave}
@@ -318,7 +332,7 @@ const AgenticQuizWorkspace = () => {
                         </SelectContent>
                     </Select>
 
-                    <Button 
+                    <Button
                         className="hidden lg:flex bg-primary text-primary-foreground font-black px-6 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all gap-2"
                         onClick={handleSave}
                         disabled={isSaving || isGenerating || !selectedCategoryId}
@@ -331,7 +345,14 @@ const AgenticQuizWorkspace = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex overflow-hidden relative pb-16 lg:pb-0">
-                
+                {/* Backdrop for mobile history */}
+                {showHistory && (
+                    <div 
+                        className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden transition-opacity"
+                        onClick={() => setShowHistory(false)}
+                    />
+                )}
+
                 {/* Left Pane: History Sidebar (Collapsible) */}
                 <aside className={`
                     fixed inset-y-0 left-0 z-40 w-72 bg-card/60 backdrop-blur-3xl border-r border-white/10 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
@@ -343,15 +364,25 @@ const AgenticQuizWorkspace = () => {
                             <History className="w-4 h-4" />
                             Lịch sử
                         </h2>
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
-                            onClick={handleNewChat}
-                            title="Bắt đầu hội thoại mới"
-                        >
-                            <Plus className="w-5 h-5" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+                                onClick={handleNewChat}
+                                title="Bắt đầu hội thoại mới"
+                            >
+                                <Plus className="w-5 h-5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary lg:hidden"
+                                onClick={() => setShowHistory(false)}
+                            >
+                                <X className="w-5 h-5" />
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
@@ -366,13 +397,13 @@ const AgenticQuizWorkspace = () => {
                             </div>
                         ) : (
                             sessions.map((session) => (
-                                <div 
+                                <div
                                     key={session.id}
                                     onClick={() => selectSession(session)}
                                     className={`
                                         group relative p-3 rounded-xl cursor-pointer transition-all border border-transparent
-                                        ${currentSessionId === session.id 
-                                            ? 'bg-primary/10 border-primary/20 shadow-lg' 
+                                        ${currentSessionId === session.id
+                                            ? 'bg-primary/10 border-primary/20 shadow-lg'
                                             : 'hover:bg-white/5'}
                                     `}
                                 >
@@ -384,7 +415,7 @@ const AgenticQuizWorkspace = () => {
                                             {format(new Date(session.updatedAt), 'HH:mm, dd/MM', { locale: vi })}
                                         </p>
                                     </div>
-                                    
+
                                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Button
                                             variant="ghost"
@@ -399,15 +430,15 @@ const AgenticQuizWorkspace = () => {
                             ))
                         )}
                     </div>
-                    
+
                     <div className="p-4 border-t border-white/5 bg-foreground/5 flex items-center justify-between lg:hidden">
-                         <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             className="w-full text-xs font-black uppercase rounded-xl border-white/10"
                             onClick={() => setShowHistory(false)}
-                         >
+                        >
                             Đóng lịch sử
-                         </Button>
+                        </Button>
                     </div>
                 </aside>
 
@@ -443,21 +474,21 @@ const AgenticQuizWorkspace = () => {
 
                 {/* Mobile Bottom Navigation */}
                 <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around px-6 z-30">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('chat')}
                         className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'chat' ? 'text-primary' : 'text-muted-foreground opacity-50'}`}
                     >
                         <MessageSquare className={`w-5 h-5 ${activeTab === 'chat' ? 'fill-primary/20' : ''}`} />
                         <span className="text-[10px] font-black uppercase tracking-tighter">Hội thoại</span>
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('canvas')}
                         className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'canvas' ? 'text-primary' : 'text-muted-foreground opacity-50'}`}
                     >
                         <LayoutIcon className={`w-5 h-5 ${activeTab === 'canvas' ? 'fill-primary/20' : ''}`} />
                         <span className="text-[10px] font-black uppercase tracking-tighter">Bản vẽ</span>
                     </button>
-                    <button 
+                    <button
                         onClick={() => setShowHistory(true)}
                         className="flex flex-col items-center gap-1 text-muted-foreground opacity-50"
                     >

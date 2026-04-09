@@ -16,17 +16,25 @@ export default function AdminAI() {
 
     const loadData = async () => {
         try {
-            const [cfgRes, jobsRes, optsRes] = await Promise.all([
-                apiClient.get("/admin/ai-config"),
-                apiClient.get("/admin/ai-jobs", { params: { status: jobStatus || undefined } }),
-                apiClient.get("/admin/ai-config-options")
+            // Loading options first and independently
+            try {
+                const optsRes = await apiClient.get("/admin/ai-config-options");
+                setFeatures(optsRes.data.features || []);
+                setModels(optsRes.data.models || []);
+            } catch (e) {
+                console.error("Failed to load AI config options", e);
+            }
+
+            // Loading other data
+            const [cfgRes, jobsRes] = await Promise.all([
+                apiClient.get("/admin/ai-config").catch(err => ({ data: [] })),
+                apiClient.get("/admin/ai-jobs", { params: { status: jobStatus || undefined } }).catch(err => ({ data: [] }))
             ]);
+            
             setConfigs(cfgRes.data);
             setJobs(jobsRes.data);
-            setFeatures(optsRes.data.features);
-            setModels(optsRes.data.models);
         } catch (e) {
-            console.error(e);
+            console.error("General error in loadData", e);
         } finally {
             setLoading(false);
         }

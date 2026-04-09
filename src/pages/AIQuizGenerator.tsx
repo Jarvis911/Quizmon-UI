@@ -125,7 +125,7 @@ const AIQuizGenerator = () => {
 
             if (finalInstruction) formData.append("instruction", finalInstruction);
             if (pdfFile) formData.append("pdfFile", pdfFile);
-            
+
             // Append multiple images
             imageFiles.forEach((file) => {
                 formData.append("imageFiles", file);
@@ -134,11 +134,7 @@ const AIQuizGenerator = () => {
             formData.append("questionCount", String(questionCount));
             formData.append("questionTypes", JSON.stringify(selectedTypes));
 
-            const res = await apiClient.post(endpoints.ai_create_job, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const res = await apiClient.post(endpoints.ai_create_job, formData);
 
             setIsDirty(false);
             // Small delay to ensure state update is processed before navigation
@@ -186,7 +182,7 @@ const AIQuizGenerator = () => {
                             className="h-10 sm:h-12 px-4 sm:px-8 rounded-2xl border-2 border-primary/20 bg-primary/5 text-primary text-xs sm:text-sm font-black hover:bg-primary/10 hover:border-primary/40 transition-all flex items-center gap-2 group shadow-xl shadow-primary/5"
                         >
                             <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
-                            Trải nghiệm Agent Workspace (Beta)
+                            Trải nghiệm Agent Workspace
                         </Button>
                     </div>
                 </div>
@@ -279,8 +275,8 @@ const AIQuizGenerator = () => {
                                     <ImageIcon className="w-3.5 h-3.5 text-primary" />
                                     Hình ảnh bài tập/đề thi (tuỳ chọn)
                                 </Label>
-                                
-                                <div 
+
+                                <div
                                     className="border-2 border-dashed border-foreground/10 rounded-2xl p-4 hover:border-primary/40 hover:bg-foreground/5 bg-foreground/5 transition-all cursor-pointer"
                                     onClick={() => document.getElementById("image-input")?.click()}
                                 >
@@ -302,9 +298,9 @@ const AIQuizGenerator = () => {
                                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
                                         {imageFiles.map((file, idx) => (
                                             <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 shadow-sm bg-background">
-                                                <img 
-                                                    src={URL.createObjectURL(file)} 
-                                                    alt="preview" 
+                                                <img
+                                                    src={URL.createObjectURL(file)}
+                                                    alt="preview"
                                                     className="w-full h-full object-cover"
                                                 />
                                                 <button

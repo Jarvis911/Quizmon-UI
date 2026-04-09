@@ -18,37 +18,37 @@ import { Download } from "lucide-react";
 const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
   const configs = [
     { // 1st
-      height: "h-36",
+      height: "h-32 md:h-36",
       ringColor: "ring-yellow-500",
       bg: "from-yellow-500/20 to-amber-600/20",
       borderColor: "border-yellow-500/30",
       label: "HẠNG 1",
       labelBg: "bg-yellow-500",
-      scale: "scale-115",
-      textSize: "text-xl",
-      scoreSize: "text-3xl",
+      scale: "scale-110 md:scale-115",
+      textSize: "text-lg md:text-xl",
+      scoreSize: "text-2xl md:text-3xl",
     },
     { // 2nd
-      height: "h-24",
+      height: "h-20 md:h-24",
       ringColor: "ring-gray-300",
       bg: "from-gray-400/20 to-gray-500/20",
       borderColor: "border-gray-300/40",
       label: "HẠNG 2",
       labelBg: "bg-gray-300",
-      scale: "",
-      textSize: "text-base",
-      scoreSize: "text-xl",
+      scale: "scale-90 md:scale-100",
+      textSize: "text-sm md:text-base",
+      scoreSize: "text-lg md:text-xl",
     },
     { // 3rd
-      height: "h-20",
+      height: "h-16 md:h-20",
       ringColor: "ring-amber-600",
       bg: "from-amber-700/20 to-amber-800/20",
       borderColor: "border-amber-600/40",
       label: "HẠNG 3",
       labelBg: "bg-amber-600",
-      scale: "",
-      textSize: "text-base",
-      scoreSize: "text-xl",
+      scale: "scale-90 md:scale-100",
+      textSize: "text-sm md:text-base",
+      scoreSize: "text-lg md:text-xl",
     },
   ];
 
@@ -62,29 +62,29 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
     >
       {/* Avatar */}
       <div className="relative">
-        <Avatar className={`w-16 h-16 ring-4 ${config.ringColor} shadow-2xl`}>
+        <Avatar className={`w-12 h-12 md:w-16 md:h-16 ring-2 md:ring-4 ${config.ringColor} shadow-2xl`}>
           {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} />}
-          <AvatarFallback className="bg-primary text-white text-xl font-black">
+          <AvatarFallback className="bg-primary text-white text-base md:text-xl font-black">
             {(player.displayName || player.username || "?")[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className={`absolute -top-3 -right-3 text-[10px] font-black px-2 py-1 rounded-full text-white shadow-xl ${config.labelBg} ring-2 ring-white/20`}>
+        <span className={`absolute -top-2 -right-2 md:-top-3 md:-right-3 text-[8px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 md:py-1 rounded-full text-white shadow-xl ${config.labelBg} ring-2 ring-white/20`}>
           {config.label}
         </span>
       </div>
 
       {/* Name */}
-      <span className={`text-foreground font-black ${config.textSize} truncate max-w-[140px] text-center drop-shadow-md`}>
+      <span className={`text-foreground font-black ${config.textSize} truncate max-w-[80px] md:max-w-[140px] text-center drop-shadow-md`}>
         {player.displayName || player.username}
-        {isCurrentUser && <span className="text-primary text-xs ml-1 font-bold">(Bạn)</span>}
+        {isCurrentUser && <span className="text-primary text-[10px] md:text-xs ml-1 font-bold">(Bạn)</span>}
       </span>
 
       {/* Score */}
-      <span className={`text-foreground font-black ${config.scoreSize} drop-shadow-lg`}>{player.score}</span>
+      <span className={`text-foreground font-black ${config.scoreSize} drop-shadow-lg tabular-nums tracking-tighter`}>{player.score.toLocaleString()}</span>
 
       {/* Podium bar */}
-      <div className={`${config.height} w-28 bg-linear-to-t ${config.bg} border-t-4 ${config.borderColor} rounded-t-2xl backdrop-blur-md flex items-end justify-center pb-3 shadow-2xl transition-all duration-300`}>
-        <span className="text-foreground/30 text-xs font-black uppercase tracking-widest">#{rank + 1}</span>
+      <div className={`${config.height} w-20 md:w-28 bg-linear-to-t ${config.bg} border-t-2 md:border-t-4 ${config.borderColor} rounded-t-xl md:rounded-t-2xl backdrop-blur-md flex items-end justify-center pb-2 md:pb-3 shadow-2xl transition-all duration-300`}>
+        <span className="text-foreground/30 text-[10px] md:text-xs font-black uppercase tracking-widest">#{rank + 1}</span>
       </div>
     </div>
   );
@@ -195,26 +195,26 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const handleGoHome = () => navigate('/');
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-transparent">
+    <div className="min-h-screen flex flex-col items-center justify-center p-3 md:p-6 relative overflow-hidden bg-transparent">
       {/* Ambient effects - use primary color for theme awareness */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-primary/30 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-primary/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-1/4 left-1/3 w-64 md:w-80 h-64 md:h-80 bg-primary/30 rounded-full blur-[80px] md:blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/3 w-48 md:w-64 h-48 md:h-64 bg-primary/20 rounded-full blur-[60px] md:blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-2xl">
+      <div className="relative z-10 w-full max-w-2xl mt-4 md:mt-0">
         {/* Title */}
-        <h1 className={`text-4xl md:text-5xl font-black text-foreground text-center mb-2 drop-shadow-2xl transition-all duration-700 ${podiumStep > 0 ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
+        <h1 className={`text-3xl md:text-5xl font-black text-foreground text-center mb-1 md:mb-2 drop-shadow-2xl transition-all duration-700 ${podiumStep > 0 ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
           Bảng Xếp Hạng
         </h1>
-        <p className={`text-muted-foreground font-bold text-center mb-12 text-sm uppercase tracking-widest transition-opacity duration-700 ${podiumStep > 0 ? "opacity-100" : "opacity-0"}`}>
+        <p className={`text-muted-foreground font-bold text-center mb-6 md:mb-12 text-[10px] md:text-sm uppercase tracking-widest transition-opacity duration-700 ${podiumStep > 0 ? "opacity-100" : "opacity-0"}`}>
           Khám phá người chiến thắng!
         </p>
 
         {/* Podium Area Container (fixed height so things don't jump around) */}
-        <div className="min-h-[220px] mb-8">
+        <div className="min-h-[180px] md:min-h-[220px] mb-4 md:mb-8">
           {top3.length > 0 && (
-            <div className="flex items-end justify-center gap-4 h-full">
+            <div className="flex items-end justify-center gap-2 md:gap-4 h-full">
               {podiumOrder.map((player, displayIdx) => {
                 const rank = podiumRanks[displayIdx];
                 // Determine visibility based on current animation step and rank
@@ -240,50 +240,50 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
         {/* Remaining players - show smoothly only when podium animations finish */}
         <div className={`transition-all duration-1000 transform ${podiumStep >= 4 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           {rest.length > 0 && (
-            <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-3xl p-4 mb-6 space-y-2 shadow-2xl">
+            <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-3xl p-2 md:p-4 mb-4 md:mb-6 space-y-1 md:space-y-2 shadow-2xl">
               {rest.map((player, index) => (
                 <div
                   key={player.userId}
-                  className={`flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${player.userId === currentUserId
-                    ? "bg-primary/20 border border-primary/30 shadow-lg scale-102"
+                  className={`flex items-center justify-between p-2.5 md:p-4 rounded-xl md:rounded-2xl transition-all duration-300 ${player.userId === currentUserId
+                    ? "bg-primary/20 border border-primary/30 shadow-lg scale-[1.01]"
                     : "hover:bg-white/5"
                     }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <span className="text-muted-foreground font-black w-8 text-center text-lg">#{index + 4}</span>
-                    <Avatar className="w-10 h-10 border-2 border-white/10 shadow-md">
+                  <div className="flex items-center gap-2 md:gap-4">
+                    <span className="text-muted-foreground font-black w-6 md:w-8 text-center text-sm md:text-lg">#{index + 4}</span>
+                    <Avatar className="w-8 h-8 md:w-10 md:h-10 border md:border-2 border-white/10 shadow-md">
                       {player.avatarUrl && <AvatarImage src={getAvatarUrl(player.avatarUrl)} className="object-cover" />}
-                      <AvatarFallback className="bg-linear-to-br from-primary to-primary/60 text-primary-foreground text-sm font-bold">
+                      <AvatarFallback className="bg-linear-to-br from-primary to-primary/60 text-primary-foreground text-xs md:text-sm font-bold">
                         {(player.displayName || player.username || "?")[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-foreground text-base font-bold">
+                    <span className="text-foreground text-sm md:text-base font-bold">
                       {player.displayName || player.username}
                       {player.userId === currentUserId && (
-                        <span className="text-primary text-xs ml-2 font-black uppercase tracking-tighter">(Bạn)</span>
+                        <span className="text-primary text-[10px] ml-2 font-black uppercase tracking-tighter">(Bạn)</span>
                       )}
                     </span>
                   </div>
-                  <span className="text-foreground font-black text-xl tabular-nums">{player.score}</span>
+                  <span className="text-foreground font-black text-base md:text-xl tabular-nums">{player.score.toLocaleString()}</span>
                 </div>
               ))}
             </div>
           )}
 
           {/* Go Home Button and Download Button */}
-          <div className="flex flex-col gap-4 mt-8">
+          <div className="flex flex-col gap-3 md:gap-4 mt-6 md:mt-8">
             <Button
               onClick={handleDownloadExcel}
               disabled={isDownloading}
               variant="secondary"
-              className="w-full h-16 text-lg font-black bg-card/60 hover:bg-card/90 text-foreground rounded-2xl border-2 border-white/10 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3 shadow-xl backdrop-blur-md"
+              className="w-full h-14 md:h-16 text-sm md:text-lg font-black bg-card/60 hover:bg-card/90 text-foreground rounded-xl md:rounded-2xl border-2 border-white/10 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 md:gap-3 shadow-xl backdrop-blur-md"
             >
-              <Download className="w-6 h-6 text-primary" />
+              <Download className="w-5 h-5 md:w-6 md:h-6 text-primary" />
               {isDownloading ? "Đang tải..." : "TẢI BÁO CÁO EXCEL"}
             </Button>
             <Button
               onClick={handleGoHome}
-              className="w-full h-16 text-xl font-black bg-primary text-primary-foreground rounded-2xl shadow-[0_8px_0_0_rgba(0,0,0,0.1)] hover:translate-y-[-2px] hover:shadow-[0_12px_20px_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-none transition-all duration-300"
+              className="w-full h-14 md:h-16 text-lg md:text-xl font-black bg-primary text-primary-foreground rounded-xl md:rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,0.1)] md:shadow-[0_8px_0_0_rgba(0,0,0,0.1)] hover:translate-y-[-2px] hover:shadow-[0_10px_15px_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-none transition-all duration-300"
             >
               TRỞ VỀ TRANG CHỦ
             </Button>

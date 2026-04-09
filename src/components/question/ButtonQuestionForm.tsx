@@ -185,11 +185,7 @@ const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDelete
 
       // Update if there was question data
       if (question?.id) {
-        const res = await apiClient.put(endpoints.question_button(question.id), formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.put(endpoints.question_button(question.id), formData);
         showAlert({
           title: "Thành công",
           message: "Cập nhật câu hỏi thành công!",
@@ -199,11 +195,7 @@ const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDelete
       }
       // Create new if there was no question data
       else {
-        const res = await apiClient.post(endpoints.question_buttons, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.post(endpoints.question_buttons, formData);
         showAlert({
           title: "Thành công",
           message: "Tạo câu hỏi thành công!",

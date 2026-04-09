@@ -160,11 +160,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDe
       }
 
       if (question?.id) {
-        const res = await apiClient.put(endpoints.question_typeanswer(question.id), formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.put(endpoints.question_typeanswer(question.id), formData);
 
         showAlert({
           title: "Thành công",
@@ -173,11 +169,7 @@ const TypeAnswerQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDe
         });
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await apiClient.post(endpoints.question_typeanswers, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.post(endpoints.question_typeanswers, formData);
 
         showAlert({
           title: "Thành công",

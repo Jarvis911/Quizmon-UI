@@ -142,7 +142,6 @@ const CreateQuizForm = () => {
       const res = await axios.post(endpoints.quizzes, formData, {
         headers: {
           Authorization: `${token}`,
-          "Content-Type": "multipart/form-data",
         },
       });
 

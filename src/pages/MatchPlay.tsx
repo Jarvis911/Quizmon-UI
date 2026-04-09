@@ -8,6 +8,19 @@ import endpoints, { getAvatarUrl } from "@/api/api";
 import { Howl } from "howler";
 import { useWindowSize } from "react-use";
 import ReactPlayer from "react-player";
+import { 
+    Volume2, 
+    VolumeX, 
+    Languages, 
+    Play, 
+    Pause, 
+    SkipForward, 
+    StopCircle, 
+    Flag, 
+    Trophy,
+    Settings
+} from "lucide-react";
+
 
 // Types
 import type { Question, LeaderboardEntry, Quiz } from "../types";
@@ -23,6 +36,10 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import FloatingElements from "@/components/ui/FloatingElements";
+
+
 
 // Question components
 import ButtonQuestionPlay from "@/components/question/ButtonQuestionPlay";
@@ -69,11 +86,11 @@ const ScoreProgressBar = ({ time, maxTime, potentialPoints }: ScoreProgressBarPr
     const isUrgent = time <= 5;
 
     return (
-        <div className="flex-1 max-w-xl mx-4 sm:mx-8 relative">
-            <div className="h-6 w-full bg-black/20 backdrop-blur-md rounded-full border-2 border-black/40 overflow-hidden relative shadow-inner">
+        <div className="flex-1 max-w-xl mx-2 md:mx-8 relative">
+            <div className="h-4 md:h-6 w-full bg-black/20 backdrop-blur-md rounded-full border-2 border-black/40 overflow-hidden relative shadow-inner">
                 {/* The animated decreasing stripe bar */}
                 <div
-                    className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-linear animate-stripe-slide rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] ${isUrgent ? "opacity-90" : ""}`}
+                    className={`absolute top-0 left-0 h-full transition-[width] duration-1000 ease-linear animate-stripe-slide rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] ${isUrgent ? "opacity-90" : ""}`}
                     style={{ width: `${progress}%` }}
                 >
                     {/* Inner Shadow for depth */}
@@ -85,10 +102,11 @@ const ScoreProgressBar = ({ time, maxTime, potentialPoints }: ScoreProgressBarPr
                     className="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-linear flex items-center justify-center"
                     style={{ left: `${Math.max(5, progress)}%` }}
                 >
-                   <span className="text-white text-sm sm:text-base font-black tabular-nums tracking-tighter drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] px-2 bg-black/20 rounded-full backdrop-blur-sm -translate-x-1/2">
+                   <span className="text-white text-[10px] md:text-base font-black tabular-nums tracking-tighter drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] px-1.5 md:px-2 bg-black/20 rounded-full backdrop-blur-sm -translate-x-1/2">
                         {potentialPoints.toLocaleString()}
                     </span>
                 </div>
+
             </div>
             {/* Urgent glow pulse */}
             {isUrgent && (
@@ -163,12 +181,34 @@ const MatchPlay = () => {
     const [correctAnswerInfo, setCorrectAnswerInfo] = useState<any>(null);
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
+    // Local Volume Settings
+    const [volume, setVolume] = useState(() => {
+        const saved = localStorage.getItem("gameVolume");
+        return saved !== null ? parseFloat(saved) : 0.05; // Slightly louder default than old 0.03
+    });
+    const [isMuted, setIsMuted] = useState(() => {
+        return localStorage.getItem("gameMuted") === "true";
+    });
+
+    useEffect(() => {
+        localStorage.setItem("gameVolume", volume.toString());
+        localStorage.setItem("gameMuted", isMuted.toString());
+    }, [volume, isMuted]);
+
+
     // Homework mode integration
     const [matchMode, setMatchMode] = useState<MatchMode>("REALTIME");
     const [homeworkQuestions, setHomeworkQuestions] = useState<Question[]>([]);
     const [homeworkScore, setHomeworkScore] = useState(0);
 
     const questionRef = useRef<Question | null>(null);
+    const scoresRef = useRef<PlayerScore[]>([]);
+    
+    // Keep scoresRef in sync with scores state
+    useEffect(() => {
+        scoresRef.current = scores;
+    }, [scores]);
+
     const { width, height } = useWindowSize();
 
     // Fetch match to determine host and mode
@@ -285,7 +325,7 @@ const MatchPlay = () => {
         };
 
         const handleUpdateScores = (newScores: PlayerScore[]) => {
-            setScores([...newScores]);
+            setScores(newScores); // Functional update is fine, but we also use ref for synchronous access in other handlers
         };
 
         const handleGameOver = ({ leaderboard }: { leaderboard: LeaderboardEntry[] }) => {
@@ -307,7 +347,8 @@ const MatchPlay = () => {
         };
 
         const handlePlayerSurrendered = ({ userId: surrenderedId }: { userId: number, remainingPlayers: number }) => {
-            const surrenderedPlayer = scores.find(p => p.userId === surrenderedId);
+            const currentScores = scoresRef.current;
+            const surrenderedPlayer = currentScores.find(p => p.userId === surrenderedId);
             const name = surrenderedPlayer?.displayName || surrenderedPlayer?.username || `Người chơi ${surrenderedId}`;
             setNotification(`${name} đã đầu hàng!`);
             setTimeout(() => setNotification(null), 4000);
@@ -323,6 +364,12 @@ const MatchPlay = () => {
             }
         };
 
+        const handleGameStarted = (data?: { isPaused?: boolean }) => {
+            if (data?.isPaused !== undefined) {
+                setIsPaused(data.isPaused);
+            }
+        };
+
         socket.on("nextQuestion", handleNextQuestion);
         socket.on("timeUpdate", handleTimeUpdate);
         socket.on("answerResult", handleAnswerResult);
@@ -334,6 +381,7 @@ const MatchPlay = () => {
         socket.on("playerSurrendered", handlePlayerSurrendered);
         socket.on("matchSettingsUpdated", handleSettingsUpdated);
         socket.on("pauseStatusUpdated", handlePauseStatusUpdated);
+        socket.on("gameStarted", handleGameStarted);
 
         return () => {
             socket.off("nextQuestion", handleNextQuestion);
@@ -347,8 +395,9 @@ const MatchPlay = () => {
             socket.off("playerSurrendered", handlePlayerSurrendered);
             socket.off("matchSettingsUpdated", handleSettingsUpdated);
             socket.off("pauseStatusUpdated", handlePauseStatusUpdated);
+            socket.off("gameStarted", handleGameStarted);
         };
-    }, [matchId, user, matchMode, scores, navigate]);
+    }, [matchId, user?.id, matchMode, navigate]);
 
     // TTS
     useEffect(() => {
@@ -381,6 +430,12 @@ const MatchPlay = () => {
     const triggerFeedback = (isCorrect: boolean) => {
         setFeedback(isCorrect ? 'correct' : 'wrong');
         // Removed timeout to persist feedback until next question
+    };
+
+    const togglePause = () => {
+        if (!matchId || !isHost) return;
+        // Pause state comes from server (pauseStatusUpdated); avoid optimistic UI flip vs server.
+        socket.emit("togglePause", { matchId });
     };
 
     // Game Over → Leaderboard or Homework Results
@@ -456,6 +511,7 @@ const MatchPlay = () => {
 
     return (
         <div className="min-h-screen relative overflow-hidden flex flex-col">
+            <FloatingElements />
             {/* Feedback Overlay */}
 
             {/* Feedback Overlay */}
@@ -484,7 +540,7 @@ const MatchPlay = () => {
                         
                         {isHost && (
                             <button
-                                onClick={() => socket.emit("togglePause", { matchId: matchId })}
+                                onClick={togglePause}
                                 className="w-full py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 TIẾP TỤC TRẬN ĐẤU
@@ -500,54 +556,54 @@ const MatchPlay = () => {
                     url={musicUrl}
                     playing={!gameOver}
                     loop={true}
-                    volume={0.03}
+                    volume={isMuted ? 0 : volume}
                     width={0}
                     height={0}
                 />
             </div>
 
+
             {/* ── Top Bar ── */}
-            <div className="relative z-10 flex items-center justify-between px-2 md:px-6 py-2 md:py-4 gap-1 md:gap-4">
+            <div className="relative z-10 flex flex-wrap items-center justify-between px-2 md:px-6 py-1 md:py-4 gap-y-1.5 md:gap-4">
                 {/* Left: Question counter & controls */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 md:gap-3 order-1">
                     {questionNumber > 0 && (
-                        <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
-                            <span className="text-foreground/60 text-sm">Câu</span>
-                            <span className="text-foreground font-extrabold text-lg">{questionNumber}</span>
+                        <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-xl md:rounded-2xl px-2.5 py-1.5 md:px-4 md:py-2 flex items-center gap-1.5 shadow-sm">
+                            <span className="text-foreground/60 text-[10px] md:text-sm font-bold">Câu</span>
+                            <span className="text-foreground font-black text-sm md:text-lg">{questionNumber}</span>
                         </div>
                     )}
                     <button
                         onClick={toggleTTS}
-                        className={`px-2 py-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-300 font-black text-[10px] md:text-sm ${isTTSEnabled
-                            ? "bg-primary/20 text-primary hover:bg-primary/30"
-                            : "bg-card/40 text-foreground/40 hover:bg-card/60"
+                        className={`p-1.5 md:p-3 rounded-xl transition-all duration-300 shadow-sm ${isTTSEnabled
+                            ? "bg-primary/20 text-primary border border-primary/30"
+                            : "bg-card/40 text-foreground/40 border border-white/10 hover:bg-card/60"
                             }`}
                         title={isTTSEnabled ? "Tắt giọng nói" : "Bật giọng nói"}
                     >
-                        <span className="sm:inline hidden">{isTTSEnabled ? "Âm thanh" : "Tắt âm"}</span>
-                        <span className="sm:hidden">{isTTSEnabled ? "VOICE" : "MUTE"}</span>
+                        <Languages className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
 
                     {/* Host: Game Controls */}
                     {isHost && (
                         <div className="flex items-center gap-1 md:gap-2">
                             <button
-                                onClick={() => socket.emit("togglePause", { matchId: matchId })}
-                                className={`px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl border font-black uppercase text-[9px] md:text-[10px] tracking-tight transition-all shadow-sm ${
+                                onClick={togglePause}
+                                className={`p-1.5 md:p-3 rounded-xl border transition-all shadow-sm ${
                                     isPaused 
-                                    ? "bg-green-500/20 border-green-500/30 text-green-500 hover:bg-green-500/30" 
-                                    : "bg-amber-500/20 border-amber-500/30 text-amber-500 hover:bg-amber-500/30"
+                                    ? "bg-green-500/20 border-green-500/30 text-green-500 hover:bg-green-500/40" 
+                                    : "bg-amber-500/20 border-amber-500/30 text-amber-500 hover:bg-amber-500/40"
                                 }`}
+                                title={isPaused ? "Tiếp tục" : "Tạm dừng"}
                             >
-                                <span className="sm:inline hidden">{isPaused ? "Tiếp tục" : "Tạm dừng"}</span>
-                                <span className="sm:hidden">{isPaused ? "▶️" : "⏸️"}</span>
+                                {isPaused ? <Play className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" /> : <Pause className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" />}
                             </button>
                             <button
                                 onClick={() => socket.emit("skipQuestion", { matchId: matchId })}
-                                className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-500/20 border border-slate-500/30 text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-tight hover:bg-slate-500/30 transition-all shadow-sm"
+                                className="p-1.5 md:p-3 rounded-xl bg-slate-500/20 border border-slate-500/30 text-slate-400 hover:bg-slate-500/30 transition-all shadow-sm"
+                                title="Bỏ qua câu này"
                             >
-                                <span className="sm:inline hidden">Bỏ qua câu</span>
-                                <span className="sm:hidden">NEXT</span>
+                                <SkipForward className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" />
                             </button>
                         </div>
                     )}
@@ -556,35 +612,67 @@ const MatchPlay = () => {
                     {isHost ? (
                         <button
                             onClick={() => setConfirmEndMatch(true)}
-                            className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-[9px] md:text-xs font-black uppercase tracking-tight hover:bg-destructive/20 transition-all shadow-sm"
+                            className="p-1.5 md:p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/20 transition-all shadow-sm"
+                            title="Kết thúc trận đấu"
                         >
-                            <span className="sm:inline hidden">Kết thúc</span>
-                            <span className="sm:hidden">STOP</span>
+                            <StopCircle className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                     ) : (
                         <button
                             onClick={() => setConfirmSurrender(true)}
-                            className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-card/40 border border-white/10 text-foreground/60 text-[9px] md:text-xs font-black uppercase tracking-tight hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
+                            className="p-1.5 md:p-3 rounded-xl bg-card/40 border border-white/10 text-foreground/60 hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
+                            title="Đầu hàng"
                         >
-                            <span className="sm:inline hidden">Đầu hàng</span>
-                            <span className="sm:hidden">EXIT</span>
+                            <Flag className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                     )}
+
                 </div>
 
-                {/* Center: Score & Progress */}
-                <ScoreProgressBar time={timer} maxTime={maxTimer} potentialPoints={potentialPoints} />
+                {/* Center: Score & Progress - Separate row on mobile */}
+                <div className="w-full md:w-auto md:flex-1 order-3 md:order-2 flex justify-center">
+                    <ScoreProgressBar time={timer} maxTime={maxTimer} potentialPoints={potentialPoints} />
+                </div>
 
-                {/* Right: Score toggle */}
-                <div className="flex items-center gap-4">
+                {/* Right: Score toggle & Volume */}
+                <div className="flex items-center gap-2 md:gap-4 order-2 md:order-3">
+                    {/* Volume Control */}
+                    <div className="flex items-center bg-card/40 backdrop-blur-xl border border-white/10 rounded-xl p-1 shadow-sm">
+                        <button
+                            onClick={() => setIsMuted(!isMuted)}
+                            className="p-1.5 md:p-2 rounded-lg hover:bg-white/10 transition-all text-foreground/60 hover:text-foreground"
+                            title={isMuted ? "Bật âm thanh" : "Tắt âm thanh"}
+                        >
+                            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
+                        </button>
+                        <div className="w-20 md:w-24 px-2 mr-2 hidden sm:block">
+                            <Slider
+                                value={[isMuted ? 0 : volume * 100]}
+                                onValueChange={([v]) => {
+                                    setVolume(v / 100);
+                                    if (v > 0) setIsMuted(false);
+                                }}
+                                min={0}
+                                max={100}
+                                step={1}
+                            />
+                        </div>
+                    </div>
+
                     <button
                         onClick={() => setShowScoreboard(!showScoreboard)}
-                        className="p-3 rounded-xl bg-card/40 text-foreground/60 hover:bg-card/60 hover:text-foreground transition-all shadow-sm"
+                        className={`p-1.5 md:p-3 rounded-xl transition-all shadow-sm flex items-center gap-2 ${
+                            showScoreboard 
+                            ? "bg-primary/20 text-primary border border-primary/30" 
+                            : "bg-card/40 text-foreground/60 border border-white/10 hover:bg-card/60 hover:text-foreground"
+                        }`}
                         title="Bảng điểm"
                     >
-                        Bảng điểm
+                        <Trophy className="w-4 h-4 md:w-5 md:h-5" />
+                        <span className="hidden xl:inline text-[10px] md:text-xs font-black uppercase tracking-wider">Xếp hạng</span>
                     </button>
                 </div>
+
             </div>
 
             {/* ── Notifications ── */}
@@ -602,9 +690,9 @@ const MatchPlay = () => {
             </div>
 
             {/* ── Main Content Area ── */}
-            <div className="relative z-10 flex flex-col lg:flex-row px-2 md:px-6 pb-6 gap-4" style={{ minHeight: "calc(100vh - 140px)" }}>
+            <div className="relative z-10 flex flex-col lg:flex-row px-2 md:px-6 pb-2 md:pb-6 gap-2 md:gap-4 flex-1 overflow-hidden">
                 {/* Question Area */}
-                <div className="flex-1 flex items-stretch justify-center">
+                <div className="flex-1 flex items-stretch justify-center overflow-y-auto scrollbar-none py-2">
                     <div className={`w-full ${question?.type === 'LOCATION' ? 'max-w-full h-full' : 'max-w-4xl'}`}>
                         {renderQuestion()}
                     </div>
@@ -612,8 +700,8 @@ const MatchPlay = () => {
 
                 {/* ── Scoreboard Sidebar ── */}
                 {showScoreboard && sortedScores.length > 0 && (
-                    <div className="w-full lg:w-64 shrink-0 animate-in slide-in-from-right-8 duration-500">
-                        <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sticky top-4 shadow-xl">
+                    <div className="w-full lg:w-64 shrink-0 animate-in slide-in-from-right-8 duration-500 lg:block absolute lg:relative inset-x-0 bottom-0 z-30 lg:z-auto max-h-[40vh] lg:max-h-full">
+                        <div className="bg-card/60 lg:bg-card/40 backdrop-blur-3xl border-t lg:border border-white/10 rounded-t-[2rem] lg:rounded-2xl p-3 h-full overflow-y-auto shadow-2xl lg:shadow-xl">
                             <h3 className="text-foreground/40 text-[10px] font-black uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
                                 Bảng xếp hạng
                             </h3>

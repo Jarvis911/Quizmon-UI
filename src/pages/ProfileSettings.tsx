@@ -156,9 +156,7 @@ const ProfileSettings = () => {
 
     setLoading(true);
     try {
-      const response = await apiClient.post(endpoints.user_avatar_upload, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      const response = await apiClient.post(endpoints.user_avatar_upload, formData);
       if (response.status === 200) {
         setAvatarUrl(response.data.user.avatarUrl);
         updateUserData(response.data.user);

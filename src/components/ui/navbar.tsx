@@ -208,7 +208,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
               className={`flex flex-col items-start gap-1 p-2 md:p-3 cursor-pointer transition-colors border-b border-foreground/5 last:border-0 hover:bg-muted/50 w-full ${!notif.isRead ? 'bg-primary/5' : ''}`}
             >
               <div className="flex gap-2 w-full justify-between items-start">
-                <span className={`text-sm leading-tight text-left break-words line-clamp-3 ${!notif.isRead ? 'font-semibold text-foreground' : 'text-foreground/80'}`}>
+                <span className={`text-sm leading-tight text-left wrap-break-word line-clamp-3 ${!notif.isRead ? 'font-semibold text-foreground' : 'text-foreground/80'}`}>
                   {notif.message}
                 </span>
                 {!notif.isRead && <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />}

@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+const apiHostNeedsNgrokBypass =
+  /ngrok/i.test(BASE_URL) || /ngrok-free\.app/i.test(BASE_URL);
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -15,12 +18,20 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem("token");
     const organizationId = localStorage.getItem("organizationId");
 
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     if (token) {
       config.headers.Authorization = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
     }
 
     if (organizationId) {
       config.headers["x-organization-id"] = organizationId;
+    }
+
+    if (apiHostNeedsNgrokBypass) {
+      config.headers["ngrok-skip-browser-warning"] = "true";
     }
 
     return config;

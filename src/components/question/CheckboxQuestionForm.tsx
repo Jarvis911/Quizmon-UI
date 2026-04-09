@@ -180,11 +180,7 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDele
         formData.append("videos", JSON.stringify(videoData));
       }
       if (question?.id) {
-        const res = await apiClient.put(endpoints.question_checkbox(question.id), formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.put(endpoints.question_checkbox(question.id), formData);
         showAlert({
           title: "Thành công",
           message: "Cập nhật câu hỏi thành công!",
@@ -192,11 +188,7 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDele
         });
         if (onSaved) onSaved(res.data);
       } else {
-        const res = await apiClient.post(endpoints.question_checkboxes, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await apiClient.post(endpoints.question_checkboxes, formData);
         showAlert({
           title: "Thành công",
           message: "Tạo câu hỏi thành công!",
