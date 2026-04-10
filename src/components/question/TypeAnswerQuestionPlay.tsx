@@ -6,7 +6,7 @@ import useQuestionSocket from "@/hooks/useQuestionSocket";
 import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
-const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, correctAnswer }) => {
+const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, onAnswered, correctAnswer }) => {
   const [answer, setAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(
@@ -26,6 +26,7 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
     if (!answer.trim() || submitted || correctAnswer !== null) return;
     const finalAnswer = answer.trim();
     setSubmitted(true);
+    onAnswered?.(); // Notify parent immediately
 
     if (mode === "HOMEWORK") {
       try {

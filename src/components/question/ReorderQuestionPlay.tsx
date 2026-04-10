@@ -17,7 +17,7 @@ const ITEM_COLORS = [
   "bg-gradient-to-r from-pink-500/60 to-pink-600/60",
 ];
 
-const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, correctAnswer }) => {
+const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, onAnswered, correctAnswer }) => {
   const [submitted, setSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(
     socket,
@@ -76,6 +76,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
     if (submitted) return;
     const answerIds = items.map(item => item.id);
     setSubmitted(true);
+    onAnswered?.(); // Notify parent immediately
 
     if (mode === "HOMEWORK") {
       try {

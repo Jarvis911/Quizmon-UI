@@ -37,7 +37,7 @@ function FlyToLocation({ location }) {
 import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
-const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult }) => {
+const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, onAnswered }) => {
   const [location, setLocation] = useState(null);
   const [correctLocation, setCorrectLocation] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
@@ -93,6 +93,7 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
     if (!location || submitted) return;
 
     setSubmitted(true);
+    onAnswered?.(); // Notify parent immediately
 
     if (mode === "HOMEWORK") {
       try {

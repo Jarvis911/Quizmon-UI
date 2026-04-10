@@ -16,7 +16,7 @@ const OPTION_COLORS = [
 
 const OPTION_ICONS = ["🔴", "🔵", "🟢", "🟡", "🟣", "🩷"];
 
-const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, correctAnswer }) => {
+const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, onAnswered, correctAnswer }) => {
   const [selectedAnswerId, setSelectedAnswerId] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(
@@ -36,6 +36,7 @@ const ButtonQuestionPlay = ({ question, socket, matchId, userId, timer, mode, on
     if (isSubmitted || timer <= 0) return;
     setSelectedAnswerId(index);
     setIsSubmitted(true);
+    onAnswered?.(); // Notify parent immediately
 
     // Auto-submit immediately for BUTTONS (single-choice)
     if (mode === "HOMEWORK") {

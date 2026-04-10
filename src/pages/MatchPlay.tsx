@@ -79,10 +79,13 @@ interface ScoreProgressBarProps {
     time: number;
     maxTime: number;
     potentialPoints: number;
+    isPaused?: boolean;
 }
 
-const ScoreProgressBar = ({ time, maxTime, potentialPoints }: ScoreProgressBarProps) => {
-    const progress = maxTime > 0 ? (time / maxTime) * 100 : 0;
+const ScoreProgressBar = ({ time, maxTime, potentialPoints, isPaused }: ScoreProgressBarProps) => {
+    // Drive progress from potentialPoints for maximum smoothness and instant pause response.
+    // potentialPoints goes 1000 -> 0, representing 100% -> 0%.
+    const progress = Math.max(0, Math.min(100, potentialPoints / 10));
     const isUrgent = time <= 5;
 
     return (
@@ -90,7 +93,7 @@ const ScoreProgressBar = ({ time, maxTime, potentialPoints }: ScoreProgressBarPr
             <div className="h-4 md:h-6 w-full bg-black/20 backdrop-blur-md rounded-full border-2 border-black/40 overflow-hidden relative shadow-inner">
                 {/* The animated decreasing stripe bar */}
                 <div
-                    className={`absolute top-0 left-0 h-full transition-[width] duration-1000 ease-linear animate-stripe-slide rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] ${isUrgent ? "opacity-90" : ""}`}
+                    className={`absolute top-0 left-0 h-full ${!isPaused ? "transition-[width] duration-100 ease-linear" : ""} animate-stripe-slide rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] ${isUrgent ? "opacity-90" : ""}`}
                     style={{ width: `${progress}%` }}
                 >
                     {/* Inner Shadow for depth */}
@@ -99,7 +102,7 @@ const ScoreProgressBar = ({ time, maxTime, potentialPoints }: ScoreProgressBarPr
                 
                 {/* Score Number - Positioned dynamically at the end of the progress */}
                 <div 
-                    className="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-linear flex items-center justify-center"
+                    className={`absolute top-1/2 -translate-y-1/2 ${!isPaused ? "transition-all duration-100 ease-linear" : ""} flex items-center justify-center`}
                     style={{ left: `${Math.max(5, progress)}%` }}
                 >
                    <span className="text-white text-[10px] md:text-base font-black tabular-nums tracking-tighter drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] px-1.5 md:px-2 bg-black/20 rounded-full backdrop-blur-sm -translate-x-1/2">
@@ -180,6 +183,8 @@ const MatchPlay = () => {
     const [musicUrl, setMusicUrl] = useState<string>("/audio/background.mp3");
     const [correctAnswerInfo, setCorrectAnswerInfo] = useState<any>(null);
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+    const [potentialPoints, setPotentialPoints] = useState(1000);
+    const [isUserAnswered, setIsUserAnswered] = useState(false);
 
     // Local Volume Settings
     const [volume, setVolume] = useState(() => {
@@ -305,6 +310,7 @@ const MatchPlay = () => {
             setFeedback(null); // Clear previous feedback
             setCorrectAnswerInfo(null);
             setShowCorrectAnswer(false);
+            setIsUserAnswered(false);
             setQuestionNumber((prev) => prev + 1);
             questionRef.current = question;
         };
@@ -399,6 +405,33 @@ const MatchPlay = () => {
         };
     }, [matchId, user?.id, matchMode, navigate]);
 
+    // Smooth potential points countdown logic
+    useEffect(() => {
+        if (matchMode !== "REALTIME" || isPaused || isUserAnswered || gameOver || !question) return;
+
+        // Sync local points with timer logic - snap if drift is significant
+        const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
+        if (Math.abs(potentialPoints - targetPoints) > 5) {
+            setPotentialPoints(targetPoints);
+        }
+
+        // Smooth decrement by 1:
+        // total points = 1000. Total time = maxTimer s. 
+        // We want to lose 1 point every (maxTimer * 1000 / 1000) ms = maxTimer ms.
+        const intervalMs = Math.max(10, maxTimer); // Floor at 10ms for safety
+        const interval = setInterval(() => {
+            setPotentialPoints(prev => {
+                if (prev <= 0) {
+                    clearInterval(interval);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, intervalMs);
+
+        return () => clearInterval(interval);
+    }, [timer, maxTimer, isPaused, isUserAnswered, gameOver, !!question, matchMode]);
+
     // TTS
     useEffect(() => {
         if (isTTSEnabled && question?.title) {
@@ -465,7 +498,6 @@ const MatchPlay = () => {
 
     // Sorted scores for sidebar
     const sortedScores = [...scores].sort((a, b) => b.score - a.score);
-    const potentialPoints = maxTimer > 0 ? Math.round((timer / maxTimer) * 1000) : 0;
 
     // Render question by type
     const renderQuestion = () => {
@@ -487,6 +519,7 @@ const MatchPlay = () => {
             mode: matchMode,
             onHomeworkSubmit: matchMode === "HOMEWORK" ? handleNextHomeworkQuestion : undefined,
             onResult: triggerFeedback,
+            onAnswered: () => setIsUserAnswered(true),
             correctAnswer: correctAnswerInfo
         };
 
@@ -631,7 +664,12 @@ const MatchPlay = () => {
 
                 {/* Center: Score & Progress - Separate row on mobile */}
                 <div className="w-full md:w-auto md:flex-1 order-3 md:order-2 flex justify-center">
-                    <ScoreProgressBar time={timer} maxTime={maxTimer} potentialPoints={potentialPoints} />
+                    <ScoreProgressBar 
+                        time={timer} 
+                        maxTime={maxTimer} 
+                        potentialPoints={potentialPoints} 
+                        isPaused={isPaused || isUserAnswered} 
+                    />
                 </div>
 
                 {/* Right: Score toggle & Volume */}

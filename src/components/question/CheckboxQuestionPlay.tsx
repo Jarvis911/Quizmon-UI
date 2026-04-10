@@ -7,7 +7,7 @@ import useQuestionSocket from "@/hooks/useQuestionSocket";
 import apiClient from "@/api/client";
 import endpoints from "../../api/api";
 
-const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, correctAnswer }) => {
+const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, onAnswered, correctAnswer }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { isCorrect, isWrong } = useQuestionSocket(
@@ -36,6 +36,7 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
     if (selectedIds.length === 0 || isSubmitted || correctAnswer !== null) return;
 
     setIsSubmitted(true);
+    onAnswered?.(); // Notify parent immediately
 
     if (mode === "HOMEWORK") {
       try {

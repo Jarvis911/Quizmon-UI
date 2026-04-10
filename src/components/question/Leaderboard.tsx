@@ -92,7 +92,7 @@ const PodiumPlace = ({ player, rank, isCurrentUser, isVisible }) => {
 
 // ─── Main Leaderboard Component ───────────────────────────────
 const Leaderboard = ({ leaderboard, currentUserId }) => {
-  const { id: matchId } = useParams();
+  const { pin: matchId } = useParams();
   const { token } = useAuth();
   const [quizId, setQuizId] = useState(null);
   const [isRated, setIsRated] = useState(true);
@@ -140,7 +140,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   useEffect(() => {
     const fetchMatch = async () => {
       try {
-        const res = await apiClient.get(endpoints.match(Number(matchId)));
+        const res = await apiClient.get(endpoints.match(matchId!));
         const qId = res.data.quizId;
         setQuizId(qId);
 
@@ -170,7 +170,7 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
-      const res = await apiClient.get(endpoints.report_excel(Number(matchId)), {
+      const res = await apiClient.get(endpoints.report_excel(matchId!), {
         responseType: 'blob', // Important for file download
       });
 

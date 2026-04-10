@@ -76,7 +76,7 @@ interface Endpoints {
     homework_finish: (id: number) => string;
 
     // Reports
-    report_excel: (matchId: number) => string;
+    report_excel: (matchId: string | number) => string;
 
     // Notifications
     notifications: string;
@@ -179,7 +179,7 @@ const endpoints: Endpoints = {
     homework_finish: (id: number) => `${BASE_URL}/homework/${id}/finish`,
 
     // Reports
-    report_excel: (matchId: number) => `${BASE_URL}/reports/excel/${matchId}`,
+    report_excel: (matchId: string | number) => `${BASE_URL}/reports/excel/${matchId}`,
 
     // Notifications
     notifications: `${BASE_URL}/notifications`,
