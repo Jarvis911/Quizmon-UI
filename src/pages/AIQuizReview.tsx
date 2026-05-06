@@ -503,7 +503,7 @@ const AIQuizReview = () => {
                 </div>
 
                 {/* Question list */}
-                <div className="flex-1 overflow-x-auto lg:overflow-y-auto p-2 md:p-4 flex flex-row lg:flex-col gap-2 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-2 custom-scrollbar">
                     {questions.map((q, i) => {
                         const cfg = STATUS_CONFIG[q.status] || STATUS_CONFIG.PENDING;
                         return (
@@ -513,10 +513,10 @@ const AIQuizReview = () => {
                                     setSelectedIdx(i);
                                     cancelEdit();
                                 }}
-                                className={`p-3 md:p-4 rounded-xl md:rounded-2xl cursor-pointer transition-all border-2 shrink-0 lg:shrink ${selectedIdx === i
+                                className={`p-3 md:p-4 rounded-xl md:rounded-2xl cursor-pointer transition-all border-2 ${selectedIdx === i
                                     ? "bg-primary/10 border-primary shadow-lg lg:scale-[1.02]"
                                     : "hover:bg-foreground/5 border-transparent hover:border-foreground/10 lg:hover:translate-x-1"
-                                    } w-24 md:w-32 lg:w-full`}
+                                    } w-full`}
                             >
                                 <div className="flex flex-col lg:flex-row lg:items-start gap-1 md:gap-4 lg:gap-4 lg:justify-between">
                                     <div className="flex items-center gap-2 mb-1 lg:mb-0">
