@@ -1,4 +1,4 @@
-import { Star, Play, Pencil } from 'lucide-react';
+import { Star, Play, Pencil, Copy } from 'lucide-react';
 import { SiGoogleclassroom } from 'react-icons/si';
 import { MdImageNotSupported } from "react-icons/md";
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ interface QuizCardProps {
     onEdit?: (id: string | number) => void;
     onAssign?: (id: string | number) => void;
     onDelete?: (id: string | number) => void;
+    onReplicate?: (id: string | number) => void;
     isAiGenerated?: boolean;
     difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
 }
@@ -21,6 +22,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     onEdit,
     onAssign,
     onDelete,
+    onReplicate,
     isAiGenerated = false,
     difficulty
 }) => {
@@ -108,6 +110,15 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                 <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
                             </Button>
                         )}
+                        {!isOwner && onReplicate && user && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => onReplicate?.(quiz.id)}
+                                className="w-full h-8 px-1 rounded-lg bg-emerald-500/80 hover:bg-emerald-600 text-white border border-emerald-400 font-bold text-[9px] uppercase tracking-tighter"
+                            >
+                                <Copy className="w-3 h-3 mr-1" /> SAO CHÉP
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -153,6 +164,15 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                 className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                             >
                                 <SiGoogleclassroom className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">GIAO</span>
+                            </Button>
+                    )}
+                    {!isOwner && onReplicate && user && (
+                            <Button
+                                variant="outline"
+                                onClick={() => onReplicate?.(quiz.id)}
+                                className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                            >
+                                <Copy className="w-3 h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">SAO CHÉP</span>
                             </Button>
                     )}
                 </div>

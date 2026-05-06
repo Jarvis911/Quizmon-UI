@@ -110,7 +110,7 @@ const router = createBrowserRouter([
             { path: "/ai/review/:jobId", element: <ProtectedRoute><AIQuizReview /></ProtectedRoute> },
             { path: "/ai/agentic-workspace", element: <ProtectedRoute><AgenticQuizWorkspace /></ProtectedRoute> },
             { path: "/classrooms", element: <ProtectedRoute><Classrooms /></ProtectedRoute> },
-            { path: "/classrooms/:id", element: <ProtectedRoute><ClassroomDetails /></ProtectedRoute> },
+            { path: "/classrooms/:code", element: <ProtectedRoute><ClassroomDetails /></ProtectedRoute> },
             { path: "/homework/:id/start", element: <ProtectedRoute><HomeworkStart /></ProtectedRoute> },
             { path: "/settings/organization", element: <ProtectedRoute><OrganizationSettings /></ProtectedRoute> },
             { path: "/billing", element: <ProtectedRoute><BillingPage /></ProtectedRoute> },

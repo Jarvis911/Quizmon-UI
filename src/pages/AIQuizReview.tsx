@@ -36,6 +36,7 @@ import {
     ChevronLeft,
     AlertCircle,
     PartyPopper,
+    Image as ImageIcon,
 } from "lucide-react";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import type {
@@ -44,6 +45,7 @@ import type {
     AIQuestionStatus,
     Category,
 } from "@/types";
+import AIImageButton from "@/components/ai/AIImageButton";
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Slider } from "@/components/ui/slider";
@@ -82,6 +84,13 @@ const TYPE_LABELS: Record<string, string> = {
     TYPEANSWER: "Tự nhập",
     REORDER: "Sắp xếp",
     LOCATION: "Vị trí",
+};
+
+const EFFECT_LABELS: Record<string, string> = {
+    NONE: "Không hiệu ứng",
+    BLUR_TO_CLEAR: "Mờ → rõ",
+    ZOOM_IN: "Zoom vào",
+    ZOOM_OUT: "Zoom ra",
 };
 
 function RecenterMap({ center }: { center: [number, number] | null }) {
@@ -352,6 +361,24 @@ const AIQuizReview = () => {
         }
     };
 
+    // Attach an AI-generated image URL to a generated question (patch via content endpoint)
+    const applyAiImageToQuestion = async (questionId: number, url: string, effect: string) => {
+        setActionLoading(questionId);
+        try {
+            const res = await apiClient.put(
+                endpoints.ai_job_question_content(Number(jobId), questionId),
+                { generatedImageUrl: url, imageEffect: effect }
+            );
+            setQuestions((prev) =>
+                prev.map((q) => (q.id === questionId ? { ...q, generatedImageUrl: url, imageEffect: effect as any } : q))
+            );
+        } catch {
+            /* non-critical */
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     // Approve all
     const approveAll = async () => {
         for (const q of questions) {
@@ -401,8 +428,8 @@ const AIQuizReview = () => {
                     />
                 </div>
                 <div className="text-center">
-                    <h2 className="text-xl md:text-2xl font-black text-foreground mb-2 animate-pulse px-4">AI Đang Tạo Câu Hỏi...</h2>
-                    <p className="text-muted-foreground font-bold tracking-widest uppercase text-[10px] md:text-xs">Vui lòng đợi trong giây lát</p>
+                    <h2 className="text-xl md:text-2xl font-black text-foreground mb-2 animate-pulse px-4">AI đang tạo câu hỏi và hình minh họa...</h2>
+                    <p className="text-muted-foreground font-bold tracking-widest uppercase text-[10px] md:text-xs px-4">Có thể mất thêm vài phút nếu AI vẽ ảnh bìa và ảnh câu hỏi</p>
                 </div>
             </div>
         );
@@ -461,6 +488,18 @@ const AIQuizReview = () => {
                             }}
                         />
                     </div>
+                    {job.suggestedCoverImageUrl && (
+                        <div className="hidden lg:flex mt-4 gap-3 items-center rounded-2xl border border-white/10 bg-foreground/5 p-2 pr-3 overflow-hidden">
+                            <img
+                                src={job.suggestedCoverImageUrl}
+                                alt="Ảnh bìa AI"
+                                className="w-14 h-14 rounded-xl object-cover shrink-0 border border-white/10"
+                            />
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-snug">
+                                Ảnh bìa quiz (AI) — sẽ dùng khi bạn tạo quiz
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Question list */}
@@ -499,6 +538,9 @@ const AIQuizReview = () => {
                                             >
                                                 {cfg.label}
                                             </Badge>
+                                            {q.generatedImageUrl && (
+                                                <ImageIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-primary shrink-0" aria-hidden />
+                                            )}
                                             <span className="hidden md:inline-block lg:inline-block text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-40 truncate">
                                                 {TYPE_LABELS[q.questionType] || q.questionType}
                                             </span>
@@ -650,6 +692,48 @@ const AIQuizReview = () => {
                                 )}
                             </div>
                         </div>
+
+                        {!editing && (
+                            <div className="mb-6 md:mb-8">
+                                {selectedQuestion.generatedImageUrl ? (
+                                    <div className="rounded-2xl border border-white/10 bg-foreground/5 overflow-hidden">
+                                        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-white/10 bg-primary/5">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-primary">
+                                                Hình minh họa AI
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                {selectedQuestion.imageEffect && selectedQuestion.imageEffect !== "NONE" && (
+                                                    <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest">
+                                                        {EFFECT_LABELS[selectedQuestion.imageEffect] || selectedQuestion.imageEffect}
+                                                    </Badge>
+                                                )}
+                                                <AIImageButton
+                                                    context={selectedQuestion.questionText}
+                                                    onGenerated={(url, effect) => applyAiImageToQuestion(selectedQuestion.id, url, effect)}
+                                                    disabled={actionLoading === selectedQuestion.id}
+                                                />
+                                            </div>
+                                        </div>
+                                        <img
+                                            src={selectedQuestion.generatedImageUrl}
+                                            alt=""
+                                            className="w-full max-h-64 object-contain bg-black/20"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-3 p-3 rounded-2xl border border-dashed border-white/10 bg-foreground/3">
+                                        <AIImageButton
+                                            context={selectedQuestion.questionText}
+                                            onGenerated={(url, effect) => applyAiImageToQuestion(selectedQuestion.id, url, effect)}
+                                            disabled={actionLoading === selectedQuestion.id}
+                                        />
+                                        <p className="text-[10px] font-bold text-muted-foreground">
+                                            Câu hỏi này chưa có hình ảnh minh họa.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Question text */}
                         <div className="mb-8 md:mb-10">
@@ -1068,6 +1152,18 @@ const AIQuizReview = () => {
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6 py-8">
+                        {job.suggestedCoverImageUrl && (
+                            <div className="flex gap-4 items-center rounded-2xl border border-primary/20 bg-primary/5 p-3">
+                                <img
+                                    src={job.suggestedCoverImageUrl}
+                                    alt="Ảnh bìa"
+                                    className="w-20 h-20 rounded-xl object-cover border border-white/10 shrink-0"
+                                />
+                                <p className="text-xs font-bold text-foreground leading-snug">
+                                    Ảnh bìa do AI tạo sẽ được gán cho quiz khi bạn xác nhận.
+                                </p>
+                            </div>
+                        )}
                         <div>
                             <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60 mb-3 block">Tên Quiz *</label>
                             <Input

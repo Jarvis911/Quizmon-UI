@@ -5,10 +5,11 @@ import { BrowserRouter } from "react-router-dom";
 import Navbar from "@/components/ui/navbar";
 import * as AuthContext from "@/context/AuthContext";
 import * as ThemeContext from "@/context/ThemeContext";
+import { OrganizationProvider } from "@/context/OrganizationContext";
+import { ModalProvider } from "@/context/ModalContext";
 import axios from "axios";
 
 // Mock axios
-vi.mock("axios");
 const mockedGet = vi.mocked(axios.get);
 const mockedPut = vi.mocked(axios.put);
 
@@ -67,14 +68,20 @@ describe("Navbar Component", () => {
     const renderNavbar = () => {
         render(
             <BrowserRouter>
-                <Navbar />
+                <AuthContext.AuthProvider>
+                    <ModalProvider>
+                        <OrganizationProvider>
+                            <Navbar />
+                        </OrganizationProvider>
+                    </ModalProvider>
+                </AuthContext.AuthProvider>
             </BrowserRouter>
         );
     };
 
     it("renders the logo and login button when logged out", () => {
         renderNavbar();
-        expect(screen.getByText("Quizmon")).toBeInTheDocument();
+        expect(screen.getByAltText("Quizmon Logo")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /đăng nhập/i })).toBeInTheDocument();
     });
 
@@ -161,6 +168,6 @@ describe("Navbar Component", () => {
         renderNavbar();
 
         const nav = screen.getByRole("navigation");
-        expect(nav).toHaveClass("h-12");
+        expect(nav.firstChild).toHaveClass("h-12");
     });
 });

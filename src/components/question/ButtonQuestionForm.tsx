@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/client";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
+import AIImageButton from "@/components/ai/AIImageButton";
 import endpoints from "@/api/api";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
@@ -260,6 +261,16 @@ const ButtonQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDelete
             {/* If IMAGE */}
             {form.watch("mediaType") === "IMAGE" && (
               <div className="flex flex-col gap-3">
+                {!imageSrc && (
+                  <AIImageButton
+                    context={form.watch("text") || "Câu hỏi trắc nghiệm"}
+                    onGenerated={(url, effect) => {
+                      setImageSrc(url);
+                      form.setValue("imageEffect", effect as any);
+                    }}
+                    disabled={loading}
+                  />
+                )}
                 <ImagePicker
                   imageSrc={imageSrc}
                   setImageSrc={setImageSrc}

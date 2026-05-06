@@ -41,6 +41,10 @@ const UserStats = () => {
         recentMatches: [],
     });
     const [period, setPeriod] = useState("all");
+    const [fromDate, setFromDate] = useState<string>("");
+    const [toDate, setToDate] = useState<string>("");
+    const [page, setPage] = useState<number>(1);
+    const [limit, setLimit] = useState<number>(20);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -63,12 +67,15 @@ const UserStats = () => {
             setLoading(true);
             setError(null);
 
-            const url =
-                selectedPeriod === "all"
-                    ? `${endpoints.user_stats}`
-                    : `${endpoints.user_stats}?period=${selectedPeriod}`;
+            const params: Record<string, string | number | undefined> = {
+                page,
+                limit,
+            };
+            if (selectedPeriod !== "all") params.period = selectedPeriod;
+            if (fromDate) params.from = fromDate;
+            if (toDate) params.to = toDate;
 
-            const res = await apiClient.get<UserStatsType>(url);
+            const res = await apiClient.get<UserStatsType>(endpoints.user_stats, { params });
             setStats(res.data);
         } catch (err) {
             console.error(`[UserStats] Error fetching stats for ${selectedPeriod}:`, err);
@@ -80,7 +87,7 @@ const UserStats = () => {
 
     useEffect(() => {
         fetchStats(period);
-    }, [period, token]);
+    }, [period, token, page, limit, fromDate, toDate]);
 
     const filteredMatches = useMemo(() => {
         if (!stats?.recentMatches) return [];
@@ -138,7 +145,12 @@ const UserStats = () => {
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", `match_${matchId}_report.xlsx`);
+            const contentDisposition = (res.headers?.["content-disposition"] || res.headers?.["Content-Disposition"]) as
+                | string
+                | undefined;
+            const filenameMatch = contentDisposition?.match(/filename="?([^"]+)"?/i);
+            const filename = filenameMatch?.[1] ?? `match_${matchId}_report.xlsx`;
+            link.setAttribute("download", filename);
             document.body.appendChild(link);
             link.click();
 
@@ -424,7 +436,7 @@ const UserStats = () => {
 
                     <div className="flex items-center gap-2 md:gap-4 bg-card/40 backdrop-blur-md p-1 md:p-2 rounded-xl md:rounded-2xl border border-white/10 shadow-lg">
                         <Calendar className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground ml-2" />
-                        <Select value={period} onValueChange={setPeriod}>
+                        <Select value={period} onValueChange={(v) => { setPeriod(v); setPage(1); }}>
                             <SelectTrigger className="w-[140px] md:w-[180px] border-none bg-transparent shadow-none focus:ring-0 font-bold text-xs md:text-sm">
                                 <SelectValue placeholder="Khoảng thời gian" />
                             </SelectTrigger>
@@ -603,6 +615,62 @@ const UserStats = () => {
                     </TabsContent>
 
                     <TabsContent value="history" className="space-y-8 mt-0 focus-visible:ring-0">
+                        {/* Filters + pagination */}
+                        <div className="flex flex-col lg:flex-row gap-3 lg:items-end lg:justify-between">
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex flex-wrap items-center gap-2 bg-card/40 backdrop-blur-md border-2 border-white/5 rounded-2xl px-4 py-3">
+                                    <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground/60 font-mono whitespace-nowrap">
+                                        Từ
+                                    </span>
+                                    <Input
+                                        type="date"
+                                        value={fromDate}
+                                        onChange={(e) => { setFromDate(e.target.value); setPage(1); }}
+                                        className="h-9 border-white/10 bg-white/5 font-bold"
+                                    />
+                                    <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground/60 font-mono whitespace-nowrap">
+                                        Đến
+                                    </span>
+                                    <Input
+                                        type="date"
+                                        value={toDate}
+                                        onChange={(e) => { setToDate(e.target.value); setPage(1); }}
+                                        className="h-9 border-white/10 bg-white/5 font-bold"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        className="h-9 font-bold"
+                                        onClick={() => { setFromDate(""); setToDate(""); setPage(1); }}
+                                    >
+                                        Xóa lọc
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3 justify-between lg:justify-end">
+                                <div className="flex items-center gap-2 bg-card/40 backdrop-blur-md border-2 border-white/5 rounded-2xl px-4 py-3">
+                                    <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground/60 font-mono">
+                                        Mỗi trang
+                                    </span>
+                                    <Select value={String(limit)} onValueChange={(v) => { setLimit(Number(v)); setPage(1); }}>
+                                        <SelectTrigger className="w-[110px] border-none bg-transparent shadow-none focus:ring-0 font-bold text-xs md:text-sm">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-white/20 backdrop-blur-lg">
+                                            {[10, 20, 50, 100].map(n => (
+                                                <SelectItem key={n} value={String(n)} className="rounded-lg font-bold">
+                                                    {n}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="text-xs md:text-sm font-bold text-muted-foreground">
+                                    {stats.pagination?.total !== undefined ? `Tổng: ${stats.pagination.total}` : null}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Search Bar - Classroom style */}
                         <div className="relative group">
                             <img
@@ -723,6 +791,29 @@ const UserStats = () => {
                                             ))}
                                         </tbody>
                                     </table>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-white/10 bg-white/3">
+                                    <div className="text-xs md:text-sm font-bold text-muted-foreground">
+                                        Trang {stats.pagination?.page ?? page} / {stats.pagination?.totalPages ?? 1}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            className="font-bold"
+                                            disabled={(stats.pagination?.page ?? page) <= 1 || loading}
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                        >
+                                            Trước
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="font-bold"
+                                            disabled={(stats.pagination?.page ?? page) >= (stats.pagination?.totalPages ?? 1) || loading}
+                                            onClick={() => setPage(p => p + 1)}
+                                        >
+                                            Sau
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}

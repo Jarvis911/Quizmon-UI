@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/client";
 import Cropper, { Area } from "react-easy-crop";
 import { Upload, Loader2, Settings, Trash2 } from "lucide-react";
+import AIImageButton from "@/components/ai/AIImageButton";
 import { MdImageNotSupported } from "react-icons/md";
 import endpoints from "@/api/api";
 import { useModal } from "@/context/ModalContext";
@@ -71,6 +72,8 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
     const [isImageChanged, setIsImageChanged] = useState(false);
+    /** True when imageSrc is an already-uploaded URL (AI-generated), skip crop */
+    const [isDirectUrl, setIsDirectUrl] = useState(false);
 
     const form = useForm<QuizFormData>({
         resolver: zodResolver(quizSchema),
@@ -172,9 +175,14 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
 
             if (isImageChanged) {
                 if (imageSrc) {
-                    const croppedBlob = await getCroppedImg();
-                    if (croppedBlob) {
-                        formData.append("file", croppedBlob, "image.jpg");
+                    if (isDirectUrl) {
+                        // AI-generated image already on Azure — pass URL directly
+                        formData.append("imageUrl", imageSrc);
+                    } else {
+                        const croppedBlob = await getCroppedImg();
+                        if (croppedBlob) {
+                            formData.append("file", croppedBlob, "image.jpg");
+                        }
                     }
                 } else {
                     formData.append("removeImage", "true");
@@ -279,7 +287,7 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                                                         onDrop={(e) => handleDrop(e, field)}
                                                     >
                                                         {!imageSrc ? (
-                                                            <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
+                                                            <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full gap-3">
                                                                 <MdImageNotSupported className="w-12 h-12 text-muted-foreground mb-2" />
                                                                 <span className="text-muted-foreground text-sm text-center px-4">
                                                                     Kéo thả hoặc click để chọn ảnh
@@ -290,6 +298,20 @@ const QuizSettingsModal = ({ quiz, open, onOpenChange, onSuccess }: QuizSettings
                                                                     className="hidden"
                                                                     onChange={(e) => handleFileChange(e, field)}
                                                                 />
+                                                                <span
+                                                                    onClick={(e) => e.preventDefault()}
+                                                                    className="pointer-events-auto"
+                                                                >
+                                                                    <AIImageButton
+                                                                        context={form.watch("title") || quiz.title || "Ảnh bìa quiz"}
+                                                                        onGenerated={(url) => {
+                                                                            setImageSrc(url);
+                                                                            setIsImageChanged(true);
+                                                                            setIsDirectUrl(true);
+                                                                        }}
+                                                                        disabled={loading}
+                                                                    />
+                                                                </span>
                                                             </label>
                                                         ) : (
                                                             <>

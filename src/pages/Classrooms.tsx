@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import apiClient from "@/api/client";
 import { useModal } from "@/context/ModalContext";
+import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import endpoints from "../api/api";
 import { Users, Plus, DoorOpen, ArrowRight, HelpCircle, Info, CheckCircle2, GraduationCap, UserCircle } from "lucide-react";
@@ -20,13 +21,14 @@ interface Classroom {
     name: string;
     description: string;
     joinCode: string;
-    teacher: { username: string; email: string };
+    teacher: { id: number; username: string; email: string };
     _count: { members: number; assignments: number };
 }
 
 export default function Classrooms() {
     const [classrooms, setClassrooms] = useState<Classroom[]>([]);
     const { showAlert } = useModal();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [showGuide, setShowGuide] = useState(false);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -225,34 +227,44 @@ export default function Classrooms() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-4 md:mt-8">
-                    {filteredClassrooms.map(c => (
-                        <div
-                            key={c.id}
-                            onClick={() => navigate(`/classrooms/${c.id}`)}
-                            className="bg-card/40 backdrop-blur-md group cursor-pointer rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg border-2 border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
-                        >
-                            <div className="flex justify-between items-start mb-4 md:mb-6">
-                                <div className="bg-primary text-primary-foreground w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center font-black text-xl md:text-2xl shadow-lg transform group-hover:rotate-3 transition-transform">
-                                    {c.name.substring(0, 2).toUpperCase()}
+                    {filteredClassrooms.map(c => {
+                        const isOwner = user?.id === c.teacher?.id;
+                        return (
+                            <div
+                                key={c.id}
+                                onClick={() => navigate(`/classrooms/${c.joinCode}`)}
+                                className="bg-card/40 backdrop-blur-md group cursor-pointer rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg border-2 border-white/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
+                            >
+                                <div className="flex justify-between items-start mb-4 md:mb-6">
+                                    <div className="bg-primary text-primary-foreground w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center font-black text-xl md:text-2xl shadow-lg transform group-hover:rotate-3 transition-transform">
+                                        {c.name.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1.5">
+                                        <div className="bg-foreground/5 text-[9px] md:text-[10px] font-black px-3 py-1.5 md:px-4 md:py-2 rounded-full text-muted-foreground uppercase tracking-widest border border-foreground/5">
+                                            {c._count.members} Thành viên
+                                        </div>
+                                        {!isOwner && (
+                                            <div className="bg-indigo-500/10 text-indigo-500 text-[8px] md:text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-widest border border-indigo-500/20 shadow-xs">
+                                                Học sinh
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="bg-foreground/5 text-[9px] md:text-[10px] font-black px-3 py-1.5 md:px-4 md:py-2 rounded-full text-muted-foreground uppercase tracking-widest border border-foreground/5">
-                                    {c._count.members} Thành viên
-                                </div>
-                            </div>
-                            <h3 className="text-lg md:text-2xl font-black text-foreground mb-1 md:mb-2 group-hover:text-primary transition-colors line-clamp-1">{c.name}</h3>
-                            <p className="text-muted-foreground font-medium text-xs md:text-sm line-clamp-2 h-8 md:h-10 mb-4 md:mb-6 opacity-70 leading-relaxed">{c.description || "Không có mô tả."}</p>
+                                <h3 className="text-lg md:text-2xl font-black text-foreground mb-1 md:mb-2 group-hover:text-primary transition-colors line-clamp-1">{c.name}</h3>
+                                <p className="text-muted-foreground font-medium text-xs md:text-sm line-clamp-2 h-8 md:h-10 mb-4 md:mb-6 opacity-70 leading-relaxed">{c.description || "Không có mô tả."}</p>
 
-                            <div className="flex justify-between items-center border-t border-white/5 pt-4 md:pt-6 mt-2 md:mt-4">
-                                <div className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
-                                    <span className="font-black text-foreground">{c.teacher?.username}</span>
-                                    <span className="opacity-60 text-[9px] md:text-[10px] uppercase font-black ml-1">(GV)</span>
-                                </div>
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
-                                    <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                                <div className="flex justify-between items-center border-t border-white/5 pt-4 md:pt-6 mt-2 md:mt-4">
+                                    <div className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
+                                        <span className="font-black text-foreground">{c.teacher?.username}</span>
+                                        <span className="opacity-60 text-[9px] md:text-[10px] uppercase font-black ml-1">(GV)</span>
+                                    </div>
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
+                                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 

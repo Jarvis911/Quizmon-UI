@@ -278,6 +278,7 @@ const QuizEditor = () => {
                     <Button
                         onClick={() => setCreatingType("SELECT")}
                         variant="secondary"
+                        aria-label="Thêm câu hỏi"
                         className="min-w-16 h-16 md:min-w-20 md:h-20 rounded-xl flex items-center justify-center border-2 border-dashed border-primary/40 hover:border-primary hover:bg-primary/10 transition-all shadow-md group shrink-0"
                     >
                         <Plus className="w-6 h-6 md:w-8 md:h-8 text-primary group-hover:scale-110 transition-transform" />

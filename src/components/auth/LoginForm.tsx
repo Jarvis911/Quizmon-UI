@@ -102,10 +102,11 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-1 sm:space-y-2">
-              <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 px-1">Email / Tài khoản</label>
+              <label htmlFor="email-input" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 px-1">Email / Tài khoản</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 sm:size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                 <input
+                  id="email-input"
                   type="text"
                   className="w-full bg-slate-50 border-2 border-slate-50 py-3 sm:py-4 pl-10 sm:pl-12 pr-4 rounded-xl sm:rounded-2xl text-base sm:text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"
                   value={email}
@@ -117,12 +118,13 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 
             <div className="space-y-1 sm:space-y-2">
               <div className="flex items-center justify-between px-1">
-                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400">Mật khẩu</label>
+                <label htmlFor="password-input" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400">Mật khẩu</label>
                 <a href="#" className="text-[10px] sm:text-xs font-black text-primary hover:underline">Quên mật khẩu?</a>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 sm:size-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                 <input
+                  id="password-input"
                   type="password"
                   placeholder="••••••••"
                   className="w-full bg-slate-50 border-2 border-slate-50 py-3 sm:py-4 pl-10 sm:pl-12 pr-4 rounded-xl sm:rounded-2xl text-base sm:text-lg font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-primary/20 focus:bg-white transition-all shadow-sm"

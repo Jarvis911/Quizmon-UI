@@ -117,6 +117,24 @@ const Home = () => {
         setIsHomeworkModalOpen(true);
     };
 
+    const handleReplicateQuiz = async (quizId: string | number) => {
+        if (!checkAuth()) return;
+        try {
+            await apiClient.post(endpoints.quiz_replicate(Number(quizId)));
+            showAlert({
+                title: "Đã sao chép!",
+                message: "Quiz đã được sao chép vào thư viện của bạn.",
+                type: "success"
+            });
+        } catch (err: any) {
+            showAlert({
+                title: "Lỗi",
+                message: sanitizeError(err, "Không thể sao chép quiz."),
+                type: "error"
+            });
+        }
+    };
+
     const handleSubmitHomework = async (e: FormEvent) => {
         e.preventDefault();
         try {
@@ -237,6 +255,7 @@ const Home = () => {
                             onPlay={handlePlayNow}
                             onEdit={handleEditQuiz}
                             onAssign={handleOpenHomeworkModal}
+                            onReplicate={handleReplicateQuiz}
                             icon={getIconForCategory(cat.name)}
                             isAiGenerated={cat.name.toLowerCase().includes('ai')}
                         />
@@ -381,6 +400,7 @@ const CategoryQuizzes = ({
     onPlay,
     onEdit,
     onAssign,
+    onReplicate,
     icon,
     isAiGenerated
 }: {
@@ -388,6 +408,7 @@ const CategoryQuizzes = ({
     onPlay: (id: string | number) => void,
     onEdit: (id: string | number) => void,
     onAssign: (id: string | number) => void,
+    onReplicate: (id: string | number) => void,
     icon: React.ReactNode,
     isAiGenerated: boolean
 }) => {
@@ -416,6 +437,7 @@ const CategoryQuizzes = ({
             onPlay={onPlay}
             onEdit={onEdit}
             onAssign={onAssign}
+            onReplicate={onReplicate}
             icon={icon}
             isAiGeneratedSection={isAiGenerated}
         />

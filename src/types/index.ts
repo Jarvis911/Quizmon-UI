@@ -249,6 +249,9 @@ export interface AIGeneratedQuestion {
     userFeedback?: string | null;
     regenerationCount: number;
     finalQuestionId?: number | null;
+    /** AI-generated illustration URL (Azure), shown in review and copied to the quiz question */
+    generatedImageUrl?: string | null;
+    imageEffect?: 'NONE' | 'BLUR_TO_CLEAR' | 'ZOOM_IN' | 'ZOOM_OUT';
     createdAt: string;
     updatedAt: string;
 }
@@ -265,6 +268,7 @@ export interface AIGenerationJob {
     suggestedTitle?: string | null;
     suggestedDescription?: string | null;
     suggestedCategoryId?: number | null;
+    suggestedCoverImageUrl?: string | null;
     userId: number;
     generatedQuestions?: AIGeneratedQuestion[];
     _count?: { generatedQuestions: number };
@@ -312,4 +316,12 @@ export interface UserStats {
     rankCounts: Record<string, number>;
     winRate: number;
     recentMatches: RecentMatch[];
+    pagination?: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+        from?: string | Date;
+        to?: string | Date | null;
+    };
 }

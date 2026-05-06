@@ -5,7 +5,6 @@ import axios from "axios";
 import JoinMatch from "@/pages/JoinMatch";
 
 // Mock axios
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 // Mock useNavigate
@@ -54,7 +53,7 @@ describe("JoinMatch Page", () => {
     });
 
     it("successfully joins a match and navigates", async () => {
-        mockedAxios.get.mockResolvedValueOnce({ status: 200, data: { id: "match-123" } });
+        mockedAxios.get.mockResolvedValueOnce({ status: 200, data: { id: "match-123", pin: "123456" } });
         renderPage();
 
         const input = screen.getByPlaceholderText("Game ID");
@@ -69,7 +68,7 @@ describe("JoinMatch Page", () => {
 
         await waitFor(() => {
             expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining("123456"));
-            expect(mockedUsedNavigate).toHaveBeenCalledWith("/match/match-123/lobby");
+            expect(mockedUsedNavigate).toHaveBeenCalledWith("/match/123456/lobby");
         });
     });
 

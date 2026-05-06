@@ -10,6 +10,7 @@ interface QuizSectionProps {
     onPlay: (id: string | number) => void;
     onEdit?: (id: string | number) => void;
     onAssign?: (id: string | number) => void;
+    onReplicate?: (id: string | number) => void;
     isAiGeneratedSection?: boolean;
     iconColor?: string;
     icon?: React.ReactNode;
@@ -21,6 +22,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
     onPlay,
     onEdit,
     onAssign,
+    onReplicate,
     isAiGeneratedSection = false,
     iconColor = 'bg-indigo-500',
     icon
@@ -87,6 +89,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
                                     onPlay={onPlay}
                                     onEdit={onEdit}
                                     onAssign={onAssign}
+                                    onReplicate={onReplicate}
                                     isAiGenerated={isAiGeneratedSection}
                                     difficulty={isAiGeneratedSection ? 'EASY' : undefined}
                                 />

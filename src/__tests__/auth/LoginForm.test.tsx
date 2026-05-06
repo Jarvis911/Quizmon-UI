@@ -42,10 +42,10 @@ describe("LoginForm Component", () => {
 
     it("renders the login form correctly", () => {
         renderForm();
-        expect(screen.getByText("Log in")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("Username or email")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /let's go!/i })).toBeInTheDocument();
+        expect(screen.getByText("Chào mừng trở lại!")).toBeInTheDocument();
+        expect(screen.getByText("Email / Tài khoản")).toBeInTheDocument();
+        expect(screen.getByText("Mật khẩu")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /đăng nhập ngay!/i })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /google/i })).toBeInTheDocument();
     });
 
@@ -53,9 +53,9 @@ describe("LoginForm Component", () => {
         mockLogin.mockResolvedValueOnce(true);
         renderForm();
 
-        const emailInput = screen.getByPlaceholderText("Username or email");
-        const passwordInput = screen.getByPlaceholderText("Password");
-        const submitButton = screen.getByRole("button", { name: /let's go!/i });
+        const emailInput = screen.getByLabelText(/email \/ tài khoản/i);
+        const passwordInput = screen.getByLabelText(/mật khẩu/i);
+        const submitButton = screen.getByRole("button", { name: /đăng nhập ngay!/i });
 
         fireEvent.change(emailInput, { target: { value: "test@example.com" } });
         fireEvent.change(passwordInput, { target: { value: "password123" } });
@@ -72,9 +72,9 @@ describe("LoginForm Component", () => {
         mockLogin.mockResolvedValueOnce(false);
         renderForm();
 
-        const emailInput = screen.getByPlaceholderText("Username or email");
-        const passwordInput = screen.getByPlaceholderText("Password");
-        const submitButton = screen.getByRole("button", { name: /let's go!/i });
+        const emailInput = screen.getByLabelText(/email \/ tài khoản/i);
+        const passwordInput = screen.getByLabelText(/mật khẩu/i);
+        const submitButton = screen.getByRole("button", { name: /đăng nhập ngay!/i });
 
         fireEvent.change(emailInput, { target: { value: "wrong@example.com" } });
         fireEvent.change(passwordInput, { target: { value: "wrongpass" } });
@@ -82,7 +82,7 @@ describe("LoginForm Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(screen.getByText("Đăng nhập thất bại, vui lòng thử lại!")).toBeInTheDocument();
+            expect(screen.getByText("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!")).toBeInTheDocument();
         });
     });
 
@@ -109,7 +109,7 @@ describe("LoginForm Component", () => {
 
     it("navigates to signup page", () => {
         renderForm();
-        const signupButton = screen.getByRole("button", { name: /sign up/i });
+        const signupButton = screen.getByText(/đăng ký ngay/i);
 
         fireEvent.click(signupButton);
 

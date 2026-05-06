@@ -8,6 +8,7 @@ import apiClient from "@/api/client";
 import { useEffect, useState, useCallback, ChangeEvent, DragEvent } from "react";
 import Cropper from "react-easy-crop";
 import { Upload, Loader2 } from "lucide-react";
+import AIImageButton from "@/components/ai/AIImageButton";
 import { MdImageNotSupported } from "react-icons/md";
 import endpoints from "@/api/api";
 import type { CropArea, Category } from "@/types";
@@ -52,6 +53,7 @@ const CreateQuizForm = () => {
 
     // Crop and zoom image
     const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [isDirectUrl, setIsDirectUrl] = useState(false);
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null);
@@ -136,9 +138,13 @@ const CreateQuizForm = () => {
             formData.append("categoryId", values.quiz_category);
             formData.append("isPublic", String(values.is_public));
 
-            const croppedBlob = await getCroppedImg();
-            if (croppedBlob) {
-                formData.append("file", croppedBlob, "image.jpg");
+            if (isDirectUrl && imageSrc) {
+                formData.append("imageUrl", imageSrc);
+            } else {
+                const croppedBlob = await getCroppedImg();
+                if (croppedBlob) {
+                    formData.append("file", croppedBlob, "image.jpg");
+                }
             }
 
             const res = await apiClient.post(endpoints.quizzes, formData);
@@ -206,7 +212,7 @@ const CreateQuizForm = () => {
                                                     onDrop={(e) => handleDrop(e, field)}
                                                 >
                                                     {!imageSrc ? (
-                                                        <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
+                                                        <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full gap-3">
                                                             <MdImageNotSupported className="w-16 h-16 text-gray-400 mb-2" />
                                                             <span className="text-gray-500">
                                                                 Kéo & thả hoặc click để chọn ảnh
@@ -217,6 +223,19 @@ const CreateQuizForm = () => {
                                                                 className="hidden"
                                                                 onChange={(e) => handleFileChange(e, field)}
                                                             />
+                                                            <span
+                                                                onClick={(e) => e.preventDefault()}
+                                                                className="pointer-events-auto"
+                                                            >
+                                                                <AIImageButton
+                                                                    context={form.watch("title") || form.watch("description") || "Ảnh bìa quiz"}
+                                                                    onGenerated={(url) => {
+                                                                        setImageSrc(url);
+                                                                        setIsDirectUrl(true);
+                                                                    }}
+                                                                    disabled={loading}
+                                                                />
+                                                            </span>
                                                         </label>
                                                     ) : (
                                                         <>

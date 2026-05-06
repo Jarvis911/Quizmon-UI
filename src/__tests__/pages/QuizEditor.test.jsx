@@ -2,10 +2,11 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import QuizEditor from "@/pages/QuizEditor";
+import { AuthProvider } from "@/context/AuthContext";
+import { ModalProvider } from "@/context/ModalContext";
 import axios from "axios";
 
 // Mock axios
-vi.mock("axios");
 const mockedGet = vi.mocked(axios.get);
 
 // Mock useParams
@@ -14,6 +15,7 @@ vi.mock("react-router-dom", async () => {
     return {
         ...actual,
         useParams: () => ({ id: "quiz-123" }),
+        useBlocker: vi.fn().mockReturnValue({ state: "unblocked" }),
     };
 });
 
@@ -62,7 +64,11 @@ describe("QuizEditor Page", () => {
     const renderEditor = () => {
         render(
             <BrowserRouter>
-                <QuizEditor />
+                <AuthProvider>
+                    <ModalProvider>
+                        <QuizEditor />
+                    </ModalProvider>
+                </AuthProvider>
             </BrowserRouter>
         );
     };
@@ -103,7 +109,7 @@ describe("QuizEditor Page", () => {
         });
 
         // Plus button to add question
-        const addButton = screen.getByRole("button", { name: "" }); // Plus icon button
+        const addButton = screen.getByRole("button", { name: /thêm câu hỏi/i });
         fireEvent.click(addButton);
 
         expect(screen.getByTestId("select-type-form")).toBeInTheDocument();

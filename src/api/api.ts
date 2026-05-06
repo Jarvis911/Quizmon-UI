@@ -11,11 +11,17 @@ interface Endpoints {
 
     // Quiz
     quizzes: string;
+    quiz_my: string;
+    quiz_org_library: string;
+    quiz_assignable: string;
     explore: string;
     quiz: (id: number) => string;
     quiz_rating: (id: number) => string;
     quiz_isRated: (id: number) => string;
     quiz_delete: (id: number | string) => string;
+    quiz_replicate: (id: number) => string;
+    quiz_assign_to_org: (id: number) => string;
+    quiz_remove_from_org: (id: number) => string;
 
     // Question
     question_buttons: string;
@@ -55,6 +61,7 @@ interface Endpoints {
     ai_job_question_regenerate: (jobId: number, questionId: number) => string;
     ai_job_question_delete: (jobId: number, questionId: number) => string;
     ai_job_approve_all: (id: number) => string;
+    ai_generate_image: string;
     ai_agentic_save: string;
 
     // Agentic Workspace Sessions
@@ -67,6 +74,16 @@ interface Endpoints {
     classrooms: string;
     classroom: (id: number) => string;
     classroom_join: string;
+    classroom_join_invite: (token: string) => string;
+    classroom_pending: (id: number) => string;
+    classroom_approve: (id: number, memberId: number) => string;
+    classroom_reject: (id: number, memberId: number) => string;
+    classroom_remove_member: (id: number, userId: number) => string;
+    classroom_import_students: (id: number) => string;
+    classroom_clear_expected: (id: number) => string;
+    classroom_regenerate_invite: (id: number) => string;
+    classroom_expected_match: (id: number, expectedId: number, userId: number) => string;
+    classroom_expected_unmatch: (id: number, expectedId: number) => string;
 
     // Homework
     homework: string;
@@ -113,11 +130,17 @@ const endpoints: Endpoints = {
 
     // Quiz
     quizzes: `${BASE_URL}/quiz`,
+    quiz_my: `${BASE_URL}/quiz`,
+    quiz_org_library: `${BASE_URL}/quiz/org-library`,
+    quiz_assignable: `${BASE_URL}/quiz/assignable`,
     explore: `${BASE_URL}/quiz/explore`,
     quiz: (id: number) => `${BASE_URL}/quiz/${id}`,
     quiz_rating: (id: number) => `${BASE_URL}/quiz/${id}/rating`,
     quiz_isRated: (id: number) => `${BASE_URL}/quiz/${id}/rated`,
     quiz_delete: (id: number | string) => `${BASE_URL}/quiz/${id}`,
+    quiz_replicate: (id: number) => `${BASE_URL}/quiz/${id}/replicate`,
+    quiz_assign_to_org: (id: number) => `${BASE_URL}/quiz/${id}/assign-to-org`,
+    quiz_remove_from_org: (id: number) => `${BASE_URL}/quiz/${id}/remove-from-org`,
 
     // Question
     question_buttons: `${BASE_URL}/question/buttons`,
@@ -158,6 +181,7 @@ const endpoints: Endpoints = {
     ai_job_question_regenerate: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}/regenerate`,
     ai_job_question_delete: (jobId: number, questionId: number) => `${BASE_URL}/ai/jobs/${jobId}/questions/${questionId}`,
     ai_job_approve_all: (id: number) => `${BASE_URL}/ai/jobs/${id}/approve-all`,
+    ai_generate_image: `${BASE_URL}/ai/generate-image`,
     ai_agentic_save: `${BASE_URL}/ai/agentic/save`,
 
     // Agentic Workspace Sessions
@@ -170,6 +194,16 @@ const endpoints: Endpoints = {
     classrooms: `${BASE_URL}/classrooms`,
     classroom: (id: number) => `${BASE_URL}/classrooms/${id}`,
     classroom_join: `${BASE_URL}/classrooms/join`,
+    classroom_join_invite: (token: string) => `${BASE_URL}/classrooms/invite/${token}`,
+    classroom_pending: (id: number) => `${BASE_URL}/classrooms/${id}/pending`,
+    classroom_approve: (id: number, memberId: number) => `${BASE_URL}/classrooms/${id}/members/${memberId}/approve`,
+    classroom_reject: (id: number, memberId: number) => `${BASE_URL}/classrooms/${id}/members/${memberId}/reject`,
+    classroom_remove_member: (id: number, userId: number) => `${BASE_URL}/classrooms/${id}/members/${userId}`,
+    classroom_import_students: (id: number) => `${BASE_URL}/classrooms/${id}/import-students`,
+    classroom_clear_expected: (id: number) => `${BASE_URL}/classrooms/${id}/expected-students`,
+    classroom_regenerate_invite: (id: number) => `${BASE_URL}/classrooms/${id}/regenerate-invite`,
+    classroom_expected_match: (id: number, expectedId: number, userId: number) => `${BASE_URL}/classrooms/${id}/expected-students/${expectedId}/match/${userId}`,
+    classroom_expected_unmatch: (id: number, expectedId: number) => `${BASE_URL}/classrooms/${id}/expected-students/${expectedId}/match`,
 
     // Homework
     homework: `${BASE_URL}/homework`,

@@ -6,6 +6,7 @@ import apiClient from "@/api/client";
 import endpoints from "@/api/api.js";
 import YoutubePicker from "@/components/picker/YoutubePicker";
 import ImagePicker from "@/components/picker/ImagePicker";
+import AIImageButton from "@/components/ai/AIImageButton";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
 import { ImageIcon, Youtube, Trash2, Loader2 } from "lucide-react";
@@ -253,6 +254,16 @@ const CheckboxQuestionForm = ({ quizId, question, onSaved, onDirtyChange, onDele
             {/* Nếu chọn IMAGE */}
             {form.watch("mediaType") === "IMAGE" && (
               <div className="flex flex-col gap-3">
+                {!imageSrc && (
+                  <AIImageButton
+                    context={form.watch("text") || "Câu hỏi nhiều đáp án"}
+                    onGenerated={(url, effect) => {
+                      setImageSrc(url);
+                      form.setValue("imageEffect", effect as any);
+                    }}
+                    disabled={loading}
+                  />
+                )}
                 <ImagePicker
                   imageSrc={imageSrc}
                   setImageSrc={setImageSrc}
