@@ -175,10 +175,20 @@ export default function ClassroomDetails() {
     const downloadReport = async (aId: number) => {
         setDownloadingId(aId);
         try {
+            const assignment = classroom.assignments.find(a => a.id === aId);
+            const className = classroom.name.replace(/[^a-zA-Z0-9\sÀ-ỹ]/g, "").trim();
+            const quizTitle = assignment?.quiz.title.replace(/[^a-zA-Z0-9\sÀ-ỹ]/g, "").trim() || "Bao_cao";
+            const now = new Date();
+            const dateStr = now.toLocaleDateString("vi-VN").replace(/\//g, "-");
+            const timeStr = now.toLocaleTimeString("vi-VN", { hour12: false, hour: '2-digit', minute: '2-digit' }).replace(/:/g, "h");
+            
+            const fileName = `Ket_qua_${className}_${quizTitle}_${dateStr}_${timeStr}.xlsx`.replace(/\s+/g, "_");
+
             const res = await apiClient.get(endpoints.report_excel(aId), { responseType: "blob" });
             const url = URL.createObjectURL(new Blob([res.data]));
             const a = document.createElement("a");
-            a.href = url; a.download = `report_${aId}.xlsx`;
+            a.href = url; 
+            a.download = fileName;
             document.body.appendChild(a); a.click();
             a.remove(); URL.revokeObjectURL(url);
         } catch { showAlert({ title: "Lỗi", message: "Không thể tải báo cáo.", type: "error" }); }
@@ -717,7 +727,7 @@ export default function ClassroomDetails() {
                         <h3 className="font-black text-base text-foreground mb-1 flex items-center gap-2">
                             <Upload className="w-4 h-4 text-primary" /> Import danh sách học sinh
                         </h3>
-                        <p className="text-sm text-muted-foreground mb-5">Upload file danh sách từ nhà trường. Hệ thống dùng AI (Gemini) để nhận dạng và trích xuất tên học sinh chính xác.</p>
+                        <p className="text-sm text-muted-foreground mb-5">Upload file danh sách từ nhà trường. Hệ thống sẽ tự động nhận dạng và trích xuất tên học sinh chính xác.</p>
                         <div
                             className="border-2 border-dashed border-primary/20 rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                             onClick={() => pdfRef.current?.click()}

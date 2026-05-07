@@ -7,7 +7,7 @@
  *   disabled?    – Externally disable the button (e.g. while saving).
  */
 import { useState } from "react";
-import { Sparkles, Loader2, AlertTriangle, Image as ImageIcon, X } from "lucide-react";
+import { Sparkles, Loader2, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -78,20 +78,17 @@ export default function AIImageButton({ context, onGenerated, disabled }: AIImag
                 style: style || undefined,
                 imageEffect: effect,
             });
-            setPreview(res.data.url);
+            const url = res.data.url as string;
+            setPreview(url);
+            // Attach immediately; user can remove later if they don't like it.
+            onGenerated(url, effect);
+            setOpen(false);
         } catch (err: any) {
             setError(
                 err?.response?.data?.message || "Tạo ảnh thất bại. Thử lại hoặc thay đổi mô tả."
             );
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleApply = () => {
-        if (preview) {
-            onGenerated(preview, effect);
-            setOpen(false);
         }
     };
 
@@ -166,7 +163,7 @@ export default function AIImageButton({ context, onGenerated, disabled }: AIImag
                                 value={extraPrompt}
                                 onChange={(e) => setExtraPrompt(e.target.value)}
                                 placeholder="Ví dụ: bản đồ thế giới, màu xanh lá, góc nhìn từ trên cao..."
-                                className="min-h-[72px] bg-foreground/5 border-white/5 rounded-xl font-bold text-sm"
+                                className="min-h-[72px] max-h-36 overflow-y-auto resize-none bg-foreground/5 border-white/5 rounded-xl font-bold text-sm"
                             />
                         </div>
 
@@ -233,27 +230,18 @@ export default function AIImageButton({ context, onGenerated, disabled }: AIImag
                             Huỷ
                         </Button>
 
-                        {preview ? (
-                            <Button
-                                onClick={handleApply}
-                                className="h-11 rounded-2xl font-black uppercase tracking-widest text-xs px-8 bg-primary text-primary-foreground shadow-lg hover:scale-[1.02] transition-all"
-                            >
-                                <ImageIcon className="w-4 h-4 mr-2" /> Dùng ảnh này
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleGenerate}
-                                disabled={loading}
-                                className="h-11 rounded-2xl font-black uppercase tracking-widest text-xs px-8 bg-primary text-primary-foreground shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
-                            >
-                                {loading ? (
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                ) : (
-                                    <Sparkles className="w-4 h-4 mr-2" />
-                                )}
-                                {loading ? "Đang tạo..." : `Tạo ảnh (−${IMAGE_QUOTA_COST} quota)`}
-                            </Button>
-                        )}
+                        <Button
+                            onClick={handleGenerate}
+                            disabled={loading}
+                            className="h-11 rounded-2xl font-black uppercase tracking-widest text-xs px-8 bg-primary text-primary-foreground shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
+                        >
+                            {loading ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                                <Sparkles className="w-4 h-4 mr-2" />
+                            )}
+                            {loading ? "Đang tạo..." : `Tạo & gắn luôn (−${IMAGE_QUOTA_COST} quota)`}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
