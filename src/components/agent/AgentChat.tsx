@@ -14,6 +14,15 @@ interface AgentChatProps {
     isGenerating: boolean;
 }
 
+const SUGGESTIONS = [
+    "Tạo quiz 5 câu về Lịch sử Việt Nam",
+    "Quiz Toán lớp 10 với 6 câu hỏi",
+    "Tạo quiz tiếng Anh giao tiếp cơ bản",
+    "Thêm 3 câu dạng sắp xếp vào quiz",
+    "Tạo quiz Địa lý thế giới 8 câu",
+    "Quiz Khoa học tự nhiên lớp 8",
+];
+
 const AgentChat = ({ messages, onSend, isGenerating }: AgentChatProps) => {
     const [input, setInput] = useState("");
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -29,6 +38,8 @@ const AgentChat = ({ messages, onSend, isGenerating }: AgentChatProps) => {
         onSend(input);
         setInput("");
     };
+
+    const showSuggestions = messages.length <= 1 && !isGenerating;
 
     return (
         <div className="flex flex-col h-full bg-transparent">
@@ -50,6 +61,23 @@ const AgentChat = ({ messages, onSend, isGenerating }: AgentChatProps) => {
                         </div>
                     </div>
                 ))}
+                {showSuggestions && (
+                    <div className="pt-2 animate-in fade-in duration-500">
+                        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 px-1">Gợi ý nhanh</p>
+                        <div className="flex flex-wrap gap-2">
+                            {SUGGESTIONS.map((s) => (
+                                <button
+                                    key={s}
+                                    onClick={() => onSend(s)}
+                                    className="text-[11px] font-semibold px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/40 transition-all cursor-pointer leading-tight text-left"
+                                >
+                                    {s}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {isGenerating && (
                     <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="max-w-[85%] flex gap-3">

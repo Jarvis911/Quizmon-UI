@@ -100,7 +100,8 @@ const router = createBrowserRouter([
             { path: "/results", element: <Results /> },
             { path: "/home", element: <Navigate to="/" replace /> },
 
-            // Protected Routes
+            // Protected Routes (static /quiz/create alias before dynamic /quiz/:id/...)
+            { path: "/quiz/create", element: <Navigate to="/quiz" replace /> },
             { path: "/quiz/:id/editor", element: <ProtectedRoute><QuizEditor /></ProtectedRoute> },
             { path: "/match/:pin/lobby", element: <ProtectedRoute><MatchLobby /></ProtectedRoute> },
             { path: "/match/:pin/play", element: <ProtectedRoute><MatchPlay /></ProtectedRoute> },

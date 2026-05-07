@@ -11,6 +11,8 @@ import { Plus, BookOpen, Building2, ArrowUpRight, ArrowDownLeft, Copy, Search } 
 import QuizCard from "@/components/quiz/QuizCard";
 import { checkAuth, sanitizeError } from "@/lib/utils";
 
+const ADMIN_ROLES = ["OWNER", "ADMIN"];
+
 type LibraryTab = "my" | "org";
 
 const Library = () => {
@@ -102,6 +104,17 @@ const Library = () => {
         }
     };
 
+    const handleForceUnlock = async (quizId: string | number) => {
+        if (!checkAuth()) return;
+        try {
+            await apiClient.post(endpoints.quiz_force_checkin(Number(quizId)));
+            showAlert({ title: "Thành công", message: "Đã giải phóng khóa chỉnh sửa.", type: "success" });
+            await fetchOrgQuizzes();
+        } catch (err: any) {
+            showAlert({ title: "Lỗi", message: sanitizeError(err, "Không thể force unlock."), type: "error" });
+        }
+    };
+
     const handleRemoveFromOrg = async (quizId: string | number) => {
         if (!checkAuth()) return;
         showAlert({
@@ -120,6 +133,7 @@ const Library = () => {
         });
     };
 
+    const canForceUnlock = currentOrg != null && ADMIN_ROLES.includes(currentOrg.role);
     const currentQuizzes = activeTab === "my" ? myQuizzes : orgQuizzes;
     const filteredQuizzes = currentQuizzes.filter(quiz =>
         quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -236,6 +250,8 @@ const Library = () => {
                                 onPlay={handlePlayNow}
                                 onEdit={handleEditQuiz}
                                 onDelete={handleDeleteQuiz}
+                                onForceUnlock={activeTab === "org" ? handleForceUnlock : undefined}
+                                canForceUnlock={activeTab === "org" && canForceUnlock}
                             />
                             {/* Org management overlay */}
                             {(quiz as any).creatorId === currentUserId && (

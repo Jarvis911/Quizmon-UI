@@ -48,6 +48,7 @@ import type {
 import AIImageButton from "@/components/ai/AIImageButton";
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { defaultLeafletMarkerIcon } from "@/lib/leafletMarkerIcon";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { sanitizeError } from "@/lib/utils";
@@ -1050,7 +1051,13 @@ const AIQuizReview = () => {
                                                     />
                                                     {selectedQuestion.optionsData?.correctLatitude && (
                                                         <>
-                                                            <Marker position={[selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude]} />
+                                                            <Marker
+                                                                position={[
+                                                                    selectedQuestion.optionsData.correctLatitude,
+                                                                    selectedQuestion.optionsData.correctLongitude,
+                                                                ]}
+                                                                icon={defaultLeafletMarkerIcon}
+                                                            />
                                                             <Circle
                                                                 center={[selectedQuestion.optionsData.correctLatitude, selectedQuestion.optionsData.correctLongitude]}
                                                                 radius={selectedQuestion.optionsData.radius500 || 30000}

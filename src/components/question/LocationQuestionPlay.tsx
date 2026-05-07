@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import apiClient from "@/api/client";
+import endpoints from "../../api/api";
 import {
   MapContainer,
   TileLayer,
@@ -8,8 +10,8 @@ import {
   useMapEvents,
   useMap
 } from "react-leaflet";
-import { Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { defaultLeafletMarkerIcon } from "@/lib/leafletMarkerIcon";
 
 function LocationPicker({ setLocation }) {
   useMapEvents({
@@ -33,9 +35,6 @@ function FlyToLocation({ location }) {
 
   return null;
 }
-
-import apiClient from "@/api/client";
-import endpoints from "../../api/api";
 
 const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, onHomeworkSubmit, onResult, onAnswered }) => {
   const [location, setLocation] = useState(null);
@@ -139,10 +138,15 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
           }
         />
         <LocationPicker setLocation={setLocation} />
-        {location && <Marker position={[location.lat, location.lon]} />}
+        {location && (
+          <Marker position={[location.lat, location.lon]} icon={defaultLeafletMarkerIcon} />
+        )}
         {correctLocation && (
           <>
-            <Marker position={[correctLocation.lat, correctLocation.lon]} />
+            <Marker
+              position={[correctLocation.lat, correctLocation.lon]}
+              icon={defaultLeafletMarkerIcon}
+            />
             <Circle
               center={[correctLocation.lat, correctLocation.lon]}
               radius={question.optionsData?.radius500 || 30000}

@@ -18,7 +18,13 @@ const GlobalModal = () => {
 
   if (!modalOptions) return null;
 
-  const { title, message, type = "info", confirmText = "OK", cancelText = "Hủy" } = modalOptions;
+  const { title, message, type = "info", cancelText = "Hủy", onConfirm, confirmText: confirmTextOpt } =
+    modalOptions;
+  /** Two-step dialogs: explicit confirm type, or showAlert with async action (warning delete, etc.). */
+  const needsCancel = type === "confirm" || Boolean(onConfirm);
+  const confirmText =
+    confirmTextOpt ??
+    (needsCancel && type !== "success" && type !== "error" ? "Xác nhận" : "OK");
 
   const getIcon = () => {
     switch (type) {
@@ -35,8 +41,6 @@ const GlobalModal = () => {
     }
   };
 
-  const isConfirm = type === "confirm";
-
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
       <AlertDialogContent className="max-w-md w-[90vw] md:w-full rounded-3xl p-6 md:p-6">
@@ -52,8 +56,8 @@ const GlobalModal = () => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="sm:justify-center gap-3 mt-4">
-          {isConfirm && (
-            <AlertDialogCancel 
+          {needsCancel && (
+            <AlertDialogCancel
               onClick={handleCancel}
               className="w-full sm:w-auto min-w-[120px] bg-slate-100 hover:bg-slate-200 border-none text-slate-700 shadow-sm transition-all hover:scale-105 active:scale-95"
             >

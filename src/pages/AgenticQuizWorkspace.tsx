@@ -24,11 +24,13 @@ type Session = {
 };
 
 type AgentUpdatePayload = {
+    type?: 'chat' | 'quiz_update';
+    message?: string;
     suggestedTitle?: string;
     suggestedDescription?: string;
     suggestedCategory?: string;
     questions?: QuizQuestion[];
-    // Sometimes backend might evolve; keep extra fields
+    sessionId?: number;
     [k: string]: any;
 };
 
@@ -100,9 +102,20 @@ const AgenticQuizWorkspace = () => {
             // Update Session ID if it's new
             if (data.sessionId && data.sessionId !== currentSessionId) {
                 setCurrentSessionId(data.sessionId);
-                fetchSessions(); // Refresh list to show new session
+                fetchSessions();
             }
 
+            // Shape A: conversational reply — just show the message, no canvas update
+            if (data.type === 'chat') {
+                setMessages((m) => [
+                    ...m,
+                    { role: "agent", text: data.message || 'Mình có thể giúp gì cho bạn?' },
+                ]);
+                setIsGenerating(false);
+                return;
+            }
+
+            // Shape B: quiz update — update canvas + show agent message
             setQuizData((prev) => {
                 const next: QuizData = {
                     title: data?.suggestedTitle || prev.title,
@@ -115,14 +128,10 @@ const AgenticQuizWorkspace = () => {
                     questions: Array.isArray(data?.questions) ? data.questions : prev.questions,
                 };
 
-                setMessages((m) => [
-                    ...m,
-                    {
-                        role: "agent",
-                        text: `Mình đã cập nhật quiz: "${next.title}" (${next.questions.length} câu). Bạn muốn thêm/sửa/xoá gì tiếp?`,
-                    },
-                ]);
+                const agentMsg = data.message ||
+                    `Mình đã cập nhật quiz: "${next.title}" (${next.questions.length} câu). Bạn muốn thêm/sửa/xoá gì tiếp?`;
 
+                setMessages((m) => [...m, { role: "agent", text: agentMsg }]);
                 return next;
             });
 
@@ -174,10 +183,23 @@ const AgenticQuizWorkspace = () => {
             const { messages: dbMessages } = res.data;
 
             // Map DB messages to UI format
-            const uiMessages: AgentMessage[] = dbMessages.map((m: any) => ({
-                role: m.role === 'user' ? 'user' : 'agent',
-                text: m.role === 'model' ? JSON.parse(m.text).suggestedTitle ? `Hệ thống đã nạp lại trạng thái: ${JSON.parse(m.text).suggestedTitle}` : 'Cập nhật từ Agent' : m.text
-            }));
+            const uiMessages: AgentMessage[] = dbMessages.map((m: any) => {
+                if (m.role === 'user') return { role: 'user' as const, text: m.text };
+                try {
+                    const parsed = JSON.parse(m.text);
+                    if (parsed.type === 'chat') {
+                        return { role: 'agent' as const, text: parsed.message || 'Tin nhắn từ Agent' };
+                    }
+                    return {
+                        role: 'agent' as const,
+                        text: parsed.message || (parsed.suggestedTitle
+                            ? `Quiz: "${parsed.suggestedTitle}" (${parsed.questions?.length ?? 0} câu)`
+                            : 'Cập nhật từ Agent')
+                    };
+                } catch {
+                    return { role: 'agent' as const, text: 'Cập nhật từ Agent' };
+                }
+            });
 
             // Find last model message to restore canvas
             const modelMessages = dbMessages.filter((m: any) => m.role === 'model');

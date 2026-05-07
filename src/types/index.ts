@@ -22,6 +22,12 @@ export interface Quiz {
     categoryId?: number;
     category?: Category;
     questions?: Question[];
+    organizationId?: number | null;
+    // Checkout lock
+    lockedById?: number | null;
+    lockedBy?: { id: number; username: string } | null;
+    lockedAt?: string | null;
+    lockExpiresAt?: string | null;
     createdAt?: string;
     updatedAt?: string;
 }

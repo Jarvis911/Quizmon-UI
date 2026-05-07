@@ -1,7 +1,7 @@
-import { useState, useEffect, ReactNode } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect, useRef, ReactNode } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Trash2 } from "lucide-react";
+import { Plus, Settings, Trash2, Lock } from "lucide-react";
 import { MdImageNotSupported } from "react-icons/md";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
@@ -36,9 +36,12 @@ interface QuizResponse extends Omit<Quiz, 'questions'> {
     questions: EditorQuestion[];
 }
 
+const HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+
 const QuizEditor = () => {
     const { id } = useParams<{ id: string }>();
     const { showAlert } = useModal();
+    const navigate = useNavigate();
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [questions, setQuestions] = useState<EditorQuestion[]>([]);
@@ -46,8 +49,66 @@ const QuizEditor = () => {
     const [creatingType, setCreatingType] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
+    const [isOrgQuiz, setIsOrgQuiz] = useState(false);
+    const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const checkedOutRef = useRef(false);
 
     useUnsavedChanges(isDirty);
+
+    // Checkout on mount, checkin on unmount
+    useEffect(() => {
+        if (!id) return;
+
+        const doCheckout = async () => {
+            try {
+                await apiClient.post(endpoints.quiz_checkout(Number(id)));
+                checkedOutRef.current = true;
+                // Heartbeat to keep lock alive
+                heartbeatRef.current = setInterval(async () => {
+                    try {
+                        await apiClient.post(endpoints.quiz_checkout(Number(id)));
+                    } catch {
+                        // Ignore heartbeat failures silently
+                    }
+                }, HEARTBEAT_INTERVAL_MS);
+            } catch (err: any) {
+                if (err?.response?.status === 423) {
+                    const data = err.response.data;
+                    showAlert({
+                        title: "Quiz đang bị khóa",
+                        message: `Quiz này đang được chỉnh sửa bởi "${data.lockedBy}". Vui lòng thử lại sau.`,
+                        type: "error",
+                        onConfirm: () => navigate("/library"),
+                    });
+                    // Also navigate immediately after alert
+                    navigate("/library");
+                }
+            }
+        };
+
+        const doCheckin = () => {
+            if (!checkedOutRef.current) return;
+            checkedOutRef.current = false;
+            // Use sendBeacon for reliable cleanup on page unload
+            navigator.sendBeacon(endpoints.quiz_checkin(Number(id)));
+        };
+
+        doCheckout();
+
+        const handleUnload = () => doCheckin();
+        window.addEventListener("beforeunload", handleUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleUnload);
+            if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+            // Normal navigation cleanup
+            if (checkedOutRef.current) {
+                checkedOutRef.current = false;
+                apiClient.post(endpoints.quiz_checkin(Number(id))).catch(() => {});
+            }
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -65,6 +126,7 @@ const QuizEditor = () => {
                 setQuestions(normalized);
                 setActiveIndex(normalized.length ? 0 : null);
                 setQuiz(res.data as unknown as Quiz);
+                setIsOrgQuiz(!!(res.data as any).organizationId);
             } catch (err) {
                 console.error("Failed to load quiz:", err);
             } finally {
@@ -286,11 +348,21 @@ const QuizEditor = () => {
                 </div>
 
                 {/* Save and Exit */}
-                <div className="shrink-0 flex items-center pl-1 md:pl-2">
+                <div className="shrink-0 flex items-center gap-2 pl-1 md:pl-2">
+                    {/* Lock badge for org quizzes */}
+                    {isOrgQuiz && (
+                        <div
+                            className="hidden md:flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400"
+                            title="Bạn đang giữ quyền chỉnh sửa quiz này"
+                        >
+                            <Lock className="w-4 h-4" />
+                            <span className="text-[9px] font-black uppercase tracking-wide leading-none">Đã khóa</span>
+                        </div>
+                    )}
                     <div
                         className="min-w-16 h-16 md:min-w-20 md:h-20 rounded-xl border-2 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center overflow-hidden shadow-sm hover:scale-105 border-green-500/30 hover:border-green-500/50 bg-green-500/5 group"
                         onClick={() => {
-                            window.location.href = `/library`; 
+                            navigate("/library");
                         }}
                         title="Lưu và Thoát"
                     >

@@ -22,6 +22,9 @@ interface Endpoints {
     quiz_replicate: (id: number) => string;
     quiz_assign_to_org: (id: number) => string;
     quiz_remove_from_org: (id: number) => string;
+    quiz_checkout: (id: number) => string;
+    quiz_checkin: (id: number) => string;
+    quiz_force_checkin: (id: number) => string;
 
     // Question
     question_buttons: string;
@@ -110,6 +113,8 @@ interface Endpoints {
     subscription_current: string;
     subscriptions: string;
     subscription_usage: string;
+    subscription_cancel: string;
+    subscription_history: string;
 
     // Promotions
     promotions_active: string;
@@ -141,6 +146,9 @@ const endpoints: Endpoints = {
     quiz_replicate: (id: number) => `${BASE_URL}/quiz/${id}/replicate`,
     quiz_assign_to_org: (id: number) => `${BASE_URL}/quiz/${id}/assign-to-org`,
     quiz_remove_from_org: (id: number) => `${BASE_URL}/quiz/${id}/remove-from-org`,
+    quiz_checkout: (id: number) => `${BASE_URL}/quiz/${id}/checkout`,
+    quiz_checkin: (id: number) => `${BASE_URL}/quiz/${id}/checkin`,
+    quiz_force_checkin: (id: number) => `${BASE_URL}/quiz/${id}/force-checkin`,
 
     // Question
     question_buttons: `${BASE_URL}/question/buttons`,
@@ -230,6 +238,8 @@ const endpoints: Endpoints = {
     subscription_current: `${BASE_URL}/subscriptions/current`,
     subscriptions: `${BASE_URL}/subscriptions`,
     subscription_usage: `${BASE_URL}/subscriptions/usage`,
+    subscription_cancel: `${BASE_URL}/subscriptions/cancel`,
+    subscription_history: `${BASE_URL}/subscriptions/history`,
 
     // Promotions
     promotions_active: `${BASE_URL}/promotions/active`,

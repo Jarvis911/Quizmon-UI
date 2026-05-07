@@ -30,6 +30,7 @@ import {
 
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { defaultLeafletMarkerIcon } from "@/lib/leafletMarkerIcon";
 
 const questionSchema = z.object({
   text: z.string().min(3, "Câu hỏi ít nhất 3 ký tự"),
@@ -275,7 +276,7 @@ const LocationQuestionForm = ({ quizId, question, onSaved, onDelete }) => {
               <LocationPicker setLocation={setLocation} />
               {location && (
                 <>
-                  <Marker position={[location.lat, location.lng]} />
+                  <Marker position={[location.lat, location.lng]} icon={defaultLeafletMarkerIcon} />
                   <Circle
                     center={[location.lat, location.lng]}
                     radius={form.watch("radius500") || 30000}

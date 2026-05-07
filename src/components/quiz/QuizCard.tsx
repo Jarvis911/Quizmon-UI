@@ -1,4 +1,4 @@
-import { Star, Play, Pencil, Copy } from 'lucide-react';
+import { Star, Play, Pencil, Copy, Lock, Unlock } from 'lucide-react';
 import { SiGoogleclassroom } from 'react-icons/si';
 import { MdImageNotSupported } from "react-icons/md";
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,10 @@ interface QuizCardProps {
     onAssign?: (id: string | number) => void;
     onDelete?: (id: string | number) => void;
     onReplicate?: (id: string | number) => void;
+    onForceUnlock?: (id: string | number) => void;
     isAiGenerated?: boolean;
     difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+    canForceUnlock?: boolean;
 }
 
 const QuizCard: React.FC<QuizCardProps> = ({
@@ -23,14 +25,24 @@ const QuizCard: React.FC<QuizCardProps> = ({
     onAssign,
     onDelete,
     onReplicate,
+    onForceUnlock,
     isAiGenerated = false,
-    difficulty
+    difficulty,
+    canForceUnlock = false,
 }) => {
     const { user } = useAuth();
     const isOwner = user && user.id === quiz.creatorId;
 
+    const now = new Date();
+    const isActiveLock =
+        quiz.lockedById != null &&
+        quiz.lockExpiresAt != null &&
+        new Date(quiz.lockExpiresAt) > now;
+    const isLockedByMe = isActiveLock && quiz.lockedById === user?.id;
+    const isLockedByOther = isActiveLock && quiz.lockedById !== user?.id;
+
     return (
-        <div className="group relative bg-white dark:bg-slate-900 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden flex flex-col h-full border border-slate-200 dark:border-slate-800">
+        <div className={`group relative bg-white dark:bg-slate-900 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden flex flex-col h-full border ${isLockedByOther ? 'border-rose-400/60 dark:border-rose-500/50' : 'border-slate-200 dark:border-slate-800'}`}>
             {/* Image Container */}
             <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                 {quiz.image ? (
@@ -43,6 +55,22 @@ const QuizCard: React.FC<QuizCardProps> = ({
                     <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
                         <MdImageNotSupported className="w-12 h-12 mb-2" />
                         <span className="text-[10px] font-black uppercase tracking-widest">Không có ảnh</span>
+                    </div>
+                )}
+
+                {/* Lock badge overlay */}
+                {isLockedByOther && (
+                    <div className="absolute inset-0 bg-rose-900/40 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1 pointer-events-none">
+                        <Lock className="w-7 h-7 text-rose-300 drop-shadow-lg" />
+                        <span className="text-[10px] font-black text-rose-200 uppercase tracking-widest drop-shadow text-center px-2">
+                            {quiz.lockedBy?.username ?? 'Người khác'} đang sửa
+                        </span>
+                    </div>
+                )}
+                {isLockedByMe && (
+                    <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 shadow">
+                        <Lock className="w-3 h-3 text-white" />
+                        <span className="text-[9px] font-black text-white uppercase tracking-wider">Bạn đang sửa</span>
                     </div>
                 )}
 
@@ -83,10 +111,12 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                     <>
                                         <Button
                                             variant="secondary"
-                                            onClick={() => onEdit?.(quiz.id)}
-                                            className="flex-1 h-8 px-1 rounded-lg bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[9px] uppercase tracking-tighter"
+                                            onClick={() => !isLockedByOther && onEdit?.(quiz.id)}
+                                            disabled={isLockedByOther}
+                                            className="flex-1 h-8 px-1 rounded-lg bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[9px] uppercase tracking-tighter disabled:opacity-40 disabled:cursor-not-allowed"
+                                            title={isLockedByOther ? `Đang bị khóa bởi ${quiz.lockedBy?.username}` : 'Chỉnh sửa quiz'}
                                         >
-                                            <Pencil className="w-3 h-3 mr-1" /> SỬA
+                                            {isLockedByOther ? <Lock className="w-3 h-3 mr-1" /> : <Pencil className="w-3 h-3 mr-1" />} SỬA
                                         </Button>
                                     </>
                                 )}
@@ -108,6 +138,15 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                 className="w-full h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
                             >
                                 <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
+                            </Button>
+                        )}
+                        {canForceUnlock && isLockedByOther && onForceUnlock && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => onForceUnlock(quiz.id)}
+                                className="w-full h-8 px-1 rounded-lg bg-rose-500/80 hover:bg-rose-600 text-white border border-rose-400 font-bold text-[9px] uppercase tracking-tighter"
+                            >
+                                <Unlock className="w-3 h-3 mr-1" /> FORCE UNLOCK
                             </Button>
                         )}
                         {!isOwner && onReplicate && user && (
@@ -149,31 +188,43 @@ const QuizCard: React.FC<QuizCardProps> = ({
                     </Button>
 
                     {isOwner && (
-                            <Button
-                                variant="outline"
-                                onClick={() => onEdit?.(quiz.id)}
-                                className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md"
-                            >
-                                <Pencil className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">SỬA</span>
-                            </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => !isLockedByOther && onEdit?.(quiz.id)}
+                            disabled={isLockedByOther}
+                            className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md disabled:opacity-40 disabled:cursor-not-allowed"
+                            title={isLockedByOther ? `Đang bị khóa bởi ${quiz.lockedBy?.username}` : 'Chỉnh sửa'}
+                        >
+                            {isLockedByOther ? <Lock className="w-3 h-3 shrink-0 text-rose-400" /> : <Pencil className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" />}
+                            <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">SỬA</span>
+                        </Button>
                     )}
                     {user && onAssign && (
-                            <Button
-                                variant="outline"
-                                onClick={() => onAssign?.(quiz.id)}
-                                className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                            >
-                                <SiGoogleclassroom className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">GIAO</span>
-                            </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => onAssign?.(quiz.id)}
+                            className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                        >
+                            <SiGoogleclassroom className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">GIAO</span>
+                        </Button>
+                    )}
+                    {canForceUnlock && isLockedByOther && onForceUnlock && (
+                        <Button
+                            variant="outline"
+                            onClick={() => onForceUnlock(quiz.id)}
+                            className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-rose-600 border-rose-200 hover:bg-rose-50"
+                        >
+                            <Unlock className="w-3 h-3 shrink-0" />
+                        </Button>
                     )}
                     {!isOwner && onReplicate && user && (
-                            <Button
-                                variant="outline"
-                                onClick={() => onReplicate?.(quiz.id)}
-                                className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-emerald-600 border-emerald-200 hover:bg-emerald-50"
-                            >
-                                <Copy className="w-3 h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">SAO CHÉP</span>
-                            </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => onReplicate?.(quiz.id)}
+                            className="flex-1 h-7 p-0 md:h-8 md:px-1 min-w-0 justify-center rounded-md text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                        >
+                            <Copy className="w-3 h-3 md:mr-1 shrink-0" /> <span className="hidden md:inline font-bold text-[10px] uppercase tracking-tight truncate">SAO CHÉP</span>
+                        </Button>
                     )}
                 </div>
             </div>

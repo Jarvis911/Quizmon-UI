@@ -51,7 +51,7 @@ export function SignUpForm({ className, ...props }: SignupFormProps) {
         });
       }
       else {
-        navigate("/quiz/create");
+        navigate("/quiz");
       }
     } catch (err) {
       showAlert({

@@ -79,18 +79,41 @@ interface ScoreProgressBarProps {
     time: number;
     maxTime: number;
     potentialPoints: number;
+    frozenPoints?: number | null;
     isPaused?: boolean;
 }
 
-const ScoreProgressBar = ({ time, maxTime, potentialPoints, isPaused }: ScoreProgressBarProps) => {
+const ScoreProgressBar = ({ time, maxTime, potentialPoints, frozenPoints, isPaused }: ScoreProgressBarProps) => {
     // Drive progress from potentialPoints for maximum smoothness and instant pause response.
     // potentialPoints goes 1000 -> 0, representing 100% -> 0%.
     const progress = Math.max(0, Math.min(100, potentialPoints / 10));
+    const frozenProgress =
+        frozenPoints === null || frozenPoints === undefined
+            ? null
+            : Math.max(0, Math.min(100, frozenPoints / 10));
     const isUrgent = time <= 5;
 
     return (
         <div className="flex-1 max-w-xl mx-2 md:mx-8 relative">
             <div className="h-4 md:h-6 w-full bg-black/20 backdrop-blur-md rounded-full border-2 border-black/40 overflow-hidden relative shadow-inner">
+                {/* Frozen marker (shadow) - shows your locked-in points moment */}
+                {frozenProgress !== null && (
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div
+                            className="absolute top-0 left-0 h-full rounded-full bg-white/20 shadow-[0_0_0_2px_rgba(255,255,255,0.15),0_6px_14px_rgba(0,0,0,0.25)]"
+                            style={{ width: `${frozenProgress}%` }}
+                        />
+                        <div
+                            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center"
+                            style={{ left: `${Math.max(5, frozenProgress)}%` }}
+                        >
+                            <span className="text-white/80 text-[10px] md:text-base font-black tabular-nums tracking-tighter drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)] px-1.5 md:px-2 bg-black/20 rounded-full backdrop-blur-sm -translate-x-1/2">
+                                {frozenPoints?.toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
                 {/* The animated decreasing stripe bar */}
                 <div
                     className={`absolute top-0 left-0 h-full ${!isPaused ? "transition-[width] duration-100 ease-linear" : ""} animate-stripe-slide rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] ${isUrgent ? "opacity-90" : ""}`}
@@ -185,6 +208,7 @@ const MatchPlay = () => {
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
     const [potentialPoints, setPotentialPoints] = useState(1000);
     const [isUserAnswered, setIsUserAnswered] = useState(false);
+    const [frozenPoints, setFrozenPoints] = useState<number | null>(null);
 
     // Local Volume Settings
     const [volume, setVolume] = useState(() => {
@@ -311,6 +335,8 @@ const MatchPlay = () => {
             setCorrectAnswerInfo(null);
             setShowCorrectAnswer(false);
             setIsUserAnswered(false);
+            setFrozenPoints(null);
+            setPotentialPoints(1000);
             setQuestionNumber((prev) => prev + 1);
             questionRef.current = question;
         };
@@ -407,7 +433,7 @@ const MatchPlay = () => {
 
     // Smooth potential points countdown logic
     useEffect(() => {
-        if (matchMode !== "REALTIME" || isPaused || isUserAnswered || gameOver || !question) return;
+        if (matchMode !== "REALTIME" || isPaused || gameOver || !question) return;
 
         // Sync local points with timer logic - snap if drift is significant
         const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
@@ -430,7 +456,7 @@ const MatchPlay = () => {
         }, intervalMs);
 
         return () => clearInterval(interval);
-    }, [timer, maxTimer, isPaused, isUserAnswered, gameOver, !!question, matchMode]);
+    }, [timer, maxTimer, isPaused, gameOver, !!question, matchMode, potentialPoints]);
 
     // TTS
     useEffect(() => {
@@ -519,7 +545,10 @@ const MatchPlay = () => {
             mode: matchMode,
             onHomeworkSubmit: matchMode === "HOMEWORK" ? handleNextHomeworkQuestion : undefined,
             onResult: triggerFeedback,
-            onAnswered: () => setIsUserAnswered(true),
+            onAnswered: () => {
+                setIsUserAnswered(true);
+                setFrozenPoints((prev) => (prev === null ? potentialPoints : prev));
+            },
             correctAnswer: correctAnswerInfo
         };
 
@@ -668,7 +697,8 @@ const MatchPlay = () => {
                         time={timer} 
                         maxTime={maxTimer} 
                         potentialPoints={potentialPoints} 
-                        isPaused={isPaused || isUserAnswered} 
+                        frozenPoints={isUserAnswered ? frozenPoints : null}
+                        isPaused={isPaused} 
                     />
                 </div>
 
