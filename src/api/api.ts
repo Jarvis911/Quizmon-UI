@@ -122,6 +122,11 @@ interface Endpoints {
     admin_promotion: (id: number) => string;
     admin_promotion_publish: (id: number) => string;
     subscription_checkout_free: string;
+
+    admin_plan_keys: string;
+    admin_plans: string;
+    admin_plan: (id: number) => string;
+    admin_plan_features: (id: number) => string;
 }
 
 const endpoints: Endpoints = {
@@ -247,6 +252,11 @@ const endpoints: Endpoints = {
     admin_promotion: (id: number) => `${BASE_URL}/admin/promotions/${id}`,
     admin_promotion_publish: (id: number) => `${BASE_URL}/admin/promotions/${id}/publish`,
     subscription_checkout_free: `${BASE_URL}/subscriptions/checkout-free`,
+
+    admin_plan_keys: `${BASE_URL}/admin/plans/keys`,
+    admin_plans: `${BASE_URL}/admin/plans`,
+    admin_plan: (id: number) => `${BASE_URL}/admin/plans/${id}`,
+    admin_plan_features: (id: number) => `${BASE_URL}/admin/plans/${id}/features`,
 };
 
 export const getAvatarUrl = (url: string | null | undefined): string => {

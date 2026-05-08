@@ -10,7 +10,6 @@ interface SearchResultItemProps {
 
 const SearchResultItem: React.FC<SearchResultItemProps> = ({ quiz, onPlay }) => {
     const rating = typeof quiz.ratingAverage === 'number' ? quiz.ratingAverage : 0;
-    const ratingCount = typeof quiz.ratingCount === 'number' ? quiz.ratingCount : 0;
     const questionCount = quiz.questions?.length || 0;
     const isAiGenerated = quiz.title.toLowerCase().includes('ai') || quiz.description?.toLowerCase().includes('ai');
 
@@ -51,7 +50,6 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ quiz, onPlay }) => 
                             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                             <span>
                                 {rating.toFixed(1)}
-                                {ratingCount > 0 ? ` (${ratingCount})` : ''}
                             </span>
                         </div>
 

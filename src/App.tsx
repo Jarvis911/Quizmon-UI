@@ -31,6 +31,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAI from "./pages/admin/AdminAI";
 import AdminPromotions from "./pages/admin/AdminPromotions";
+import AdminPlans from "./pages/admin/AdminPlans";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -131,6 +132,7 @@ const router = createBrowserRouter([
                     { path: "users", element: <AdminUsers /> },
                     { path: "ai", element: <AdminAI /> },
                     { path: "promotions", element: <AdminPromotions /> },
+                    { path: "plans", element: <AdminPlans /> },
                 ]
             },
             { path: "*", element: <NotFound /> }

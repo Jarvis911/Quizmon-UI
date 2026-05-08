@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { LayoutDashboard, Users, FileWarning, Cpu, ShieldCheck, Gift, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, FileWarning, Cpu, ShieldCheck, Gift, CreditCard, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems: { name: string; path: string; icon: any; isImageUrl?: boolean }[] = [
@@ -16,6 +16,7 @@ const navItems: { name: string; path: string; icon: any; isImageUrl?: boolean }[
     { name: "Người dùng & Doanh thu", path: "/admin/users", icon: Users },
     { name: "Cài đặt AI", path: "/admin/ai", icon: Cpu },
     { name: "Khuyến mãi", path: "/admin/promotions", icon: Gift },
+    { name: "Gói & tính năng", path: "/admin/plans", icon: CreditCard },
 ];
 
 export default function AdminLayout() {

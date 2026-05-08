@@ -564,14 +564,14 @@ export default function BillingPage() {
         </section>
       )}
 
-      {/* Usage Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Usage Stats — four cards in one row on md+ (Pro plan shows AI image quota) */}
+      <section className="grid grid-cols-2 gap-2 md:gap-3 md:grid-cols-4">
         {(() => {
           const matchUsage = usage.find((u) => u.key === "matches_hosted");
           return (
             <UsageCard
               icon={
-                <svg className="text-primary w-8 h-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg className="text-primary w-5 h-5 sm:w-6 sm:h-6 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="20" y="60" width="22" height="25" rx="4" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
                   <rect x="42" y="50" width="22" height="35" rx="4" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
                   <rect x="64" y="65" width="22" height="20" rx="4" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
@@ -588,7 +588,7 @@ export default function BillingPage() {
           const aiUsage = usage.find((u) => u.key === "ai_generations");
           return (
             <UsageCard
-              icon={<RiAiGenerate2 className="text-primary w-6 h-6" />}
+              icon={<RiAiGenerate2 className="text-primary w-5 h-5 sm:w-6 sm:h-6 shrink-0" />}
               label="Lượt tạo câu hỏi AI"
               value={aiUsage?.value || 0}
               limit={activeSub?.plan?.features?.find((f: any) => f.featureKey === "AI_GENERATION")?.limit ?? null}
@@ -602,7 +602,7 @@ export default function BillingPage() {
           if (!imgFeature?.enabled) return null;
           return (
             <UsageCard
-              icon={<Sparkles className="text-primary w-6 h-6" />}
+              icon={<Sparkles className="text-primary w-5 h-5 sm:w-6 sm:h-6 shrink-0" />}
               label="Lượt tạo ảnh AI"
               value={imgUsage?.value || 0}
               limit={imgFeature?.limit ?? null}
@@ -611,7 +611,7 @@ export default function BillingPage() {
           );
         })()}
         <UsageCard
-          icon={<PiStudent className="text-primary w-7 h-7" />}
+          icon={<PiStudent className="text-primary w-5 h-5 sm:w-6 sm:h-6 shrink-0" />}
           label="Số người tối đa tham gia trong 1 trận đấu"
           value={activeSub?.plan?.features?.find((f: any) => f.featureKey === "MAX_PLAYERS_PER_MATCH")?.limit ?? 10}
         />
@@ -996,28 +996,32 @@ function UsageCard({
   renewalDate?: string;
 }) {
   return (
-    <div className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-3xl md:rounded-4xl p-4 md:p-6 shadow-lg flex flex-col gap-3 md:gap-4">
-      <div className="flex items-center gap-4 md:gap-6">
-        <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center shadow-inner shrink-0">{icon}</div>
-        <div>
-          <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground mb-0.5 md:mb-1">{label}</p>
-          <div className="flex items-baseline gap-1 md:gap-2">
+    <div className="bg-card/40 backdrop-blur-xl border border-white/10 md:border-2 rounded-2xl p-3 md:p-3.5 shadow-md flex flex-col gap-2 min-w-0">
+      <div className="flex items-start gap-2 md:gap-2.5 min-w-0">
+        <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-white/5 flex items-center justify-center shadow-inner shrink-0">{icon}</div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-wide text-muted-foreground leading-snug mb-0.5 line-clamp-2">
+            {label}
+          </p>
+          <div className="flex items-baseline gap-1 flex-wrap">
             {limit === null ? (
-              <span className="text-xl md:text-3xl font-black text-primary italic">Không giới hạn</span>
+              <span className="text-sm sm:text-base md:text-lg font-black text-primary italic leading-none">Không giới hạn</span>
             ) : (
               <>
-                <span className="text-xl md:text-3xl font-black text-foreground">{value}</span>
-                {limit !== undefined && <span className="text-xs md:text-base text-muted-foreground font-bold">/ {limit}</span>}
+                <span className="text-sm sm:text-base md:text-xl font-black text-foreground tabular-nums leading-none">{value}</span>
+                {limit !== undefined && (
+                  <span className="text-[10px] sm:text-xs text-muted-foreground font-bold tabular-nums">/ {limit}</span>
+                )}
               </>
             )}
           </div>
         </div>
       </div>
       {renewalDate && (
-        <div className="pt-2 border-t border-white/5">
-          <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground flex items-center gap-1.5 md:gap-2">
-            <Calendar className="w-2.5 h-2.5 md:w-3 md:h-3" />
-            Làm mới vào: {new Date(renewalDate).toLocaleDateString("vi-VN")}
+        <div className="pt-1.5 border-t border-white/5 mt-auto">
+          <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground flex items-center gap-1 leading-tight">
+            <Calendar className="w-2.5 h-2.5 shrink-0" />
+            <span className="truncate">Làm mới: {new Date(renewalDate).toLocaleDateString("vi-VN")}</span>
           </p>
         </div>
       )}

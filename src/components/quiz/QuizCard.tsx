@@ -33,7 +33,6 @@ const QuizCard: React.FC<QuizCardProps> = ({
     const { user } = useAuth();
     const isOwner = user && user.id === quiz.creatorId;
     const rating = typeof quiz.ratingAverage === 'number' ? quiz.ratingAverage : 0;
-    const ratingCount = typeof quiz.ratingCount === 'number' ? quiz.ratingCount : 0;
 
     const now = new Date();
     const isActiveLock =
@@ -173,7 +172,6 @@ const QuizCard: React.FC<QuizCardProps> = ({
                     <div className="flex items-center gap-0.5 md:gap-1">
                         <span className="text-amber-500 font-bold text-[10px] md:text-xs">
                             {rating.toFixed(1)}
-                            {ratingCount > 0 ? ` (${ratingCount})` : ''}
                         </span>
                         <Star className="w-3 h-3 md:w-4 md:h-4 fill-amber-500 text-amber-500" />
                     </div>
