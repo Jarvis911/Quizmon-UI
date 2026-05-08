@@ -81,6 +81,8 @@ const Results = () => {
 
         // 3. Apply sorting
         results.sort((a, b) => {
+            const aRating = typeof a.ratingAverage === 'number' ? a.ratingAverage : 0;
+            const bRating = typeof b.ratingAverage === 'number' ? b.ratingAverage : 0;
             switch (sortBy) {
                 case "name-az":
                     return a.title.localeCompare(b.title);
@@ -95,7 +97,9 @@ const Results = () => {
                 case "questions-lowest":
                     return (a.questions?.length || 0) - (b.questions?.length || 0);
                 case "rating-highest":
-                    return 0; // Mock ratings
+                    return bRating - aRating;
+                case "rating-lowest":
+                    return aRating - bRating;
                 case "best-match":
                 default:
                     return 0; 

@@ -23,6 +23,9 @@ export interface Quiz {
     category?: Category;
     questions?: Question[];
     organizationId?: number | null;
+    /** Pre-aggregated rating stats (provided by backend list endpoints) */
+    ratingAverage?: number;
+    ratingCount?: number;
     // Checkout lock
     lockedById?: number | null;
     lockedBy?: { id: number; username: string } | null;

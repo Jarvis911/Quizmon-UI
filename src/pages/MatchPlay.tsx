@@ -209,6 +209,7 @@ const MatchPlay = () => {
     const [potentialPoints, setPotentialPoints] = useState(1000);
     const [isUserAnswered, setIsUserAnswered] = useState(false);
     const [frozenPoints, setFrozenPoints] = useState<number | null>(null);
+    const [isQuestionEnded, setIsQuestionEnded] = useState(false);
 
     // Local Volume Settings
     const [volume, setVolume] = useState(() => {
@@ -337,6 +338,7 @@ const MatchPlay = () => {
             setIsUserAnswered(false);
             setFrozenPoints(null);
             setPotentialPoints(1000);
+            setIsQuestionEnded(false);
             setQuestionNumber((prev) => prev + 1);
             questionRef.current = question;
         };
@@ -345,12 +347,14 @@ const MatchPlay = () => {
             setTimer(remainingTime);
         };
 
-        const handleAnswerResult = ({ userId, isCorrect, questionId, correctAnswer }: { userId: number, isCorrect: boolean, questionId: number, correctAnswer?: any }) => {
+        const handleAnswerResult = ({ userId, isCorrect, questionId, correctAnswer, phase }: { userId: number, isCorrect: boolean, questionId: number, correctAnswer?: any, phase?: "attempt" | "reveal" }) => {
             if (userId === user.id && questionRef.current?.id === questionId) {
                 triggerFeedback(isCorrect);
             }
-            // Always store correct answer for current question
-            if (questionRef.current?.id === questionId) {
+            // Only "end" the question UI when we are in reveal phase (time-up / all-submitted)
+            // which is indicated by having `correctAnswer` or `phase === "reveal"`.
+            if (questionRef.current?.id === questionId && (phase === "reveal" || correctAnswer !== undefined)) {
+                setIsQuestionEnded(true);
                 setCorrectAnswerInfo(correctAnswer);
                 setShowCorrectAnswer(true);
             }
@@ -434,6 +438,7 @@ const MatchPlay = () => {
     // Smooth potential points countdown logic
     useEffect(() => {
         if (matchMode !== "REALTIME" || isPaused || gameOver || !question) return;
+        if (isQuestionEnded) return;
 
         // Sync local points with timer logic - snap if drift is significant
         const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
@@ -456,7 +461,21 @@ const MatchPlay = () => {
         }, intervalMs);
 
         return () => clearInterval(interval);
-    }, [timer, maxTimer, isPaused, gameOver, !!question, matchMode, potentialPoints]);
+    }, [timer, maxTimer, isPaused, gameOver, !!question, matchMode, potentialPoints, isQuestionEnded]);
+
+    // When the question is ended/revealed, freeze the number in place
+    useEffect(() => {
+        if (matchMode !== "REALTIME") return;
+        if (!isQuestionEnded) return;
+        // Prefer freezing to the user's locked-in points if they have answered.
+        if (isUserAnswered && frozenPoints !== null) {
+            setPotentialPoints(frozenPoints);
+            return;
+        }
+        // Otherwise freeze to whatever timer-derived points would be at this moment.
+        const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
+        setPotentialPoints(targetPoints);
+    }, [isQuestionEnded, isUserAnswered, frozenPoints, matchMode, maxTimer, timer]);
 
     // TTS
     useEffect(() => {

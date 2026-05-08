@@ -95,6 +95,8 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
   const { pin: matchId } = useParams();
   const { token } = useAuth();
   const [quizId, setQuizId] = useState(null);
+  const [matchInternalId, setMatchInternalId] = useState<number | null>(null);
+  const [quizTitle, setQuizTitle] = useState<string>("");
   const [isRated, setIsRated] = useState(true);
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
@@ -141,8 +143,10 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
     const fetchMatch = async () => {
       try {
         const res = await apiClient.get(endpoints.match(matchId!));
-        const qId = res.data.quizId;
+        setMatchInternalId(res.data.id);
+        const qId = res.data.quizId ?? res.data.quiz?.id;
         setQuizId(qId);
+        setQuizTitle(res.data.quiz?.title || "");
 
         const ratedRes = await apiClient.get(endpoints.quiz_isRated(qId));
         if (ratedRes) {
@@ -167,10 +171,30 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
     }
   }
 
+  const formatDateTimeForFilename = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+  };
+
+  const sanitizeFilenamePart = (s: string) => {
+    const cleaned = (s || "quiz")
+      .trim()
+      // Windows reserved characters: \ / : * ? " < > |
+      .replace(/[\\/:*?"<>|]/g, "_")
+      .replace(/\s+/g, " ")
+      .slice(0, 80);
+    return cleaned.length ? cleaned : "quiz";
+  };
+
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
-      const res = await apiClient.get(endpoints.report_excel(matchId!), {
+      const effectiveMatchId = matchInternalId ?? Number(matchId);
+      if (!effectiveMatchId || Number.isNaN(effectiveMatchId)) {
+        throw new Error("Invalid match id for report export");
+      }
+
+      const res = await apiClient.get(endpoints.report_excel(effectiveMatchId), {
         responseType: 'blob', // Important for file download
       });
 
@@ -178,7 +202,9 @@ const Leaderboard = ({ leaderboard, currentUserId }) => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `report_match_${matchId}.xlsx`);
+      const now = new Date();
+      const fileBase = `${sanitizeFilenamePart(quizTitle)}_${formatDateTimeForFilename(now)}`;
+      link.setAttribute('download', `${fileBase}.xlsx`);
       document.body.appendChild(link);
       link.click();
 

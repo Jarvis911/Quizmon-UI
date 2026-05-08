@@ -9,8 +9,8 @@ interface SearchResultItemProps {
 }
 
 const SearchResultItem: React.FC<SearchResultItemProps> = ({ quiz, onPlay }) => {
-    // Calculate average rating or use a default
-    const rating = 4.5; // Mock for now, in a real app calculate from quizRatings
+    const rating = typeof quiz.ratingAverage === 'number' ? quiz.ratingAverage : 0;
+    const ratingCount = typeof quiz.ratingCount === 'number' ? quiz.ratingCount : 0;
     const questionCount = quiz.questions?.length || 0;
     const isAiGenerated = quiz.title.toLowerCase().includes('ai') || quiz.description?.toLowerCase().includes('ai');
 
@@ -49,7 +49,10 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ quiz, onPlay }) => 
                         {/* Rating */}
                         <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                            <span>{rating.toFixed(1)}</span>
+                            <span>
+                                {rating.toFixed(1)}
+                                {ratingCount > 0 ? ` (${ratingCount})` : ''}
+                            </span>
                         </div>
 
                         {/* Question Count */}
