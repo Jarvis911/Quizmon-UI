@@ -61,7 +61,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
   }, [correctAnswer]);
 
   const handleDragEnd = (event) => {
-    if (correctAnswer !== null || timer <= 0) return;
+    if (submitted || correctAnswer !== null || timer <= 0) return;
     const { active, over } = event;
     if (active.id !== over.id) {
       setItems((items) => {
@@ -88,6 +88,7 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
         console.error("Failed to submit homework answer", err);
+        if (onHomeworkSubmit) setTimeout(onHomeworkSubmit, 1500);
       }
     } else {
       socket.emit("submitAnswer", {
@@ -115,24 +116,26 @@ const ReorderQuestionPlay = ({ question, socket, matchId, userId, timer, mode, o
           <h2 className="min-w-[250px] max-w-full wrap-break-word text-2xl font-black mb-6 text-foreground drop-shadow-sm">
             {question.text}
           </h2>
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={items} strategy={verticalListSortingStrategy}>
-              <div className="space-y-2">
-                {items.map((item) => (
-                  <SortableItem key={item.id} id={item.id} color={item.color}>
-                    <span className="text-white font-bold drop-shadow-sm">{item.text}</span>
-                  </SortableItem>
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <div className={submitted || timer <= 0 ? "pointer-events-none opacity-80" : ""}>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={items} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {items.map((item) => (
+                    <SortableItem key={item.id} id={item.id} color={item.color}>
+                      <span className="text-white font-bold drop-shadow-sm">{item.text}</span>
+                    </SortableItem>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
         </div>
         <Button
           onClick={handleSubmit}
           disabled={submitted || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
-          className="mt-6 w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
+          className="mt-6 w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all disabled:opacity-90"
         >
-          XÁC NHẬN
+          {submitted ? "ĐÃ XÁC NHẬN" : "XÁC NHẬN"}
         </Button>
       </div>
     </div>

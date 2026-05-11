@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
@@ -8,15 +8,30 @@ import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Input } from "@/components/ui/input";
 import { Plus, BookOpen, Building2, ArrowUpRight, ArrowDownLeft, Copy, Search } from "lucide-react";
+import { SiGoogleclassroom } from "react-icons/si";
 import QuizCard from "@/components/quiz/QuizCard";
 import { checkAuth, sanitizeError } from "@/lib/utils";
+
+interface Classroom {
+    id: string | number;
+    name: string;
+    teacher?: {
+        id: number;
+    };
+}
+
+interface HomeworkForm {
+    classroomId: string;
+    deadline: string;
+    strictMode: boolean;
+}
 
 const ADMIN_ROLES = ["OWNER", "ADMIN"];
 
 type LibraryTab = "my" | "org";
 
 const Library = () => {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const { currentOrg } = useOrganization();
     const { showAlert } = useModal();
     const [myQuizzes, setMyQuizzes] = useState<Quiz[]>([]);
@@ -25,6 +40,23 @@ const Library = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<LibraryTab>("my");
     const navigate = useNavigate();
+
+    // Homework Modal State
+    const [isHomeworkModalOpen, setIsHomeworkModalOpen] = useState(false);
+    const [selectedQuizId, setSelectedQuizId] = useState<string | number | null>(null);
+    const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+    const [homeworkForm, setHomeworkForm] = useState<HomeworkForm>({ classroomId: "", deadline: "", strictMode: false });
+
+    useEffect(() => {
+        const fetchClassrooms = async () => {
+            if (!token) return;
+            try {
+                const res = await apiClient.get(endpoints.classrooms);
+                setClassrooms(res.data.filter((c: Classroom) => (c.teacher?.id as any) === user?.id)); // Only classes they teach
+            } catch (err) { console.error(err); }
+        };
+        fetchClassrooms();
+    }, [token, user]);
 
     const fetchMyQuizzes = useCallback(async () => {
         if (!token) return;
@@ -72,6 +104,37 @@ const Library = () => {
     const handleEditQuiz = (quizId: string | number) => {
         if (!checkAuth()) return;
         navigate(`/quiz/${quizId}/editor`);
+    };
+
+    const handleOpenHomeworkModal = (quizId: string | number) => {
+        if (!checkAuth()) return;
+        setSelectedQuizId(quizId);
+        setIsHomeworkModalOpen(true);
+    };
+
+    const handleSubmitHomework = async (e: FormEvent) => {
+        e.preventDefault();
+        try {
+            await apiClient.post(endpoints.homework, {
+                quizId: selectedQuizId,
+                classroomId: homeworkForm.classroomId,
+                deadline: homeworkForm.deadline || null,
+                strictMode: homeworkForm.strictMode
+            });
+            setIsHomeworkModalOpen(false);
+            setHomeworkForm({ classroomId: "", deadline: "", strictMode: false });
+            showAlert({
+                title: "Thành công!",
+                message: "Đã giao bài tập thành công.",
+                type: "success"
+            });
+        } catch (err: any) {
+            showAlert({
+                title: "Thất bại",
+                message: sanitizeError(err, "Không thể giao bài tập"),
+                type: "error"
+            });
+        }
     };
 
     const handleDeleteQuiz = async (quizId: string | number) => {
@@ -250,6 +313,7 @@ const Library = () => {
                                 onPlay={handlePlayNow}
                                 onEdit={handleEditQuiz}
                                 onDelete={handleDeleteQuiz}
+                                onAssign={handleOpenHomeworkModal}
                                 onForceUnlock={activeTab === "org" ? handleForceUnlock : undefined}
                                 canForceUnlock={activeTab === "org" && canForceUnlock}
                             />
@@ -302,6 +366,63 @@ const Library = () => {
                             Tạo bài trắc nghiệm đầu tiên
                         </button>
                     )}
+                </div>
+            )}
+
+            {/* Assign Homework Modal */}
+            {isHomeworkModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><SiGoogleclassroom className="text-primary" size={20} /> Giao Bài Tập</h3>
+                            <button onClick={() => setIsHomeworkModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                        </div>
+                        <form onSubmit={handleSubmitHomework} className="p-6 space-y-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Chọn Lớp Học *</label>
+                                <select
+                                    required
+                                    value={homeworkForm.classroomId}
+                                    onChange={e => setHomeworkForm({ ...homeworkForm, classroomId: e.target.value })}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+                                >
+                                    <option value="" disabled>-- Chọn một lớp --</option>
+                                    {classrooms.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                                {classrooms.length === 0 && <p className="text-xs text-red-500 mt-2">Bạn chưa tạo lớp học nào.</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Hạn chót (Tùy chọn)</label>
+                                <input
+                                    type="datetime-local"
+                                    value={homeworkForm.deadline}
+                                    onChange={e => setHomeworkForm({ ...homeworkForm, deadline: e.target.value })}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100">
+                                <input
+                                    type="checkbox"
+                                    id="strictMode"
+                                    checked={homeworkForm.strictMode}
+                                    onChange={e => setHomeworkForm({ ...homeworkForm, strictMode: e.target.checked })}
+                                    className="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer"
+                                />
+                                <label htmlFor="strictMode" className="text-sm font-medium text-orange-900 cursor-pointer select-none">
+                                    <strong>Chế độ Nghiêm ngặt:</strong> Ngăn học sinh chuyển tab trình duyệt khi đang làm bài.
+                                </label>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button type="button" onClick={() => setIsHomeworkModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Hủy</button>
+                                <button type="submit" disabled={!homeworkForm.classroomId || classrooms.length === 0} className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50">Giao Bài</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

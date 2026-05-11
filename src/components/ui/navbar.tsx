@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 import { useAuth } from "../../context/AuthContext";
 import { useModal } from "../../context/ModalContext";
-import { useTheme, BACKGROUND_THEMES } from "../../context/ThemeContext";
+import { useTheme, THEMES_IN_PICKER } from "../../context/ThemeContext";
 import { TrendingUp, Sparkles, BookOpen, Home as HomeIcon, Library, ArrowLeft, Bell, Check, Trash, Building2, User, ShieldCheck, Menu } from "lucide-react"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import apiClient from "../../api/client";
@@ -436,14 +436,14 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                       <DropdownMenuSubContent>
-                        {BACKGROUND_THEMES.map((theme) => (
+                        {THEMES_IN_PICKER.map((theme) => (
                           <DropdownMenuItem
                             key={theme.id}
                             onClick={() => handleThemeChange(theme.id)}
                             className={`cursor-pointer mb-1 flex items-center gap-2 ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : ''}`}
                             inset={undefined}
                           >
-                            <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
+                            <div className={`w-4 h-4 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'coban' ? 'bg-slate-200' : ''}`} />
                             {theme.name}
                           </DropdownMenuItem>
                         ))}
@@ -480,7 +480,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
             <DialogTitle>Đổi Giao Diện</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
-            {BACKGROUND_THEMES.map((theme) => (
+            {THEMES_IN_PICKER.map((theme) => (
               <button
                 key={theme.id}
                 onClick={() => {
@@ -489,7 +489,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                 }}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${themeId === theme.id ? 'bg-primary/10 font-semibold text-primary' : 'hover:bg-foreground/5'}`}
               >
-                <div className={`w-6 h-6 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'default' ? 'bg-slate-200' : ''}`} />
+                <div className={`w-6 h-6 rounded-full border border-black/10 shadow-sm ${theme.className} ${theme.id === 'coban' ? 'bg-slate-200' : ''}`} />
                 {theme.name}
               </button>
             ))}

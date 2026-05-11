@@ -62,14 +62,15 @@ const useQuestionSocket = (
             phase,
         }: AnswerResultPayload) => {
             if (resUserId === userId && qId === questionId) {
+                // TYPEANSWER receives a second "reveal" event when time is up or everyone submitted.
+                // We completely ignore it here to prevent playing sounds or updating attempts twice.
+                if (phase === "reveal") return;
+
                 setIsCorrect(resCorrect);
                 if (resCorrect) {
                     correctSound.play();
                     onCorrect();
                 } else {
-                    // TYPEANSWER may receive a second "reveal" event when time is up;
-                    // don't re-trigger wrong effects in that phase.
-                    if (phase === "reveal") return;
                     if (verdict === "near") {
                         setIsNear(true);
                         setTimeout(() => setIsNear(false), 650);

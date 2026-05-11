@@ -307,7 +307,7 @@ export default function Classrooms() {
                             <label className="block text-xs font-black text-muted-foreground mb-3 uppercase tracking-widest">Tên lớp học</label>
                             <Input
                                 type="text"
-                                placeholder="ví dụ Lịch sử 101"
+                                placeholder="Ví dụ: TOEIC 10-5"
                                 value={createForm.name}
                                 onChange={e => setCreateForm({ ...createForm, name: e.target.value })}
                                 className="h-14 bg-foreground/5 border-2 border-foreground/10 focus:border-primary rounded-2xl font-bold px-6"

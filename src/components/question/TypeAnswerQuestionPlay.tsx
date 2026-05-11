@@ -177,6 +177,8 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
         }
       } catch (err) {
         console.error("Failed to submit homework answer", err);
+        // Advance to next question on API failure to avoid permanent freeze
+        if (onHomeworkSubmit) setTimeout(onHomeworkSubmit, 1500);
       }
     } else {
       socket.emit("submitAnswer", {
@@ -192,10 +194,10 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
     window.setTimeout(() => setIsSubmitting(false), 450);
   };
 
-  // Auto-submit when timer runs out
+  // Auto-advance in HOMEWORK when timer runs out without a correct answer
   useEffect(() => {
-    if (timer === 0 && mode !== "HOMEWORK" && !isLockedCorrect) {
-      // do nothing: we don't want to auto-submit a potentially wrong attempt and end/lock UX
+    if (timer === 0 && mode === "HOMEWORK" && !isLockedCorrect) {
+      onHomeworkSubmit?.();
     }
   }, [timer, mode, isLockedCorrect]);
   const handleKeyDown = (e) => {
@@ -239,10 +241,10 @@ const TypeAnswerQuestionPlay = ({ question, socket, matchId, userId, timer, mode
                   {attempts.map((a) => {
                     const badgeClass =
                       a.verdict === "correct"
-                        ? "border-green-500/30 bg-green-500/10 text-green-200"
+                        ? "border-green-500/30 bg-green-400 text-black"
                         : a.verdict === "near"
-                          ? "border-yellow-500/30 bg-yellow-500/10 text-yellow-100"
-                          : "border-red-500/30 bg-red-500/10 text-red-200";
+                          ? "border-yellow-500/30 bg-yellow-400 text-black"
+                          : "border-red-500/30 bg-red-400 text-black";
                     const label = a.verdict === "correct" ? "Đúng" : a.verdict === "near" ? "Gần đúng" : "Sai";
                     return (
                       <div

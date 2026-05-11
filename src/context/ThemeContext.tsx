@@ -84,6 +84,11 @@ export const BACKGROUND_THEMES: Theme[] = [
     },
 ];
 
+/** Themes selectable in Đổi Giao Diện (others temporarily hidden). */
+export const THEMES_IN_PICKER = BACKGROUND_THEMES.filter((t) =>
+    t.id === 'coban' || t.id === 'lavender'
+);
+
 interface ThemeContextType {
     themeId: string;
     selectedTheme: Theme;
@@ -94,7 +99,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const [themeId, setThemeId] = useState<string>(() => {
-        return localStorage.getItem("home_bg_theme") || "coban";
+        const stored = localStorage.getItem("home_bg_theme") || "coban";
+        const allowed = stored === "coban" || stored === "lavender";
+        const next = allowed ? stored : "coban";
+        if (next !== stored) {
+            localStorage.setItem("home_bg_theme", next);
+        }
+        return next;
     });
 
     const selectedTheme = BACKGROUND_THEMES.find(t => t.id === themeId) || BACKGROUND_THEMES[0];
@@ -104,6 +115,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }, [themeId]);
 
     const handleThemeChange = (id: string) => {
+        if (id !== "coban" && id !== "lavender") return;
         setThemeId(id);
         localStorage.setItem("home_bg_theme", id);
     };

@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { sanitizeError } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Clock, AlertCircle, Sparkles, ChevronRight, ArrowLeft } from "lucide-react";
+import { BookOpen, Clock, AlertCircle, Sparkles, ChevronRight, ArrowLeft, ListChecks } from "lucide-react";
 import { SiGoogleclassroom } from "react-icons/si";
 import { MdImageNotSupported } from "react-icons/md";
 import { Quiz } from "@/types";
@@ -35,27 +35,29 @@ const HomeworkStart = () => {
         fetchData();
     }, [id, token]);
 
+    const alreadySubmitted = homework?.myParticipantStatus === 'SUBMITTED';
+
     const handleStart = () => {
-        navigate(`/match/${homework.matchId}/play`);
+        navigate(`/match/${homework.pin || homework.id}/play`);
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-                <div className="w-20 h-20 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6" />
-                <p className="text-muted-foreground font-black uppercase tracking-widest animate-pulse">Đang tải bài tập...</p>
+            <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-6">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+                <p className="text-muted-foreground font-bold text-sm animate-pulse">Đang tải bài tập...</p>
             </div>
         );
     }
 
     if (error || !quiz) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-                <div className="bg-red-500/10 p-8 rounded-4xl border border-red-500/20 text-center max-w-md shadow-2xl">
-                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
-                    <h2 className="text-2xl font-black text-foreground mb-3 tracking-tight">Đã xảy ra lỗi</h2>
-                    <p className="text-muted-foreground font-bold mb-8">{error}</p>
-                    <Button variant="default" className="w-full h-12 rounded-2xl font-black bg-primary text-primary-foreground shadow-lg" onClick={() => navigate(-1)}>
+            <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-6">
+                <div className="bg-rose-500/10 p-8 rounded-3xl border border-rose-500/20 text-center max-w-md shadow-xl animate-in fade-in zoom-in-95">
+                    <AlertCircle className="w-16 h-16 text-rose-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-black text-foreground mb-2">Đã xảy ra lỗi</h2>
+                    <p className="text-muted-foreground font-medium mb-6 text-sm leading-relaxed">{error}</p>
+                    <Button variant="default" className="w-full h-11 rounded-xl font-black bg-primary text-primary-foreground shadow-lg shadow-primary/20" onClick={() => navigate(-1)}>
                         QUAY LẠI
                     </Button>
                 </div>
@@ -66,96 +68,122 @@ const HomeworkStart = () => {
     const isPastDeadline = homework.deadline && new Date(homework.deadline) < new Date();
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
-            <div className="max-w-xl w-full">
-                <div className="bg-card/80 backdrop-blur-3xl rounded-4xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden border border-white/10 group">
+        <div className="min-h-[calc(100vh-64px)] p-4 md:p-10 max-w-4xl mx-auto space-y-6">
+            {/* Back Button */}
+            <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-primary font-black transition-all hover:-translate-x-1 uppercase tracking-widest text-[10px] md:text-xs"
+            >
+                <ArrowLeft className="w-3.5 h-3.5" /> Quay lại
+            </button>
 
-                    {/* Header Image Area */}
-                    <div className="relative h-64 bg-linear-to-br from-primary to-indigo-600 p-10 flex flex-col justify-end overflow-hidden">
-                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
-                        {quiz.image ? (
-                            <img src={quiz.image} alt="Quiz Cover" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 group-hover:scale-110 transition-transform duration-1000" />
-                        ) : (
-                            <div className="absolute inset-0 w-full h-full flex items-center justify-center mix-blend-overlay opacity-30 group-hover:scale-110 transition-transform duration-1000">
-                                <MdImageNotSupported className="w-48 h-48 text-white" />
-                            </div>
-                        )}
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-2 text-primary-foreground/60 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
-                                <Sparkles size={12} className="animate-spin-slow" />
-                                Giao bởi Google Classroom
-                            </div>
-                            <h1 className="text-4xl font-black text-white tracking-tighter leading-none mb-2 drop-shadow-xl">{quiz.title}</h1>
+            {/* Main Assignment Card */}
+            <div className="bg-card/60 backdrop-blur-xl rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+                {/* Branding Top Strip */}
+                <div className="h-1.5 bg-primary w-full" />
+
+                <div className="p-6 md:p-10">
+                    <div className="flex flex-col md:flex-row gap-8">
+                        {/* Quiz Thumbnail */}
+                        <div className="w-full md:w-64 h-48 md:h-64 rounded-2xl bg-foreground/5 border border-white/5 overflow-hidden shrink-0 shadow-inner group">
+                            {quiz.image ? (
+                                <img src={quiz.image} alt={quiz.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <BookOpen className="w-16 h-16 text-muted-foreground/20" />
+                                </div>
+                            )}
                         </div>
-                    </div>
 
-                    <div className="p-10">
-                        {/* Description */}
-                        <p className="text-muted-foreground text-lg font-bold mb-10 leading-relaxed italic opacity-80 border-l-4 border-primary/20 pl-6">{quiz.description || "Không có mô tả cho quiz này."}</p>
+                        {/* Info Content */}
+                        <div className="flex-1 space-y-6">
+                            <div>
+                                <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                                    <Sparkles size={12} className="animate-pulse" />
+                                    Bài tập Quizmon
+                                </div>
+                                <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight leading-tight mb-3">
+                                    {quiz.title}
+                                </h1>
+                                <p className="text-muted-foreground text-sm md:text-base font-medium leading-relaxed line-clamp-3">
+                                    {quiz.description || "Không có mô tả chi tiết cho bài tập này."}
+                                </p>
+                            </div>
 
-                        <div className="space-y-4 mb-10">
-                            <div className="flex items-center justify-between p-6 bg-foreground/5 rounded-3xl border border-white/5 transition-all hover:bg-foreground/10 group/item">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-3xl bg-primary/20 text-primary flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform">
-                                        <SiGoogleclassroom size={24} />
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="bg-foreground/5 rounded-2xl p-4 flex items-center gap-3 border border-white/5">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                        <ListChecks size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Số câu hỏi</p>
-                                        <p className="text-lg font-bold text-foreground">Bộ câu hỏi chi tiết</p>
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Số câu hỏi</p>
+                                        <p className="text-base font-black text-foreground">{quiz.questions?.length || 0} câu</p>
                                     </div>
                                 </div>
-                                <span className="font-black text-2xl text-primary tabular-nums">{quiz.questions?.length || 0}</span>
-                            </div>
 
-                            <div className={`flex items-center justify-between p-6 rounded-3xl border transition-all hover:scale-[1.01] ${isPastDeadline ? 'bg-red-500/5 border-red-500/20' : 'bg-orange-500/5 border-orange-500/20'}`}>
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-3xl flex items-center justify-center shadow-lg ${isPastDeadline ? 'bg-red-500/20 text-red-500' : 'bg-orange-500/20 text-orange-500'}`}>
-                                        <Clock size={24} />
+                                <div className={`rounded-2xl p-4 flex items-center gap-3 border ${isPastDeadline ? 'bg-rose-500/5 border-rose-500/10' : 'bg-amber-500/5 border-amber-500/10'}`}>
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPastDeadline ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                        <Clock size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Hạn chót</p>
-                                        <p className={`text-lg font-bold ${isPastDeadline ? 'text-red-500' : 'text-orange-500'}`}>
-                                            {homework.deadline ? new Date(homework.deadline).toLocaleDateString() : 'Không thời hạn'}
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Hạn chót</p>
+                                        <p className={`text-base font-black ${isPastDeadline ? 'text-rose-500' : 'text-amber-500'}`}>
+                                            {homework.deadline ? new Date(homework.deadline).toLocaleString("vi-VN", { dateStyle: 'short', timeStyle: 'short' }) : 'Không giới hạn'}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
+                            {/* Strict Mode Badge */}
                             {homework.strictMode && (
-                                <div className="flex items-center justify-between p-6 bg-violet-500/5 rounded-3xl border border-violet-500/20">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-3xl bg-violet-500/20 text-violet-500 flex items-center justify-center shadow-lg">
-                                            <AlertCircle size={24} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-violet-500 uppercase tracking-widest mb-1">Chế độ nghiêm ngặt</p>
-                                            <p className="text-lg font-bold text-foreground">Hoàn thành trong 1 lần</p>
-                                        </div>
-                                    </div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-lg">
+                                    <AlertCircle size={14} className="animate-bounce" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Chế độ nghiêm ngặt active</span>
                                 </div>
                             )}
-                        </div>
 
-                        {/* Action Area */}
-                        <div className="flex flex-col gap-4">
-                            <Button
-                                onClick={handleStart}
-                                disabled={isPastDeadline}
-                                className="w-full h-20 text-2xl font-black bg-primary text-primary-foreground rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 uppercase tracking-tighter"
-                            >
-                                {isPastDeadline ? 'ĐÃ HẾT HẠN' : 'Bắt đầu bài tập'}
-                                <ChevronRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
-                            </Button>
+                            {/* Already submitted banner */}
+                            {alreadySubmitted && (
+                                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                                    <AlertCircle size={18} className="shrink-0" />
+                                    <p className="text-sm font-black">Bạn đã nộp bài tập này rồi. Kết quả đã được ghi nhận.</p>
+                                </div>
+                            )}
 
-                            <button
-                                onClick={() => navigate('/classrooms')}
-                                className="w-full py-4 text-muted-foreground hover:text-foreground font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group"
-                            >
-                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                                Quay lại Danh sách lớp học
-                            </button>
+                            {/* Action Area */}
+                            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                                <Button
+                                    onClick={handleStart}
+                                    disabled={isPastDeadline || alreadySubmitted}
+                                    className="flex-1 h-14 text-lg font-black bg-primary text-primary-foreground rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-tight disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                >
+                                    {isPastDeadline ? 'ĐÃ HẾT HẠN' : alreadySubmitted ? 'ĐÃ NỘP BÀI' : 'Bắt đầu làm bài'}
+                                    <ChevronRight className="w-5 h-5" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => navigate('/classrooms')}
+                                    className="h-14 px-6 rounded-2xl border-white/10 hover:bg-foreground/5 font-black text-sm uppercase tracking-widest"
+                                >
+                                    Về lớp học
+                                </Button>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Footer Guide */}
+                <div className="px-6 md:px-10 py-4 bg-foreground/[0.02] border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] font-bold">
+                        <SiGoogleclassroom className="w-3.5 h-3.5" />
+                        Đồng bộ hóa với Classroom
+                    </div>
+                    {homework.strictMode && (
+                        <p className="text-[10px] text-indigo-400/80 font-medium italic">
+                            * Lưu ý: Kết quả sẽ được ghi lại ngay sau khi nộp bài.
+                        </p>
+                    )}
                 </div>
             </div>
         </div>

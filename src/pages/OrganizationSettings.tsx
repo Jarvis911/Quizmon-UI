@@ -18,8 +18,16 @@ import {
   CheckCircle2,
   HelpCircle,
   CreditCard,
-  Target
+  Target,
+  ShieldAlert
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Member {
   id: number;
@@ -139,7 +147,7 @@ export default function OrganizationSettings() {
     if (!confirmed) return;
 
     try {
-      await apiClient.delete(`${endpoints.organization_members(currentOrg.id)}/${userId}`);
+      await apiClient.delete(endpoints.organization_member(currentOrg.id, userId));
       fetchMembers();
       showAlert({
         title: "Thành công",
@@ -154,6 +162,31 @@ export default function OrganizationSettings() {
       });
     }
   };
+
+  const handleUpdateRole = async (targetUserId: number, newRole: string) => {
+    if (!currentOrg) return;
+    try {
+      await apiClient.put(endpoints.organization_member_role(currentOrg.id, targetUserId), { role: newRole });
+      fetchMembers();
+      showAlert({
+        title: "Thành công",
+        message: "Đã cập nhật vai trò thành viên.",
+        type: "success"
+      });
+    } catch (err: any) {
+      showAlert({
+        title: "Thất bại",
+        message: sanitizeError(err, "Cập nhật vai trò thất bại."),
+        type: "error"
+      });
+    }
+  };
+
+  const currentUserMember = members.find(m => m.user.id === (user as any)?.id);
+  const currentUserRole = currentUserMember?.role;
+  const isOwner = currentUserRole === 'OWNER';
+  const isAdmin = currentUserRole === 'ADMIN';
+  const isAtLeastAdmin = isOwner || isAdmin;
 
   if (!currentOrg) return <div className="p-10 text-center font-bold">Chưa chọn tổ chức nào.</div>;
 
@@ -303,34 +336,62 @@ export default function OrganizationSettings() {
               {isLoadingMembers ? (
                 <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>
               ) : (
-                members.map(member => (
-                  <div key={member.id} className="group flex items-center justify-between p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl md:rounded-2xl transition-all gap-2">
-                    <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
-                      <div className="shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm md:text-base">
-                        {member.user.username[0].toUpperCase()}
+                members.map(member => {
+                  const isTargetOwner = member.role === 'OWNER';
+                  const isSelf = member.user.id === (user as any)?.id;
+                  const canManage = isAtLeastAdmin && !isSelf && !isTargetOwner;
+
+                  return (
+                    <div key={member.id} className="group flex items-center justify-between p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl md:rounded-2xl transition-all gap-2">
+                      <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                        <div className="shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm md:text-base">
+                          {member.user.username[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-black text-foreground text-sm md:text-base truncate">{member.user.username}</p>
+                          <p className="text-[10px] md:text-xs text-muted-foreground font-bold truncate max-w-24 xs:max-w-32 sm:max-w-none">{member.user.email}</p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-black text-foreground text-sm md:text-base truncate">{member.user.username}</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground font-bold truncate max-w-24 xs:max-w-32 sm:max-w-none">{member.user.email}</p>
+                      <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                        {canManage ? (
+                          <Select
+                            value={member.role}
+                            onValueChange={(value) => handleUpdateRole(member.user.id, value)}
+                          >
+                            <SelectTrigger className="h-8 md:h-9 bg-primary/10 border-transparent text-primary font-black uppercase text-[10px] md:text-xs hover:bg-primary/20 transition-all rounded-lg md:rounded-xl px-2 md:px-3">
+                              <div className="flex items-center gap-1.5">
+                                <ShieldCheck className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                                <SelectValue />
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="MEMBER">MEMBER</SelectItem>
+                              <SelectItem value="ADMIN">ADMIN</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className={`flex items-center gap-1 text-[10px] md:text-xs font-black uppercase tracking-tighter px-2 py-1 rounded-lg ${isTargetOwner ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'}`}>
+                            {isTargetOwner ? <ShieldAlert className="w-3 h-3 md:w-4 md:h-4" /> : <ShieldCheck className="w-3 h-3 md:w-4 md:h-4" />}
+                            <span className="hidden sm:inline">{member.role}</span>
+                          </div>
+                        )}
+                        
+                        <div className="w-8 md:w-10 flex justify-center">
+                          {canManage && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveMember(member.user.id)}
+                              className="md:opacity-0 md:group-hover:opacity-100 text-rose-500 hover:bg-rose-500/10 rounded-lg md:rounded-xl transition-all h-8 w-8 md:h-10 md:w-10"
+                            >
+                              <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                      <div className="flex items-center gap-1 text-[10px] md:text-xs font-black uppercase tracking-tighter text-primary bg-primary/10 px-2 py-1 rounded-lg">
-                        <ShieldCheck className="w-3 h-3 md:w-4 md:h-4" /> <span className="hidden sm:inline">{member.role}</span>
-                      </div>
-                      {member.user.id !== (user as any)?.id && ( // Can't remove yourself
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveMember(member.user.id)}
-                          className="md:opacity-0 md:group-hover:opacity-100 text-rose-500 hover:bg-rose-500/10 rounded-lg md:rounded-xl transition-all h-8 w-8 md:h-10 md:w-10"
-                        >
-                          <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

@@ -188,11 +188,11 @@ const LocationQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
         )}
 
         <Button
-          className="w-full h-10 md:h-12 text-sm font-black bg-primary text-primary-foreground rounded-lg md:rounded-xl shadow-lg hover:-translate-y-px active:translate-y-px transition-all"
+          className="w-full h-10 md:h-12 text-sm font-black bg-primary text-primary-foreground rounded-lg md:rounded-xl shadow-lg hover:-translate-y-px active:translate-y-px transition-all disabled:opacity-90"
           onClick={handleSubmit}
           disabled={submitted || !location || (mode !== "HOMEWORK" && isCorrect !== null) || timer <= 0}
         >
-          XÁC NHẬN
+          {submitted ? "ĐÃ XÁC NHẬN" : "XÁC NHẬN"}
         </Button>
       </div>
     </div>

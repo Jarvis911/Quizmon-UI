@@ -100,6 +100,7 @@ const MatchLobby = () => {
     const [error, setError] = useState<string | null>(null);
     const [alreadyInMatchId, setAlreadyInMatchId] = useState<string | number | null>(null);
     const [alreadyInMatchPin, setAlreadyInMatchPin] = useState<string | null>(null);
+    const [alreadyInMatchQuizTitle, setAlreadyInMatchQuizTitle] = useState<string | null>(null);
 
     // Player customization
     const [displayName, setDisplayName] = useState(user?.username || "");
@@ -235,9 +236,10 @@ const MatchLobby = () => {
                 setIsHost(true);
             }
         });
-        socket.on("alreadyInMatch", ({ currentMatchId, currentMatchPin }) => {
+        socket.on("alreadyInMatch", ({ currentMatchId, currentMatchPin, currentMatchQuizTitle }) => {
             setAlreadyInMatchId(currentMatchId);
             setAlreadyInMatchPin(currentMatchPin || null);
+            setAlreadyInMatchQuizTitle(currentMatchQuizTitle || null);
         });
         socket.on("leftMatch", () => {
             if (alreadyInMatchId) {
@@ -794,11 +796,12 @@ const MatchLobby = () => {
                         <DialogHeader className="space-y-2">
                             <DialogTitle className="text-xl md:text-2xl font-black text-foreground">Trận đấu đang diễn ra!</DialogTitle>
                             <DialogDescription className="text-sm md:text-base text-foreground/70 font-medium leading-relaxed">
-                                Bạn có một phòng đang hoạt động (Phòng: <span className="font-black text-primary px-1.5 py-0.5 bg-primary/10 rounded-lg mx-1">{alreadyInMatchPin || alreadyInMatchId}</span>).
+                                Bạn có một phòng đang hoạt động (Phòng: <span className="font-black text-primary px-1.5 py-0.5 bg-primary/10 rounded-lg mx-1">{alreadyInMatchPin || alreadyInMatchId}</span>
+                                {alreadyInMatchQuizTitle && <span> - Quiz: <span className="font-black text-foreground">{alreadyInMatchQuizTitle}</span></span>}).
                                 <br />Tạo phòng mới sẽ xóa dữ liệu ở phòng cũ. Bạn muốn làm gì?
                             </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter className="flex flex-col gap-3 mt-6">
+                        <DialogFooter className="flex flex-col sm:flex-col gap-3 mt-6">
                             <Button
                                 onClick={handleResign}
                                 className="w-full h-12 text-sm md:text-base font-black shadow-xl text-white bg-destructive hover:bg-destructive/90 rounded-xl transition-all"

@@ -7,7 +7,7 @@
  *   disabled?    – Externally disable the button (e.g. while saving).
  */
 import { useState } from "react";
-import { Sparkles, Loader2, AlertTriangle, X } from "lucide-react";
+import { Sparkles, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -20,7 +20,6 @@ import { Textarea } from "@/components/ui/textarea";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 
-const IMAGE_QUOTA_COST = 3;
 
 const STYLE_OPTIONS = [
     { value: "", label: "AI tự chọn" },
@@ -117,13 +116,6 @@ export default function AIImageButton({ context, onGenerated, disabled }: AIImag
                         </DialogTitle>
                     </DialogHeader>
 
-                    {/* Quota warning */}
-                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-                        <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                        <p className="text-xs font-bold text-amber-600 dark:text-amber-400 leading-snug">
-                            Mỗi ảnh tiêu tốn <span className="font-black text-amber-500">{IMAGE_QUOTA_COST} quota</span> từ giới hạn AI của bạn trong kỳ hiện tại.
-                        </p>
-                    </div>
 
                     <div className="space-y-4 py-1">
                         {/* Context preview */}
@@ -240,7 +232,7 @@ export default function AIImageButton({ context, onGenerated, disabled }: AIImag
                             ) : (
                                 <Sparkles className="w-4 h-4 mr-2" />
                             )}
-                            {loading ? "Đang tạo..." : `Tạo & gắn luôn (−${IMAGE_QUOTA_COST} quota)`}
+                            {loading ? "Đang tạo..." : "Tạo & gắn luôn"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

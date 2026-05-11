@@ -9,7 +9,7 @@ import {
     ChevronRight, AlertCircle, BookOpen, Download, ListChecks, Plus
 } from "lucide-react";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, PieChart, Pie, Cell, Legend
 } from "recharts";
 
@@ -126,6 +126,48 @@ export default function ClassroomDetails() {
     if (!classroom) return null;
 
     const isTeacher = currentUserId === classroom.teacher.id;
+    const currentUserMember = classroom.members.find(m => m.user.id === currentUserId);
+
+    if (!isTeacher && currentUserMember?.status === "PENDING") {
+        return (
+            <div className="min-h-[calc(100vh-64px)] p-4 md:p-10 max-w-7xl mx-auto space-y-6 flex flex-col items-center justify-center text-center">
+                <div className="p-6 md:p-10 bg-amber-500/10 border-2 border-amber-500/20 rounded-[2.5rem] max-w-md w-full animate-in fade-in zoom-in-95 duration-500">
+                    <Clock className="w-16 h-16 md:w-20 md:h-20 text-amber-500 mx-auto mb-6 animate-pulse" />
+                    <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">Đang chờ phê duyệt</h2>
+                    <p className="text-sm md:text-base text-muted-foreground font-medium mb-8 leading-relaxed">
+                        Yêu cầu tham gia lớp <span className="text-foreground font-black bg-foreground/5 px-2 py-0.5 rounded-md">{classroom.name}</span> của bạn đang chờ giáo viên phê duyệt. Vui lòng quay lại sau!
+                    </p>
+                    <button
+                        onClick={() => navigate("/classrooms")}
+                        className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-primary text-primary-foreground font-black rounded-xl md:rounded-2xl hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 text-sm md:text-base"
+                    >
+                        <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" /> Quay lại danh sách lớp
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!isTeacher && !currentUserMember) {
+        return (
+            <div className="min-h-[calc(100vh-64px)] p-4 md:p-10 max-w-7xl mx-auto space-y-6 flex flex-col items-center justify-center text-center">
+                <div className="p-6 md:p-10 bg-rose-500/10 border-2 border-rose-500/20 rounded-[2.5rem] max-w-md w-full animate-in fade-in zoom-in-95 duration-500">
+                    <AlertCircle className="w-16 h-16 md:w-20 md:h-20 text-rose-500 mx-auto mb-6" />
+                    <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">Chưa tham gia lớp</h2>
+                    <p className="text-sm md:text-base text-muted-foreground font-medium mb-8 leading-relaxed">
+                        Bạn chưa tham gia lớp học này hoặc đã bị xóa khỏi lớp.
+                    </p>
+                    <button
+                        onClick={() => navigate("/classrooms")}
+                        className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-primary text-primary-foreground font-black rounded-xl md:rounded-2xl hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 text-sm md:text-base"
+                    >
+                        <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" /> Quay lại danh sách lớp
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     const approved = classroom.members.filter(m => m.status === "APPROVED" && m.role === "STUDENT");
     const pending = classroom.members.filter(m => m.status === "PENDING");
     const teachers = classroom.members.filter(m => m.role === "TEACHER");
@@ -837,24 +879,6 @@ export default function ClassroomDetails() {
                         </div>
                     ) : (
                         <>
-                            {/* Bar chart */}
-                            <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-white/5 p-6">
-                                <h3 className="font-black text-base text-foreground mb-5 flex items-center gap-2">
-                                    <BarChart3 className="w-4 h-4 text-primary" /> Hoàn thành & Điểm TB theo bài
-                                </h3>
-                                <ResponsiveContainer width="100%" height={240}>
-                                    <BarChart data={chartData} margin={{ top: 0, right: 8, left: -16, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                        <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} />
-                                        <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} unit="%" axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "var(--foreground)", fontSize: 12 }} formatter={(v: number) => [`${v}%`]} />
-                                        <Legend iconType="circle" iconSize={8} />
-                                        <Bar dataKey="Hoàn thành" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                                        <Bar dataKey="Điểm TB" fill="hsl(var(--primary) / 0.35)" radius={[6, 6, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 {/* Pie chart */}
                                 <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-white/5 p-6">

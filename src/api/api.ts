@@ -107,6 +107,8 @@ interface Endpoints {
     organizations: string;
     organization: (id: number) => string;
     organization_members: (id: number) => string;
+    organization_member: (id: number, userId: number) => string;
+    organization_member_role: (id: number, userId: number) => string;
 
     // Subscriptions
     plans: string;
@@ -237,6 +239,8 @@ const endpoints: Endpoints = {
     organizations: `${BASE_URL}/organizations`,
     organization: (id: number) => `${BASE_URL}/organizations/${id}`,
     organization_members: (id: number) => `${BASE_URL}/organizations/${id}/members`,
+    organization_member: (id: number, userId: number) => `${BASE_URL}/organizations/${id}/members/${userId}`,
+    organization_member_role: (id: number, userId: number) => `${BASE_URL}/organizations/${id}/members/${userId}/role`,
 
     // Subscriptions
     plans: `${BASE_URL}/subscriptions/plans`,

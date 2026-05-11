@@ -256,6 +256,24 @@ const MatchPlay = () => {
                 }
 
                 if (res.data.mode === "HOMEWORK") {
+                    const matchId = res.data.id;
+                    // Register this student as an active participant (required before submitting answers)
+                    try {
+                        await apiClient.post(endpoints.homework_start(matchId), {});
+                    } catch (startErr: any) {
+                        if (startErr?.response?.status === 400) {
+                            // Already submitted — block re-entry and send back
+                            setError("Bạn đã nộp bài tập này rồi.");
+                            setGameOver(true);
+                            return;
+                        }
+                        if (startErr?.response?.status === 403) {
+                            setError("Bạn không có quyền truy cập bài tập này.");
+                            setGameOver(true);
+                            return;
+                        }
+                        console.error("Failed to start homework session", startErr);
+                    }
                     const qList = res.data.quiz?.questions || [];
                     setHomeworkQuestions(qList);
                     setQuestionNumber(1);
@@ -276,6 +294,8 @@ const MatchPlay = () => {
     // Handle Homework specific countdown and submission
     useEffect(() => {
         if (matchMode !== "HOMEWORK" || gameOver || !question) return;
+        // Stop the countdown once the user has submitted an answer
+        if (isUserAnswered) return;
 
         const interval = setInterval(() => {
             setTimer((prev) => {
@@ -288,29 +308,39 @@ const MatchPlay = () => {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [matchMode, gameOver, question]);
+    }, [matchMode, gameOver, question, isUserAnswered]);
 
     const handleNextHomeworkQuestion = async () => {
         if (questionNumber < homeworkQuestions.length) {
             const nextQ = homeworkQuestions[questionNumber];
-            setQuestion(nextQ);
-            setQuestionNumber((prev) => prev + 1);
-            setTimer(nextQ.timeLimit || 30);
-            setMaxTimer(nextQ.timeLimit || 30);
+            // Delay transition so user sees the correct/wrong feedback overlay for ~1.5s
+            setTimeout(() => {
+                setIsUserAnswered(false);
+                setIsQuestionEnded(false);
+                setFrozenPoints(null);
+                setPotentialPoints(1000);
+                setFeedback(null);
+                setQuestion(nextQ);
+                setQuestionNumber((prev) => prev + 1);
+                setTimer(nextQ.timeLimit || 30);
+                setMaxTimer(nextQ.timeLimit || 30);
+            }, 1500);
         } else {
-            // Finish homework
-            try {
-                if (!matchId) return;
-                const res = await apiClient.post<{ score: number }>(endpoints.homework_finish(matchId), {});
-                setHomeworkScore(res.data.score || 0);
-                setGameOver(true);
-                setNotification("Bạn đã hoàn thành bài tập!");
-                setTimeout(() => setNotification(null), 5000);
-            } catch (err) {
-                console.error("Failed to finish homework", err);
-                setError("Có lỗi khi nộp bài tập");
-                setGameOver(true);
-            }
+            // Finish homework — also delay so user sees feedback on the last question
+            setTimeout(async () => {
+                try {
+                    if (!matchId) return;
+                    const res = await apiClient.post<{ score: number }>(endpoints.homework_finish(matchId), {});
+                    setHomeworkScore(res.data.score || 0);
+                    setGameOver(true);
+                    setNotification("Bạn đã hoàn thành bài tập!");
+                    setTimeout(() => setNotification(null), 5000);
+                } catch (err) {
+                    console.error("Failed to finish homework", err);
+                    setError("Có lỗi khi nộp bài tập");
+                    setGameOver(true);
+                }
+            }, 1500);
         }
     };
 
@@ -437,13 +467,20 @@ const MatchPlay = () => {
 
     // Smooth potential points countdown logic
     useEffect(() => {
-        if (matchMode !== "REALTIME" || isPaused || gameOver || !question) return;
+        if (gameOver || !question) return;
         if (isQuestionEnded) return;
+        // In HOMEWORK mode, stop draining points once the user has answered
+        if (matchMode === "HOMEWORK" && isUserAnswered) return;
+        if (matchMode === "REALTIME" && isPaused) return;
 
         // Sync local points with timer logic - snap if drift is significant
-        const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
-        if (Math.abs(potentialPoints - targetPoints) > 5) {
-            setPotentialPoints(targetPoints);
+        // HOMEWORK timer decrements by 1 each second (not server-synced), so the snap
+        // would cause a visible jump every second. Skip snap for HOMEWORK mode.
+        if (matchMode === "REALTIME") {
+            const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
+            if (Math.abs(potentialPoints - targetPoints) > 5) {
+                setPotentialPoints(targetPoints);
+            }
         }
 
         // Smooth decrement by 1:
@@ -465,7 +502,6 @@ const MatchPlay = () => {
 
     // When the question is ended/revealed, freeze the number in place
     useEffect(() => {
-        if (matchMode !== "REALTIME") return;
         if (!isQuestionEnded) return;
         // Prefer freezing to the user's locked-in points if they have answered.
         if (isUserAnswered && frozenPoints !== null) {
@@ -519,6 +555,26 @@ const MatchPlay = () => {
     // Game Over → Leaderboard or Homework Results
     if (gameOver) {
         if (matchMode === "HOMEWORK") {
+            // Error state (e.g. already submitted, no access)
+            if (error) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+                        <div className="bg-card/40 backdrop-blur-3xl rounded-4xl shadow-2xl overflow-hidden border border-white/10 p-10 max-w-md w-full text-center animate-in zoom-in-95 duration-500">
+                            <div className="w-24 h-24 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-4 ring-rose-500/10">
+                                <span className="text-5xl">⚠️</span>
+                            </div>
+                            <h2 className="text-2xl font-black text-foreground mb-3 drop-shadow-sm">Không thể làm bài</h2>
+                            <p className="text-foreground/60 font-bold mb-8 text-sm leading-relaxed">{error}</p>
+                            <button
+                                onClick={() => navigate('/classrooms')}
+                                className="px-8 py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:bg-primary/90 transition-all w-full shadow-xl shadow-primary/20 hover:translate-y-[-2px] active:translate-y-px"
+                            >
+                                VỀ DANH SÁCH LỚP
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
             return (
                 <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
                     <div className="bg-card/40 backdrop-blur-3xl rounded-4xl shadow-2xl overflow-hidden border border-white/10 p-10 max-w-md w-full text-center animate-in zoom-in-95 duration-500">
@@ -567,6 +623,10 @@ const MatchPlay = () => {
             onAnswered: () => {
                 setIsUserAnswered(true);
                 setFrozenPoints((prev) => (prev === null ? potentialPoints : prev));
+                // In HOMEWORK mode, mark the question as ended so the score bar freezes
+                if (matchMode === "HOMEWORK") {
+                    setIsQuestionEnded(true);
+                }
             },
             correctAnswer: correctAnswerInfo
         };
@@ -787,7 +847,7 @@ const MatchPlay = () => {
 
                 {/* ── Scoreboard Sidebar ── */}
                 {showScoreboard && sortedScores.length > 0 && (
-                    <div className="w-full lg:w-64 shrink-0 animate-in slide-in-from-right-8 duration-500 lg:block absolute lg:relative inset-x-0 bottom-0 z-30 lg:z-auto max-h-[40vh] lg:max-h-full">
+                    <div className="w-full lg:w-64 shrink-0 animate-in slide-in-from-bottom-8 lg:slide-in-from-right-8 duration-500 relative lg:relative z-30 max-h-[40vh] lg:max-h-full">
                         <div className="bg-card/60 lg:bg-card/40 backdrop-blur-3xl border-t lg:border border-white/10 rounded-t-[2rem] lg:rounded-2xl p-3 h-full overflow-y-auto shadow-2xl lg:shadow-xl">
                             <h3 className="text-foreground/40 text-[10px] font-black uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
                                 Bảng xếp hạng

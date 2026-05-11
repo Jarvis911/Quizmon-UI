@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import apiClient from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { Trash2 } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
+import {
+    AdminLoading,
+    AdminPageHeader,
+    adminFieldClass,
+    adminFilterPanelClass,
+    adminTableShellClass,
+} from "@/components/admin/adminQuizmonChrome";
 
 export default function AdminQuizzes() {
     const { token } = useAuth();
@@ -45,29 +52,30 @@ export default function AdminQuizzes() {
         }
     };
 
-    if (loading) return <div className="p-8 text-slate-500">Đang tải...</div>;
+    if (loading) return <AdminLoading />;
 
     return (
         <div className="space-y-6 md:space-y-8">
-            <div className="relative">
-                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Kiểm duyệt Quiz</h1>
-                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium">Quản lý và loại bỏ các quiz không phù hợp từ cộng đồng.</p>
-            </div>
+            <AdminPageHeader
+              title="Kiểm duyệt Quiz"
+              subtitle="Lọc, xem và xóa các bài quiz không phù hợp."
+            />
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4 bg-card/40 dark:bg-slate-900/40 p-4 md:p-6 rounded-3xl md:rounded-4xl border border-white/10 backdrop-blur-md shadow-xl">
-                <div className="flex-1">
+            <div className={adminFilterPanelClass}>
+                <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
                     <input 
                         type="text" 
-                        placeholder="Tìm tiêu đề hoặc người tạo..." 
-                        className="w-full h-11 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                        placeholder="Tìm tiêu đề hoặc người tạo…" 
+                        className={`${adminFieldClass} pl-11`}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
                 <div className="w-full md:w-64">
                     <select 
-                        className="w-full h-11 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border border-white/5 bg-white/50 dark:bg-slate-900/50 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none"
+                        className={`${adminFieldClass} appearance-none`}
                         value={categoryId}
                         onChange={(e) => setCategoryId(e.target.value)}
                     >
@@ -79,25 +87,25 @@ export default function AdminQuizzes() {
                 </div>
             </div>
 
-            <div className="rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-card/30 dark:bg-slate-900/30 overflow-hidden backdrop-blur-md shadow-2xl">
+            <div className={adminTableShellClass}>
                 <div className="overflow-x-auto scrollbar-hide">
                     <table className="w-full text-xs md:text-sm text-left border-collapse min-w-[700px] md:min-w-0">
-                        <thead className="bg-white/10 dark:bg-white/5 border-b border-white/5">
+                        <thead className="border-b border-primary/10 bg-primary/10 dark:bg-primary/15">
                             <tr>
-                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
-                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Tiêu đề</th>
-                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Người tạo</th>
-                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Ngày tạo</th>
-                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Hành động</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-muted-foreground">ID</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-muted-foreground">Tiêu đề</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-muted-foreground">Người tạo</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 font-black uppercase tracking-wider text-muted-foreground">Ngày tạo</th>
+                                <th className="px-4 md:px-8 py-4 md:py-5 text-right font-black uppercase tracking-wider text-muted-foreground">Hành động</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {quizzes.map((quiz) => (
                                 <tr key={quiz.id} className="hover:bg-white/10 dark:hover:bg-white/5 transition-colors group">
-                                    <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-slate-500">{quiz.id}</td>
-                                    <td className="px-4 md:px-8 py-4 md:py-5 font-black text-slate-900 dark:text-white max-w-[200px] md:max-w-none truncate">{quiz.title}</td>
-                                    <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-slate-600 dark:text-slate-300">{quiz.creator?.username || quiz.creatorId}</td>
-                                    <td className="px-4 md:px-8 py-4 md:py-5 font-medium text-slate-500">{new Date(quiz.createdAt).toLocaleDateString()}</td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-muted-foreground">{quiz.id}</td>
+                                    <td className="max-w-[200px] truncate px-4 py-4 font-black text-foreground md:max-w-none md:px-8 md:py-5">{quiz.title}</td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-foreground/85">{quiz.creator?.username || quiz.creatorId}</td>
+                                    <td className="px-4 md:px-8 py-4 md:py-5 font-medium text-muted-foreground">{new Date(quiz.createdAt).toLocaleDateString()}</td>
                                     <td className="px-4 md:px-8 py-4 md:py-5 text-right">
                                         <button 
                                             onClick={() => handleDelete(quiz.id)}
@@ -110,7 +118,7 @@ export default function AdminQuizzes() {
                             ))}
                             {quizzes.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-4 md:px-8 py-10 md:py-20 text-center text-slate-500 font-bold">Không tìm thấy quiz nào.</td>
+                                    <td colSpan={5} className="px-4 md:px-8 py-10 md:py-20 text-center font-bold text-muted-foreground">Không tìm thấy quiz nào.</td>
                                 </tr>
                             )}
                         </tbody>

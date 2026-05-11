@@ -48,6 +48,7 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
         if (onHomeworkSubmit) onHomeworkSubmit();
       } catch (err) {
         console.error("Failed to submit homework answer", err);
+        if (onHomeworkSubmit) setTimeout(onHomeworkSubmit, 1500);
       }
     } else {
       socket.emit("submitAnswer", {
@@ -59,10 +60,15 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
     }
   };
 
-  // Auto-submit when timer runs out
+  // Auto-submit/advance when timer runs out
   useEffect(() => {
-    if (timer === 0 && !isSubmitted && mode !== "HOMEWORK") {
-      handleSubmit();
+    if (timer === 0 && !isSubmitted) {
+      if (mode === "HOMEWORK") {
+        // In HOMEWORK, advance even without an answer selected
+        onHomeworkSubmit?.();
+      } else {
+        handleSubmit();
+      }
     }
   }, [timer, isSubmitted, mode, selectedIds]);
 
@@ -126,9 +132,9 @@ const CheckboxQuestionPlay = ({ question, socket, matchId, userId, timer, mode, 
         <Button
           onClick={handleSubmit}
           disabled={selectedIds.length === 0 || isSubmitted || timer <= 0 || correctAnswer !== null}
-          className="w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all"
+          className="w-full text-lg font-black bg-primary text-primary-foreground rounded-2xl py-6 shadow-lg hover:translate-y-[-2px] active:translate-y-px transition-all disabled:opacity-90"
         >
-          XÁC NHẬN
+          {isSubmitted ? "ĐÃ XÁC NHẬN" : "XÁC NHẬN"}
         </Button>
       </div>
     </div>

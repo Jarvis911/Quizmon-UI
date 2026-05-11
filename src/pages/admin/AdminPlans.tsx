@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save, Layers } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { useModal } from "@/context/ModalContext";
+import { AdminLoading, AdminPageHeader } from "@/components/admin/adminQuizmonChrome";
 
 interface PlanFeature {
   id?: number;
@@ -37,7 +38,7 @@ const FEATURE_LABELS: Record<string, string> = {
 };
 
 const INPUT =
-  "w-full px-4 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-bold focus:outline-none focus:border-primary/50 text-sm md:text-base";
+  "w-full rounded-xl border-2 border-white/10 bg-card/60 px-4 py-2.5 text-sm font-bold text-foreground shadow-inner backdrop-blur-sm focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 md:py-3 md:text-base";
 
 type FeatureDraftRow = { featureKey: string; enabled: boolean; limitStr: string };
 
@@ -187,27 +188,14 @@ export default function AdminPlans() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24 text-muted-foreground font-bold gap-2">
-        <Loader2 className="w-6 h-6 animate-spin" />
-        Đang tải gói…
-      </div>
-    );
-  }
+  if (loading) return <AdminLoading label="Đang tải gói…" />;
 
   return (
     <div className="space-y-8 md:space-y-10">
-      <div>
-        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-2 flex items-center gap-3">
-          <Layers className="w-8 h-8 md:w-10 md:h-10 text-primary" />
-          Gói &amp; tính năng
-        </h1>
-        <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium max-w-3xl">
-          Chỉnh tên, mô tả, giá và bật/tắt gói hiển thị trên trang thanh toán. Tuỳ từng gói, bật tính năng và đặt hạn mức (để trống = không giới hạn khi tính năng bật). Mã gói
-          cố định (FREE, TEACHER_PRO, …) — không đổi từ đây.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Gói & tính năng"
+        subtitle="Chỉnh giá hiển thị, cờ đang bán và ma trận tính năng / hạn mức."
+      />
 
       <div className="space-y-6 md:space-y-8">
         {plans.map((plan) => {
@@ -216,9 +204,9 @@ export default function AdminPlans() {
           return (
             <div
               key={plan.id}
-              className="rounded-2xl md:rounded-[2rem] border-2 border-white/10 bg-card/40 backdrop-blur-xl shadow-xl overflow-hidden"
+              className="overflow-hidden rounded-2xl border-2 border-primary/15 bg-primary/[0.04] shadow-xl shadow-primary/5 backdrop-blur-xl dark:bg-primary/[0.06] md:rounded-[2rem]"
             >
-              <div className="px-4 md:px-8 py-4 md:py-5 border-b border-white/10 bg-white/[0.03] flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-primary/15 bg-white/[0.04] px-4 py-4 dark:bg-black/10 md:px-8 md:py-5">
                 <div className="flex flex-wrap items-center gap-2 md:gap-3">
                   <span className="text-[10px] md:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-primary/15 text-primary border border-primary/30">
                     {plan.type}

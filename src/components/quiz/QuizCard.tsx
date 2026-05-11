@@ -4,6 +4,7 @@ import { MdImageNotSupported } from "react-icons/md";
 import { Button } from '@/components/ui/button';
 import { Quiz } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import { useOrganization } from '@/context/OrganizationContext';
 
 interface QuizCardProps {
     quiz: Quiz;
@@ -31,7 +32,15 @@ const QuizCard: React.FC<QuizCardProps> = ({
     canForceUnlock = false,
 }) => {
     const { user } = useAuth();
+    const { currentOrg } = useOrganization();
+    
     const isOwner = user && user.id === quiz.creatorId;
+    const isSameOrganization = Boolean(
+        quiz.organizationId && 
+        currentOrg && 
+        quiz.organizationId === currentOrg.id
+    );
+    const canEdit = isOwner || isSameOrganization;
     const rating = typeof quiz.ratingAverage === 'number' ? quiz.ratingAverage : 0;
 
     const now = new Date();
@@ -97,66 +106,66 @@ const QuizCard: React.FC<QuizCardProps> = ({
                 </div>
 
                 {/* Hover Overlay (Desktop) */}
-                <div className="hidden lg:flex absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center p-2">
-                    <div className="flex flex-col gap-1.5 w-full animate-in zoom-in-95 duration-300">
+                <div className="hidden lg:flex absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center p-1.5">
+                    <div className="flex flex-col gap-1 w-[70%] max-w-full mx-auto animate-in zoom-in-95 duration-300 [&_svg]:size-[8.5px] [&_svg]:mr-0.5">
                         <Button
                             onClick={() => onPlay(quiz.id)}
-                            className="w-full h-8 px-2 rounded-lg bg-primary hover:bg-primary/90 font-black text-[9px] uppercase tracking-tighter"
+                            className="w-full h-[1.4rem] min-h-[1.4rem] px-[0.35rem] rounded-md bg-primary hover:bg-primary/90 font-black text-[7px] uppercase tracking-tighter"
                         >
-                            <Play className="w-3 h-3 mr-1 fill-current" /> CHƠI NGAY
+                            <Play className="fill-current" /> CHƠI NGAY
                         </Button>
 
-                        {(isOwner || (user && onAssign)) && (
-                            <div className="flex flex-row gap-1 w-full">
-                                {isOwner && (
+                        {(canEdit || (user && onAssign)) && (
+                            <div className="flex flex-row gap-0.5 w-full">
+                                {canEdit && (
                                     <>
                                         <Button
                                             variant="secondary"
                                             onClick={() => !isLockedByOther && onEdit?.(quiz.id)}
                                             disabled={isLockedByOther}
-                                            className="flex-1 h-8 px-1 rounded-lg bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[9px] uppercase tracking-tighter disabled:opacity-40 disabled:cursor-not-allowed"
+                                            className="flex-1 h-[1.4rem] min-h-[1.4rem] px-[0.2rem] rounded-md bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-[7px] uppercase tracking-tighter disabled:opacity-40 disabled:cursor-not-allowed"
                                             title={isLockedByOther ? `Đang bị khóa bởi ${quiz.lockedBy?.username}` : 'Chỉnh sửa quiz'}
                                         >
-                                            {isLockedByOther ? <Lock className="w-3 h-3 mr-1" /> : <Pencil className="w-3 h-3 mr-1" />} SỬA
+                                            {isLockedByOther ? <Lock /> : <Pencil />} SỬA
                                         </Button>
                                     </>
                                 )}
-                                {!isOwner && user && onAssign && (
+                                {!canEdit && user && onAssign && (
                                     <Button
                                         variant="secondary"
                                         onClick={() => onAssign?.(quiz.id)}
-                                        className="w-full h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
+                                        className="w-full h-[1.4rem] min-h-[1.4rem] px-[0.2rem] rounded-md bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[7px] uppercase tracking-tighter"
                                     >
-                                        <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
+                                        <SiGoogleclassroom /> GIAO
                                     </Button>
                                 )}
                             </div>
                         )}
-                        {isOwner && onAssign && (
+                        {canEdit && onAssign && (
                             <Button
                                 variant="secondary"
                                 onClick={() => onAssign?.(quiz.id)}
-                                className="w-full h-8 px-1 rounded-lg bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[9px] uppercase tracking-tighter"
+                                className="w-full h-[1.4rem] min-h-[1.4rem] px-[0.2rem] rounded-md bg-indigo-500/80 hover:bg-indigo-600 text-white border border-indigo-400 font-bold text-[7px] uppercase tracking-tighter"
                             >
-                                <SiGoogleclassroom className="w-3 h-3 mr-1" /> GIAO
+                                <SiGoogleclassroom /> GIAO
                             </Button>
                         )}
                         {canForceUnlock && isLockedByOther && onForceUnlock && (
                             <Button
                                 variant="secondary"
                                 onClick={() => onForceUnlock(quiz.id)}
-                                className="w-full h-8 px-1 rounded-lg bg-rose-500/80 hover:bg-rose-600 text-white border border-rose-400 font-bold text-[9px] uppercase tracking-tighter"
+                                className="w-full h-[1.4rem] min-h-[1.4rem] px-[0.2rem] rounded-md bg-rose-500/80 hover:bg-rose-600 text-white border border-rose-400 font-bold text-[7px] uppercase tracking-tighter"
                             >
-                                <Unlock className="w-3 h-3 mr-1" /> FORCE UNLOCK
+                                <Unlock /> FORCE UNLOCK
                             </Button>
                         )}
-                        {!isOwner && onReplicate && user && (
+                        {!canEdit && onReplicate && user && (
                             <Button
                                 variant="secondary"
                                 onClick={() => onReplicate?.(quiz.id)}
-                                className="w-full h-8 px-1 rounded-lg bg-emerald-500/80 hover:bg-emerald-600 text-white border border-emerald-400 font-bold text-[9px] uppercase tracking-tighter"
+                                className="w-full h-[1.4rem] min-h-[1.4rem] px-[0.2rem] rounded-md bg-emerald-500/80 hover:bg-emerald-600 text-white border border-emerald-400 font-bold text-[7px] uppercase tracking-tighter"
                             >
-                                <Copy className="w-3 h-3 mr-1" /> SAO CHÉP
+                                <Copy /> SAO CHÉP
                             </Button>
                         )}
                     </div>
@@ -190,7 +199,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
                         <Play className="w-3 h-3 md:w-3 md:h-3 md:mr-1 shrink-0 fill-current" /> <span className="hidden md:inline font-black text-[10px] uppercase tracking-tight truncate">CHƠI</span>
                     </Button>
 
-                    {isOwner && (
+                    {canEdit && (
                         <Button
                             variant="outline"
                             onClick={() => !isLockedByOther && onEdit?.(quiz.id)}
@@ -220,7 +229,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
                             <Unlock className="w-3 h-3 shrink-0" />
                         </Button>
                     )}
-                    {!isOwner && onReplicate && user && (
+                    {!canEdit && onReplicate && user && (
                         <Button
                             variant="outline"
                             onClick={() => onReplicate?.(quiz.id)}

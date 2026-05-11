@@ -15,6 +15,7 @@ import Classrooms from "./pages/Classrooms";
 import ClassroomDetails from "./pages/ClassroomDetails";
 import HomeworkStart from "./pages/HomeworkStart";
 import JoinMatch from "./pages/JoinMatch";
+import ErrorPage from "./pages/ErrorPage";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import BillingPage from "./pages/BillingPage";
 import BillingSuccess from "./pages/BillingSuccess";
@@ -25,7 +26,6 @@ import NotFound from "./pages/NotFound";
 
 // Admin Imports
 import AdminLayout from "./components/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminQuizzes from "./pages/admin/AdminQuizzes";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -41,6 +41,7 @@ import { ModalProvider } from "./context/ModalContext";
 import GlobalModal from "./components/ui/GlobalModal";
 import WorkspaceSidebar from "./components/WorkspaceSidebar";
 import { createBrowserRouter, RouterProvider, Navigate, useLocation, Outlet } from "react-router-dom";
+import SuperAdminConsole from "./pages/admin/SuperAdminConsole";
 import ScrollToTop from "./components/ScrollToTop";
 import { ReactNode, useState } from "react";
 
@@ -69,7 +70,14 @@ function RootLayout() {
     // Compact navbar padding on quiz routes
     const isQuizRoute = location.pathname.startsWith('/quiz');
     const isAdminRoute = location.pathname.startsWith('/admin');
-    const paddingTopClass = isAdminRoute ? "pt-[64px]" /* if navbar is used, but wait, admin has its own layout? We will show navbar above AdminLayout */ : isNoNavbarRoute ? "" : isQuizRoute ? "pt-[48px]" : "pt-24 lg:pt-32";
+    // React Admin has its own MUI AppBar; showing Quizmon navbar (z-50) on top caused bell/avatar to paint over RA chrome
+    const isReactAdminSuperConsole = location.pathname.startsWith('/admin/super');
+
+    let paddingTopClass = "pt-24 lg:pt-32";
+    if (isReactAdminSuperConsole) paddingTopClass = "";
+    else if (isAdminRoute) paddingTopClass = "pt-[64px]";
+    else if (isNoNavbarRoute) paddingTopClass = "";
+    else if (isQuizRoute) paddingTopClass = "pt-[48px]";
 
     return (
         <div className={`w-full h-full min-h-screen ${paddingTopClass}`}>
@@ -77,7 +85,9 @@ function RootLayout() {
                 <ModalProvider>
                     <OrganizationProvider>
                         <FeatureProvider>
-                            {(!isNoNavbarRoute || isAdminRoute) && <Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />}
+                            {(!isNoNavbarRoute || isAdminRoute) && !isReactAdminSuperConsole && (
+                                <Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />
+                            )}
                             <WorkspaceSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
                             <ScrollToTop />
                             <GlobalModal />
@@ -93,6 +103,7 @@ function RootLayout() {
 const router = createBrowserRouter([
     {
         element: <RootLayout />,
+        errorElement: <ErrorPage />,
         children: [
             { path: "/join", element: <JoinMatch /> },
             { path: "/login", element: <LoginForm /> },
@@ -121,19 +132,25 @@ const router = createBrowserRouter([
             { path: "/profile/settings", element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
             { path: "/library", element: <ProtectedRoute><Library /></ProtectedRoute> },
 
-            // Admin Routes
+            // Admin Routes (React Admin console is full-viewport under /admin/super — no sidebar layout)
             {
                 path: "/admin",
-                element: <AdminRoute><AdminLayout /></AdminRoute>,
+                element: <AdminRoute><Outlet /></AdminRoute>,
                 children: [
-                    { index: true, element: <AdminDashboard /> },
-                    { path: "quizzes", element: <AdminQuizzes /> },
-                    { path: "reports", element: <AdminReports /> },
-                    { path: "users", element: <AdminUsers /> },
-                    { path: "ai", element: <AdminAI /> },
-                    { path: "promotions", element: <AdminPromotions /> },
-                    { path: "plans", element: <AdminPlans /> },
-                ]
+                    { path: "super/*", element: <SuperAdminConsole /> },
+                    {
+                        element: <AdminLayout />,
+                        children: [
+                            { index: true, element: <Navigate to="/admin/quizzes" replace /> },
+                            { path: "quizzes", element: <AdminQuizzes /> },
+                            { path: "reports", element: <AdminReports /> },
+                            { path: "users", element: <AdminUsers /> },
+                            { path: "ai", element: <AdminAI /> },
+                            { path: "promotions", element: <AdminPromotions /> },
+                            { path: "plans", element: <AdminPlans /> },
+                        ],
+                    },
+                ],
             },
             { path: "*", element: <NotFound /> }
         ]

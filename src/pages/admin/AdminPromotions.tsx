@@ -17,6 +17,7 @@ import {
   Check,
 } from "lucide-react";
 import { useModal } from "@/context/ModalContext";
+import { AdminPageHeader } from "@/components/admin/adminQuizmonChrome";
 
 interface Plan {
   id: number;
@@ -180,26 +181,22 @@ export default function AdminPromotions() {
     );
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white flex items-center gap-3 tracking-tight">
-            Quản lý Khuyến Mãi
-          </h1>
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium mt-1 md:mt-2">
-            Tạo và quản lý các chiến dịch quảng bá.
-          </p>
-        </div>
-        <Button
-          id="create-promotion-btn"
-          onClick={openCreate}
-          className="rounded-xl md:rounded-2xl font-black px-6 md:px-8 py-3 md:py-4 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all flex items-center gap-2 h-auto text-sm md:text-base w-full md:w-auto justify-center"
-        >
-          <Plus className="w-5 h-5" />
-          Tạo khuyến mãi
-        </Button>
-      </div>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6 md:space-y-8">
+      <AdminPageHeader
+        title="Quản lý khuyến mãi"
+        subtitle="Chỉnh khoảng giá hiển thị, badge và thời hạn trên storefront."
+        actions={
+          <Button
+            id="create-promotion-btn"
+            type="button"
+            onClick={openCreate}
+            className="h-12 rounded-2xl border-2 border-primary/25 bg-primary px-6 font-black text-primary-foreground shadow-lg shadow-primary/25 transition hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.99] md:h-14 md:px-8"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Tạo khuyến mãi
+          </Button>
+        }
+      />
 
       {/* Form Modal */}
       {showForm && (
