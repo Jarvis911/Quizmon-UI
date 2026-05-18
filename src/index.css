@@ -425,4 +425,28 @@
   animation: floating-fall linear infinite;
 }
 
+/* React Admin super console: scroll + MUI inputs inside Tailwind preflight */
+.super-admin-console {
+  height: 100%;
+}
+
+.super-admin-console .layout {
+  height: 100%;
+  min-height: 0 !important;
+}
+
+.super-admin-console .MuiInputBase-root,
+.super-admin-console .MuiOutlinedInput-root {
+  background-color: transparent;
+}
+
+.super-admin-console .MuiInputBase-input,
+.super-admin-console .MuiOutlinedInput-input {
+  pointer-events: auto;
+}
+
+.super-admin-console .MuiOutlinedInput-notchedOutline {
+  border-width: 1px;
+}
+
 

@@ -310,12 +310,13 @@ export interface ImagePickerProps {
 // ========================
 
 export interface RecentMatch {
-    id: number | string;
+    /** Internal match id (API field `matchId`). */
+    matchId: number;
     quizId: number | string;
     quizName: string;
     quizThumbnail?: string;
     score: number;
-    rank: number;
+    rank: number | null;
     createdAt: string;
 }
 

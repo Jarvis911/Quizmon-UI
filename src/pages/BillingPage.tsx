@@ -122,7 +122,17 @@ function getPeriodProgress(startDate: string, endDate: string): number {
 }
 
 export default function BillingPage() {
-  const { currentOrg, organizations, switchOrganization } = useOrganization();
+  const {
+    currentOrg,
+    organizations,
+    switchOrganization,
+    userHasAnyTeamOrg,
+    refreshOrganizations,
+    currentOrgHasTeamCollaboration,
+  } = useOrganization();
+
+  /** Show org switcher / team billing copy — multiple workspaces or School/Enterprise. */
+  const showBillingTeamUi = currentOrgHasTeamCollaboration || organizations.length > 1;
   const { showAlert } = useModal();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [usage, setUsage] = useState<Usage[]>([]);
@@ -198,7 +208,13 @@ export default function BillingPage() {
 
   const handleFreeCheckout = async (planId: number, promotionId: number) => {
     if (!currentOrg) {
-      showAlert({ title: "Yêu cầu", message: "Vui lòng chọn một tổ chức trước.", type: "warning" });
+      showAlert({
+        title: "Yêu cầu",
+        message: showBillingTeamUi
+          ? "Vui lòng chọn một tổ chức trước."
+          : "Vui lòng chọn một không gian làm việc trước.",
+        type: "warning",
+      });
       return;
     }
     setFreeCheckoutLoading(planId);
@@ -318,10 +334,11 @@ export default function BillingPage() {
 
       {/* Billing Guide Section */}
       {showGuide && (
+        showBillingTeamUi ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="bg-primary/5 border-2 border-primary/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden">
             <h3 className="text-lg md:text-xl font-black text-primary mb-2 md:mb-4 flex items-center gap-2">
-              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-5 h-5 md:w-6 md:h-6 object-contain" /> Nâng cấp theo Tổ chức
+              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="" className="w-5 h-5 md:w-6 md:h-6 object-contain" /> Nâng cấp theo Tổ chức
             </h3>
             <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed">
               Gói dịch vụ được áp dụng cho <strong className="font-black text-foreground">Tổ chức đang hoạt động</strong>. Hãy đảm bảo bạn đã chọn đúng tổ chức trước khi thanh toán.
@@ -344,14 +361,35 @@ export default function BillingPage() {
             </p>
           </div>
         </div>
+        ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-primary/5 border-2 border-primary/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden">
+            <h3 className="text-lg md:text-xl font-black text-primary mb-2 md:mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 md:w-6 md:h-6" /> Gói & không gian làm việc
+            </h3>
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed">
+              Gói dịch vụ được áp dụng cho <strong className="font-black text-foreground">không gian làm việc hiện tại</strong> của bạn. Kiểm tra tên không gian ở trên trước khi thanh toán.
+            </p>
+          </div>
+          <div className="bg-emerald-500/5 border-2 border-emerald-500/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden">
+            <h3 className="text-lg md:text-xl font-black text-emerald-500 mb-2 md:mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 md:w-6 md:h-6" /> Sức mạnh AI Pro
+            </h3>
+            <p className="text-xs md:text-sm font-medium text-muted-foreground leading-relaxed">
+              Mở khóa <strong className="font-black text-foreground">không giới hạn</strong> lượt tạo Quiz bằng AI và tăng số lượng học sinh tham gia trận đấu lên đến hàng nghìn người.
+            </p>
+          </div>
+        </div>
+        )
       )}
 
-      {/* Organization Selector */}
+      {/* Workspace / org context — team switcher only for School/Enterprise or multiple workspaces */}
       <section className="flex justify-center">
         {currentOrg ? (
+          showBillingTeamUi ? (
           <div className="w-full max-w-2xl bg-primary/5 backdrop-blur-md border-2 border-primary/20 rounded-3xl p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 md:gap-6 shadow-xl shadow-primary/5">
             <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
-              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-6 h-6 md:w-10 md:h-10 object-contain drop-shadow-md" />
+              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="" className="w-6 h-6 md:w-10 md:h-10 object-contain drop-shadow-md" />
             </div>
             <div className="flex-1 text-center md:text-left space-y-1">
               <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary/60">Tổ chức đang chọn</p>
@@ -378,25 +416,44 @@ export default function BillingPage() {
                     </DropdownMenuItem>
                   ))}
                   <div className="h-px bg-white/5 my-2" />
+                  {userHasAnyTeamOrg && (
                   <DropdownMenuItem
                     onClick={() => setIsCreateModalOpen(true)}
                     className="rounded-xl font-bold text-primary cursor-pointer"
                   >
                     Tạo tổ chức mới
                   </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
+          ) : (
+          <div className="w-full max-w-2xl bg-card/40 backdrop-blur-md border-2 border-white/10 rounded-3xl p-5 md:p-6 flex flex-col md:flex-row items-center gap-4 md:gap-5 shadow-inner">
+            <div className="flex-1 text-center md:text-left space-y-1 w-full">
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">
+                Không gian làm việc
+              </p>
+              <h3 className="text-xl md:text-2xl font-black text-foreground">{currentOrg.name}</h3>
+              <p className="text-xs md:text-sm font-bold text-muted-foreground leading-relaxed">
+                Gói và thanh toán trên trang này áp dụng cho không gian của bạn.
+              </p>
+            </div>
+          </div>
+          )
         ) : (
           <div className="w-full max-w-2xl bg-amber-500/10 backdrop-blur-md border-2 border-amber-500/20 rounded-3xl p-6 md:p-8 flex flex-col items-center text-center gap-4 md:gap-6 shadow-xl shadow-amber-500/5">
             <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
               <AlertCircle className="text-amber-500 w-6 h-6 md:w-8 md:h-8" />
             </div>
             <div className="space-y-1 md:space-y-2">
-              <h3 className="text-xl md:text-2xl font-black text-foreground">Chưa chọn tổ chức</h3>
+              <h3 className="text-xl md:text-2xl font-black text-foreground">
+                {showBillingTeamUi ? "Chưa chọn tổ chức" : "Chưa chọn không gian làm việc"}
+              </h3>
               <p className="text-muted-foreground font-bold text-xs md:text-sm">
-                Bạn cần phải tạo hoặc chọn một tổ chức để có thể đăng ký các gói dịch vụ.
+                {showBillingTeamUi
+                  ? "Bạn cần chọn một tổ chức để đăng ký hoặc nâng cấp gói."
+                  : "Hệ thống sẽ tạo không gian cá nhân tự động. Chọn không gian bên dưới hoặc tải lại để đồng bộ."}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full sm:w-auto">
@@ -404,7 +461,7 @@ export default function BillingPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="rounded-xl md:rounded-2xl font-black px-6 py-4 md:px-8 md:py-6 bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 text-xs md:text-sm">
-                      Chọn tổ chức sẵn có
+                      {showBillingTeamUi ? "Chọn tổ chức sẵn có" : "Chọn không gian"}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64 bg-card/95 backdrop-blur-xl border-white/10 rounded-2xl p-2">
@@ -420,6 +477,7 @@ export default function BillingPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : null}
+              {userHasAnyTeamOrg ? (
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
                 variant={organizations.length > 0 ? "outline" : "default"}
@@ -430,6 +488,15 @@ export default function BillingPage() {
               >
                 Tạo tổ chức mới <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
               </Button>
+              ) : (
+              <Button
+                onClick={() => void refreshOrganizations()}
+                variant="outline"
+                className="rounded-xl md:rounded-2xl font-black px-6 py-4 md:px-8 md:py-6 text-xs md:text-sm border-amber-500/50 text-amber-600"
+              >
+                Tải lại không gian làm việc
+              </Button>
+              )}
             </div>
           </div>
         )}
@@ -795,16 +862,33 @@ export default function BillingPage() {
                   disabled={activeSub?.planId === plan.id || freeCheckoutLoading !== null}
                   onClick={() => {
                     if (!currentOrg) {
-                      organizations.length > 0
-                        ? showAlert({ title: "Yêu cầu", message: "Vui lòng chọn một tổ chức trước.", type: "warning" })
-                        : setIsCreateModalOpen(true);
+                      if (organizations.length > 0) {
+                        showAlert({
+                          title: "Yêu cầu",
+                          message: showBillingTeamUi
+                            ? "Vui lòng chọn một tổ chức trước."
+                            : "Vui lòng chọn một không gian làm việc trước.",
+                          type: "warning",
+                        });
+                      } else {
+                        void refreshOrganizations();
+                        showAlert({
+                          title: "Đang tải",
+                          message: "Hệ thống đang tạo không gian làm việc cá nhân. Vui lòng thử lại sau vài giây.",
+                          type: "info",
+                        });
+                      }
                       return;
                     }
                     handleFreeCheckout(plan.id, promo!.id);
                   }}
                 >
                   {freeCheckoutLoading === plan.id && <Loader2 className="animate-spin mr-2 w-4 h-4 md:w-5 md:h-5" />}
-                  {!currentOrg ? "Chọn tổ chức" : activeSub?.planId === plan.id ? "Đang dùng" : "Nhận miễn phí!"}
+                  {!currentOrg
+                    ? showBillingTeamUi
+                      ? "Chọn tổ chức"
+                      : "Chọn không gian"
+                    : activeSub?.planId === plan.id ? "Đang dùng" : "Nhận miễn phí!"}
                 </Button>
               ) : (
                 <Button
@@ -813,9 +897,22 @@ export default function BillingPage() {
                   disabled={(activeSub?.planId === plan.id && subStatus === "ACTIVE") || checkoutLoading !== null}
                   onClick={() => {
                     if (!currentOrg) {
-                      organizations.length > 0
-                        ? showAlert({ title: "Yêu cầu", message: "Vui lòng chọn một tổ chức trước khi nâng cấp.", type: "warning" })
-                        : setIsCreateModalOpen(true);
+                      if (organizations.length > 0) {
+                        showAlert({
+                          title: "Yêu cầu",
+                          message: showBillingTeamUi
+                            ? "Vui lòng chọn một tổ chức trước khi nâng cấp."
+                            : "Vui lòng chọn một không gian làm việc trước khi nâng cấp.",
+                          type: "warning",
+                        });
+                      } else {
+                        void refreshOrganizations();
+                        showAlert({
+                          title: "Đang tải",
+                          message: "Hệ thống đang tạo không gian làm việc cá nhân. Vui lòng thử lại sau vài giây.",
+                          type: "info",
+                        });
+                      }
                       return;
                     }
                     handleSubscribe(plan.id);
@@ -823,7 +920,9 @@ export default function BillingPage() {
                 >
                   {checkoutLoading === plan.id ? <Loader2 className="animate-spin mr-2 w-4 h-4 md:w-5 md:h-5" /> : null}
                   {!currentOrg
-                    ? "Chọn tổ chức"
+                    ? showBillingTeamUi
+                      ? "Chọn tổ chức"
+                      : "Chọn không gian"
                     : activeSub?.planId === plan.id && subStatus === "ACTIVE"
                       ? "Đang sử dụng"
                       : activeSub?.planId === plan.id && subStatus === "CANCELED"
@@ -898,7 +997,15 @@ export default function BillingPage() {
               <div>
                 <p className="font-black text-foreground mb-1">Lưu ý quan trọng</p>
                 <p className="text-sm font-bold text-muted-foreground leading-relaxed">
-                  Gói dịch vụ áp dụng cho <strong className="text-foreground">toàn bộ tổ chức</strong>, không phải tài khoản cá nhân. Mọi thành viên trong tổ chức đều được hưởng quyền lợi tương ứng. Quản trị viên tổ chức chịu trách nhiệm quản lý đăng ký và thanh toán. Để được hỗ trợ, vui lòng liên hệ qua email hỗ trợ.
+                  {showBillingTeamUi ? (
+                    <>
+                      Gói dịch vụ áp dụng cho <strong className="text-foreground">toàn bộ tổ chức</strong>, không phải tài khoản cá nhân. Mọi thành viên trong tổ chức đều được hưởng quyền lợi tương ứng. Quản trị viên tổ chức chịu trách nhiệm quản lý đăng ký và thanh toán. Để được hỗ trợ, vui lòng liên hệ qua email hỗ trợ.
+                    </>
+                  ) : (
+                    <>
+                      Gói dịch vụ áp dụng cho <strong className="text-foreground">không gian làm việc</strong> bạn đang chọn — giới hạn sử dụng và thanh toán gắn với không gian đó, không phải tách riêng theo mỗi thiết bị. Để được hỗ trợ, vui lòng liên hệ qua email hỗ trợ.
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -977,7 +1084,9 @@ export default function BillingPage() {
         </div>
       )}
 
+      {userHasAnyTeamOrg && (
       <CreateOrgModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      )}
     </div>
   );
 }

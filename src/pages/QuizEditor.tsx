@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Trash2, Lock } from "lucide-react";
+import { Plus, Settings, Trash2, Lock, ListTree, ChevronDown, ChevronUp } from "lucide-react";
 import { MdImageNotSupported } from "react-icons/md";
 import apiClient from "@/api/client";
 import endpoints from "@/api/api";
@@ -15,6 +15,8 @@ import TypeAnswerQuestionForm from "@/components/question/TypeAnswerQuestionForm
 import LocationQuestionForm from "@/components/question/LocationQuestionForm";
 import SelectQuestionType from "@/components/quiz/SelectQuestionType";
 import QuizSettingsModal from "@/components/quiz/QuizSettingsModal";
+import QuizHierarchyPanel from "@/components/quiz/QuizHierarchyPanel";
+import { cn } from "@/lib/utils";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 interface QuestionMedia {
@@ -50,6 +52,8 @@ const QuizEditor = () => {
     const [loading, setLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [isOrgQuiz, setIsOrgQuiz] = useState(false);
+    const [mobileHierarchyOpen, setMobileHierarchyOpen] = useState(false);
+    const [desktopHierarchyOpen, setDesktopHierarchyOpen] = useState(true);
     const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const checkedOutRef = useRef(false);
 
@@ -256,19 +260,86 @@ const QuizEditor = () => {
         }
     };
 
+    const selectQuestionFromHierarchy = (index: number) => {
+        setActiveIndex(index);
+        setCreatingType(null);
+        setMobileHierarchyOpen(false);
+    };
+
     return (
         <div className="flex justify-center flex-col min-h-screen pb-24">
             {/* No Header */}
 
             <main className="p-6 flex-1 flex justify-center">
-                <div className="w-full max-w-5xl">
-                    {creatingType !== "SELECT" && renderActiveQuestion()}
-                    {creatingType === "SELECT" && (
-                        <SelectQuestionType
-                            onSelect={(t) => addQuestion(t)}
-                            onClose={() => setCreatingType(null)}
-                        />
-                    )}
+                <div className="w-full max-w-7xl flex flex-col lg:flex-row gap-6 items-start">
+                    <div
+                        className={cn(
+                            "hidden lg:flex shrink-0 sticky top-6 z-10 self-start flex-col",
+                            desktopHierarchyOpen ? "w-80" : "w-auto"
+                        )}
+                    >
+                        {desktopHierarchyOpen ? (
+                            <QuizHierarchyPanel
+                                questions={questions}
+                                activeIndex={activeIndex}
+                                onSelectQuestion={selectQuestionFromHierarchy}
+                                onClose={() => setDesktopHierarchyOpen(false)}
+                            />
+                        ) : (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-11 w-11 rounded-xl border-white/15 bg-card/60 shadow-lg shrink-0"
+                                onClick={() => setDesktopHierarchyOpen(true)}
+                                aria-label="Mở cấu trúc quiz"
+                                title="Mở cấu trúc quiz"
+                            >
+                                <ListTree className="h-5 w-5 text-primary" aria-hidden />
+                            </Button>
+                        )}
+                    </div>
+
+                    <div className="flex-1 min-w-0 w-full space-y-3">
+                        <div className="lg:hidden">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full justify-between border-white/15 bg-card/40"
+                                onClick={() => setMobileHierarchyOpen((o) => !o)}
+                                aria-expanded={mobileHierarchyOpen}
+                            >
+                                <span className="flex items-center gap-2 font-semibold text-sm">
+                                    <ListTree className="w-4 h-4 text-primary shrink-0" aria-hidden />
+                                    Cấu trúc quiz
+                                </span>
+                                {mobileHierarchyOpen ? (
+                                    <ChevronUp className="w-4 h-4 shrink-0" aria-hidden />
+                                ) : (
+                                    <ChevronDown className="w-4 h-4 shrink-0" aria-hidden />
+                                )}
+                            </Button>
+                            {mobileHierarchyOpen && (
+                                <div className="mt-2">
+                                    <QuizHierarchyPanel
+                                        questions={questions}
+                                        activeIndex={activeIndex}
+                                        onSelectQuestion={selectQuestionFromHierarchy}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="w-full max-w-5xl mx-auto lg:mx-0">
+                            {creatingType !== "SELECT" && renderActiveQuestion()}
+                            {creatingType === "SELECT" && (
+                                <SelectQuestionType
+                                    onSelect={(t) => addQuestion(t)}
+                                    onClose={() => setCreatingType(null)}
+                                />
+                            )}
+                        </div>
+                    </div>
                 </div>
             </main>
 

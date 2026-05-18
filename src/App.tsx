@@ -24,15 +24,6 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Library from "./pages/Library";
 import NotFound from "./pages/NotFound";
 
-// Admin Imports
-import AdminLayout from "./components/admin/AdminLayout";
-import AdminQuizzes from "./pages/admin/AdminQuizzes";
-import AdminReports from "./pages/admin/AdminReports";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminAI from "./pages/admin/AdminAI";
-import AdminPromotions from "./pages/admin/AdminPromotions";
-import AdminPlans from "./pages/admin/AdminPlans";
-
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { OrganizationProvider } from "./context/OrganizationContext";
@@ -69,13 +60,10 @@ function RootLayout() {
 
     // Compact navbar padding on quiz routes
     const isQuizRoute = location.pathname.startsWith('/quiz');
-    const isAdminRoute = location.pathname.startsWith('/admin');
-    // React Admin has its own MUI AppBar; showing Quizmon navbar (z-50) on top caused bell/avatar to paint over RA chrome
-    const isReactAdminSuperConsole = location.pathname.startsWith('/admin/super');
+    const isAdminConsole = location.pathname.startsWith("/admin");
 
     let paddingTopClass = "pt-24 lg:pt-32";
-    if (isReactAdminSuperConsole) paddingTopClass = "";
-    else if (isAdminRoute) paddingTopClass = "pt-[64px]";
+    if (isAdminConsole) paddingTopClass = "";
     else if (isNoNavbarRoute) paddingTopClass = "";
     else if (isQuizRoute) paddingTopClass = "pt-[48px]";
 
@@ -85,10 +73,12 @@ function RootLayout() {
                 <ModalProvider>
                     <OrganizationProvider>
                         <FeatureProvider>
-                            {(!isNoNavbarRoute || isAdminRoute) && !isReactAdminSuperConsole && (
+                            {!isNoNavbarRoute && !isAdminConsole && (
                                 <Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />
                             )}
-                            <WorkspaceSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+                            {!isAdminConsole && (
+                                <WorkspaceSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+                            )}
                             <ScrollToTop />
                             <GlobalModal />
                             <Outlet />
@@ -132,25 +122,14 @@ const router = createBrowserRouter([
             { path: "/profile/settings", element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
             { path: "/library", element: <ProtectedRoute><Library /></ProtectedRoute> },
 
-            // Admin Routes (React Admin console is full-viewport under /admin/super — no sidebar layout)
+            // Admin console (React Admin, full viewport)
             {
-                path: "/admin",
-                element: <AdminRoute><Outlet /></AdminRoute>,
-                children: [
-                    { path: "super/*", element: <SuperAdminConsole /> },
-                    {
-                        element: <AdminLayout />,
-                        children: [
-                            { index: true, element: <Navigate to="/admin/quizzes" replace /> },
-                            { path: "quizzes", element: <AdminQuizzes /> },
-                            { path: "reports", element: <AdminReports /> },
-                            { path: "users", element: <AdminUsers /> },
-                            { path: "ai", element: <AdminAI /> },
-                            { path: "promotions", element: <AdminPromotions /> },
-                            { path: "plans", element: <AdminPlans /> },
-                        ],
-                    },
-                ],
+                path: "/admin/*",
+                element: (
+                    <AdminRoute>
+                        <SuperAdminConsole />
+                    </AdminRoute>
+                ),
             },
             { path: "*", element: <NotFound /> }
         ]

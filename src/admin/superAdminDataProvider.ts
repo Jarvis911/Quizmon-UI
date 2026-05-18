@@ -1,39 +1,10 @@
 import type { DataProvider, GetListParams, GetListResult, Identifier } from "react-admin";
-import { BASE_URL } from "@/api/client";
+import { superAdminHttpJson } from "@/admin/superAdminHttp";
 
-const apiHostNeedsNgrokBypass =
-  /ngrok/i.test(BASE_URL) || /ngrok-free\.app/i.test(BASE_URL);
-
-async function httpJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = localStorage.getItem("token");
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    ...(init?.body ? { "Content-Type": "application/json" } : {}),
-    ...(token ? { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } : {}),
-    ...(apiHostNeedsNgrokBypass ? { "ngrok-skip-browser-warning": "true" } : {}),
-  };
-
-  const res = await fetch(`${BASE_URL}${path}`, { ...init, headers: { ...headers, ...(init?.headers as Record<string, string>) } });
-
-  if (!res.ok) {
-    let body: unknown;
-    try {
-      body = await res.json();
-    } catch {
-      body = { message: res.statusText };
-    }
-    const message =
-      typeof body === "object" && body !== null && "message" in body
-        ? String((body as { message: unknown }).message)
-        : res.statusText;
-    const err = new Error(message) as Error & { status: number; body: unknown };
-    err.status = res.status;
-    err.body = body;
-    throw err;
-  }
-
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+function orgIdParam(f: Record<string, string | boolean | undefined>): string | undefined {
+  const v = f.organizationId;
+  if (v === undefined || v === null || v === "") return undefined;
+  return String(v);
 }
 
 function buildQuery(params: Record<string, string | undefined>): string {
@@ -71,7 +42,7 @@ async function getListGeneric<T extends { id: number }>(
   query: Record<string, string | undefined>,
   params: GetListParams
 ): Promise<GetListResult<T>> {
-  const rows = await httpJson<T[]>(`${fetchPath}${buildQuery(query)}`);
+  const rows = await superAdminHttpJson<T[]>(`${fetchPath}${buildQuery(query)}`);
   const sorted = sortRows(rows as Record<string, unknown>[], params.sort?.field, params.sort?.order) as T[];
   const { page = 1, perPage = 25 } = params.pagination || {};
   return paginateRows(sorted, page, perPage);
@@ -88,16 +59,48 @@ export const superAdminDataProvider: DataProvider = {
   getList: (resource, params) => {
     const f = (params.filter || {}) as Record<string, string | boolean | undefined>;
 
+    const org = orgIdParam(f);
+
     switch (resource) {
+      case "organizations":
+        return getListGeneric("/admin/organizations", { search: f.search as string | undefined }, params);
+      case "classrooms":
+        return getListGeneric("/admin/classrooms", { search: f.search as string | undefined, organizationId: org }, params);
+      case "matches":
+        return getListGeneric(
+          "/admin/matches",
+          { search: f.search as string | undefined, organizationId: org, mode: "REALTIME" },
+          params
+        );
+      case "homework":
+        return getListGeneric("/admin/homework", { search: f.search as string | undefined, organizationId: org }, params);
+      case "subscriptions":
+        return getListGeneric("/admin/subscriptions", { organizationId: org, status: f.status as string | undefined }, params);
+      case "payments":
+        return getListGeneric("/admin/payments", { organizationId: org, status: f.status as string | undefined }, params);
+      case "usage-metrics":
+        return getListGeneric("/admin/usage-metrics", { organizationId: org, key: f.key as string | undefined }, params);
       case "users": {
         const raw = f.isAdmin;
         let isAdminParam: string | undefined;
         if (raw === true || raw === "true") isAdminParam = "true";
         else if (raw === false || raw === "false") isAdminParam = "false";
-        return getListGeneric("/admin/users", { search: f.search as string | undefined, isAdmin: isAdminParam }, params);
+        return getListGeneric(
+          "/admin/users",
+          { search: f.search as string | undefined, isAdmin: isAdminParam, organizationId: org },
+          params
+        );
       }
       case "quizzes":
-        return getListGeneric("/admin/quizzes", { search: f.search as string | undefined, categoryId: f.categoryId != null ? String(f.categoryId) : undefined }, params);
+        return getListGeneric(
+          "/admin/quizzes",
+          {
+            search: f.search as string | undefined,
+            categoryId: f.categoryId != null ? String(f.categoryId) : undefined,
+            organizationId: org,
+          },
+          params
+        );
       case "reports":
         return getListGeneric("/admin/reports", { status: f.status as string | undefined, reportType: f.reportType as string | undefined }, params);
       case "promotions":
@@ -105,7 +108,17 @@ export const superAdminDataProvider: DataProvider = {
       case "plans":
         return getListGeneric("/admin/plans", {}, params);
       case "ai-jobs":
-        return getListGeneric("/admin/ai-jobs", { status: f.status as string | undefined, userId: f.userId != null ? String(f.userId) : undefined }, params);
+        return getListGeneric(
+          "/admin/ai-jobs",
+          {
+            status: f.status as string | undefined,
+            userId: f.userId != null ? String(f.userId) : undefined,
+            organizationId: org,
+          },
+          params
+        );
+      case "ai-config":
+        return getListGeneric("/admin/ai-config", {}, params);
       default:
         return Promise.reject(new Error(`Unknown resource: ${resource}`));
     }
@@ -135,6 +148,18 @@ export const superAdminDataProvider: DataProvider = {
   getManyReference: () => Promise.reject(new Error("Not supported")),
 
   create: async (resource, params) => {
+    if (resource === "ai-config") {
+      const d = params.data as Record<string, unknown>;
+      const created = await superAdminHttpJson<Record<string, unknown>>("/admin/ai-config", {
+        method: "PUT",
+        body: JSON.stringify({
+          featureName: d.featureName,
+          modelName: d.modelName ?? "gemini-2.5-flash",
+          isActive: d.isActive ?? true,
+        }),
+      });
+      return { data: created };
+    }
     if (resource !== "promotions") return Promise.reject(new Error("Create not supported"));
     const d = params.data as Record<string, unknown>;
     const body = {
@@ -149,7 +174,7 @@ export const superAdminDataProvider: DataProvider = {
       bannerColor: d.bannerColor,
       badgeText: d.badgeText,
     };
-    const created = await httpJson<Record<string, unknown>>("/admin/promotions", {
+    const created = await superAdminHttpJson<Record<string, unknown>>("/admin/promotions", {
       method: "POST",
       body: JSON.stringify(body),
     });
@@ -160,7 +185,7 @@ export const superAdminDataProvider: DataProvider = {
     const id = Number(params.id);
     if (resource === "reports") {
       const status = (params.data as { status?: string }).status;
-      const updated = await httpJson<Record<string, unknown>>(`/admin/reports/${id}/resolve`, {
+      const updated = await superAdminHttpJson<Record<string, unknown>>(`/admin/reports/${id}/resolve`, {
         method: "PUT",
         body: JSON.stringify({ status }),
       });
@@ -175,7 +200,7 @@ export const superAdminDataProvider: DataProvider = {
         priceYearly: d.priceYearly != null ? Number(d.priceYearly) : undefined,
         isActive: d.isActive,
       };
-      const updated = await httpJson<Record<string, unknown>>(`/admin/plans/${id}`, {
+      const updated = await superAdminHttpJson<Record<string, unknown>>(`/admin/plans/${id}`, {
         method: "PUT",
         body: JSON.stringify(body),
       });
@@ -190,9 +215,29 @@ export const superAdminDataProvider: DataProvider = {
       if (d.planId != null) d.planId = Number(d.planId);
       if (d.expiresAt instanceof Date) d.expiresAt = d.expiresAt.toISOString();
       else if (d.expiresAt != null) d.expiresAt = String(d.expiresAt);
-      const updated = await httpJson<Record<string, unknown>>(`/admin/promotions/${id}`, {
+      const updated = await superAdminHttpJson<Record<string, unknown>>(`/admin/promotions/${id}`, {
         method: "PUT",
         body: JSON.stringify(d),
+      });
+      return { data: updated };
+    }
+    if (resource === "users") {
+      const isAdmin = Boolean((params.data as { isAdmin?: boolean }).isAdmin);
+      const updated = await superAdminHttpJson<Record<string, unknown>>(`/admin/users/${id}/admin`, {
+        method: "PUT",
+        body: JSON.stringify({ isAdmin }),
+      });
+      return { data: updated };
+    }
+    if (resource === "ai-config") {
+      const d = params.data as Record<string, unknown>;
+      const updated = await superAdminHttpJson<Record<string, unknown>>("/admin/ai-config", {
+        method: "PUT",
+        body: JSON.stringify({
+          featureName: d.featureName,
+          modelName: d.modelName ?? "gemini-2.5-flash",
+          isActive: d.isActive ?? true,
+        }),
       });
       return { data: updated };
     }
@@ -203,11 +248,11 @@ export const superAdminDataProvider: DataProvider = {
 
   delete: async (resource, params) => {
     if (resource === "quizzes") {
-      await httpJson(`/admin/quizzes/${params.id}`, { method: "DELETE" });
+      await superAdminHttpJson(`/admin/quizzes/${params.id}`, { method: "DELETE" });
       return { data: params.previousData };
     }
     if (resource === "promotions") {
-      await httpJson(`/admin/promotions/${params.id}`, { method: "DELETE" });
+      await superAdminHttpJson(`/admin/promotions/${params.id}`, { method: "DELETE" });
       return { data: params.previousData };
     }
     return Promise.reject(new Error("Delete not supported"));

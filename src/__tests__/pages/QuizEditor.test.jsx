@@ -4,10 +4,18 @@ import { BrowserRouter } from "react-router-dom";
 import QuizEditor from "@/pages/QuizEditor";
 import { AuthProvider } from "@/context/AuthContext";
 import { ModalProvider } from "@/context/ModalContext";
-import axios from "axios";
 
-// Mock axios
-const mockedGet = vi.mocked(axios.get);
+const mockGet = vi.fn();
+const mockPost = vi.fn(() => Promise.resolve({ data: {} }));
+
+vi.mock("@/api/client", () => ({
+    BASE_URL: "http://localhost:3000",
+    default: {
+        get: (...args) => mockGet(...args),
+        post: (...args) => mockPost(...args),
+        delete: vi.fn(() => Promise.resolve({ data: {} })),
+    },
+}));
 
 // Mock useParams
 vi.mock("react-router-dom", async () => {
@@ -58,7 +66,8 @@ const mockQuizData = {
 describe("QuizEditor Page", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockedGet.mockResolvedValue({ data: mockQuizData });
+        mockGet.mockResolvedValue({ data: mockQuizData });
+        mockPost.mockImplementation(() => Promise.resolve({ data: {} }));
     });
 
     const renderEditor = () => {

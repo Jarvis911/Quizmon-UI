@@ -15,6 +15,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useModal } from "@/context/ModalContext";
+import { useAuth } from "@/context/AuthContext";
 import { sanitizeError } from "@/lib/utils";
 import Fuse from "fuse.js";
 
@@ -33,7 +34,9 @@ const Results = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const query = searchParams.get("q") || "";
     const categoryId = searchParams.get("categoryId");
+    const isMine = searchParams.get("mine") === "1";
     const navigate = useNavigate();
+    const { token } = useAuth();
     const { showAlert } = useModal();
 
     const [allQuizzes, setAllQuizzes] = useState<Quiz[]>([]);
@@ -46,12 +49,16 @@ const Results = () => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const [catRes, quizRes] = await Promise.all([
-                    apiClient.get(endpoints.category),
-                    apiClient.get(endpoints.explore)
-                ]);
+                const catRes = await apiClient.get(endpoints.category);
                 setCategories(catRes.data);
-                setAllQuizzes(quizRes.data);
+
+                if (isMine && token) {
+                    const myRes = await apiClient.get(endpoints.quizzes);
+                    setAllQuizzes(myRes.data);
+                } else {
+                    const quizRes = await apiClient.get(endpoints.explore);
+                    setAllQuizzes(quizRes.data);
+                }
             } catch (err) {
                 console.error("Results: Failed to fetch data", err);
             } finally {
@@ -59,14 +66,18 @@ const Results = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [isMine, token]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [categoryId, isMine, query]);
 
     // Filtered and Sorted Results
     const filteredResults = useMemo(() => {
         let results = [...allQuizzes];
 
-        // 1. Filter by category
-        if (categoryId) {
+        // 1. Filter by category (not applied when viewing mine — list is already user's quizzes)
+        if (categoryId && !isMine) {
             results = results.filter(q => q.categoryId === parseInt(categoryId));
         }
 
@@ -107,7 +118,7 @@ const Results = () => {
         });
 
         return results;
-    }, [allQuizzes, query, categoryId, sortBy]);
+    }, [allQuizzes, query, categoryId, isMine, sortBy]);
 
     const handlePlayNow = async (quizId: string | number) => {
         try {
@@ -155,6 +166,8 @@ const Results = () => {
                         <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">
                             {query ? (
                                 <>Đang hiển thị kết quả cho "{query}"</>
+                            ) : isMine ? (
+                                <>Quiz của tôi</>
                             ) : categoryId ? (
                                 <>Danh mục: {categories.find(c => c.id === parseInt(categoryId))?.name}</>
                             ) : (
@@ -197,6 +210,14 @@ const Results = () => {
                         <div className="p-20 text-center">
                             <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
                             <p className="text-slate-400 font-bold">Đang tải kết quả...</p>
+                        </div>
+                    ) : isMine && !token ? (
+                        <div className="p-20 text-center bg-slate-50/50 dark:bg-slate-900/50">
+                            <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-2">Đăng nhập để xem quiz của bạn</h2>
+                            <p className="text-slate-400 font-bold mb-6">Bạn cần đăng nhập để xem danh sách quiz đã tạo.</p>
+                            <Button onClick={() => navigate("/login")} className="font-black">
+                                Đăng nhập
+                            </Button>
                         </div>
                     ) : filteredResults.length > 0 ? (
                         filteredResults.map(quiz => (

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
@@ -42,7 +43,8 @@ interface Member {
 }
 
 export default function OrganizationSettings() {
-  const { currentOrg, refreshOrganizations } = useOrganization();
+  const { currentOrg, refreshOrganizations, currentOrgHasTeamCollaboration } = useOrganization();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { showAlert, showConfirm } = useModal();
   const [name, setName] = useState(currentOrg?.name || "");
@@ -55,14 +57,7 @@ export default function OrganizationSettings() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    if (currentOrg) {
-      setName(currentOrg.name);
-      fetchMembers();
-    }
-  }, [currentOrg]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     if (!currentOrg) return;
     setIsLoadingMembers(true);
     try {
@@ -73,7 +68,17 @@ export default function OrganizationSettings() {
     } finally {
       setIsLoadingMembers(false);
     }
-  };
+  }, [currentOrg]);
+
+  useEffect(() => {
+    if (!currentOrg) return;
+    setName(currentOrg.name);
+    if (!currentOrgHasTeamCollaboration) {
+      setMembers([]);
+      return;
+    }
+    void fetchMembers();
+  }, [currentOrg, currentOrgHasTeamCollaboration, fetchMembers]);
 
   const handleUpdateOrg = async () => {
     if (!currentOrg) return;
@@ -127,7 +132,9 @@ export default function OrganizationSettings() {
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await apiClient.get(`${endpoints.organizations}/users/search`, { params: { query } });
+        const res = await apiClient.get(`${endpoints.organizations}/users/search`, {
+          params: { query, organizationId: currentOrg!.id },
+        });
         setSearchResults(res.data);
       } catch (err) {
         console.error("Search failed", err);
@@ -189,6 +196,49 @@ export default function OrganizationSettings() {
   const isAtLeastAdmin = isOwner || isAdmin;
 
   if (!currentOrg) return <div className="p-10 text-center font-bold">Chưa chọn tổ chức nào.</div>;
+
+  if (!currentOrgHasTeamCollaboration) {
+    return (
+      <div className="max-w-3xl mx-auto p-4 md:p-10 space-y-8">
+        <header>
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground flex items-center gap-3 md:gap-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-md" /> Không gian làm việc
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground font-bold mt-2">
+            Gói hiện tại của bạn dùng một không gian cá nhân. Nâng cấp lên <strong className="text-foreground">School</strong> hoặc{" "}
+            <strong className="text-foreground">Enterprise</strong> để mời thành viên, quản lý nhiều tổ chức và thư viện quiz chung.
+          </p>
+        </header>
+
+        <div className="rounded-3xl border-2 border-primary/20 bg-primary/5 p-6 md:p-8 space-y-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="w-8 h-8 text-primary shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <p className="font-black text-lg text-foreground">Tính năng nhóm</p>
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                Quản lý thành viên, tìm người dùng để thêm vào tổ chức, và thư viện quiz dùng chung chỉ khả dụng trên gói School hoặc Enterprise.
+              </p>
+            </div>
+          </div>
+          <Button className="rounded-xl font-black" onClick={() => navigate("/billing")}>
+            Xem gói School & Enterprise
+          </Button>
+        </div>
+
+        <section className="bg-card/40 backdrop-blur-xl border-2 border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-xl space-y-4">
+          <h2 className="text-lg md:text-xl font-black">Đổi tên không gian</h2>
+          <p className="text-xs font-bold text-muted-foreground">Bạn vẫn có thể đặt tên hiển thị cho không gian cá nhân của mình.</p>
+          <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" />
+          <Button onClick={() => void handleUpdateOrg()} disabled={isUpdating} className="rounded-xl font-black">
+            {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lưu tên"}
+          </Button>
+          {message && (
+            <p className={`text-sm font-bold ${message.type === "success" ? "text-emerald-600" : "text-rose-600"}`}>{message.text}</p>
+          )}
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-10 space-y-6 md:space-y-10">

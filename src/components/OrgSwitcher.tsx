@@ -13,13 +13,24 @@ import { Button } from "./ui/button";
 import { CreateOrgModal } from "./modals/CreateOrgModal";
 
 export default function OrgSwitcher() {
-  const { organizations, currentOrg, switchOrganization, isLoading } = useOrganization();
+  const {
+    organizations,
+    currentOrg,
+    switchOrganization,
+    isLoading,
+    currentOrgHasTeamCollaboration,
+    userHasAnyTeamOrg,
+  } = useOrganization();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (isLoading && !currentOrg) {
     return (
       <div className="h-9 w-32 bg-muted/50 animate-pulse rounded-lg" />
     );
+  }
+
+  if (!currentOrg || (!currentOrgHasTeamCollaboration && organizations.length <= 1)) {
+    return null;
   }
 
   return (
@@ -54,14 +65,18 @@ export default function OrgSwitcher() {
             {currentOrg?.id === org.id && <Check className="w-4 h-4" />}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator className="bg-white/10" />
-        <DropdownMenuItem 
-          className="cursor-pointer font-bold text-primary hover:bg-primary/5"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Tạo tổ chức
-        </DropdownMenuItem>
+        {userHasAnyTeamOrg && (
+          <>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem 
+              className="cursor-pointer font-bold text-primary hover:bg-primary/5"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Tạo tổ chức
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
 
       <CreateOrgModal 

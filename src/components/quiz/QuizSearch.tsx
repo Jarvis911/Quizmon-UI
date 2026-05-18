@@ -1,21 +1,32 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Search, Loader2, X, Play, Edit, User, Bookmark } from "lucide-react";
+import { X, Play, Edit, User, Bookmark, ListFilter, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Quiz } from "@/types";
+import { Quiz, Category } from "@/types";
 import Fuse from "fuse.js";
 import { useDebounce, useClickAway } from "react-use";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getIconForCategory, defaultIcons } from "@/lib/categoryIcons";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface QuizSearchProps {
     quizzes: Quiz[];
+    categories?: Category[];
+    isLoggedIn?: boolean;
     onPlay: (quizId: string | number) => void;
     onEdit: (quizId: string | number) => void;
     variant?: "default" | "navbar";
     onExpandChange?: (isExpanded: boolean) => void;
 }
 
-const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChange }: QuizSearchProps) => {
+const QuizSearch = ({ quizzes, categories = [], isLoggedIn = false, onPlay, onEdit, variant = "default", onExpandChange }: QuizSearchProps) => {
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [results, setResults] = useState<Quiz[]>([]);
@@ -24,8 +35,41 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const activeCategoryId = searchParams.get("categoryId");
+    const isMineActive = searchParams.get("mine") === "1";
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
     const isNavbar = variant === "navbar";
+    const activeCategory = categories.find((c) => String(c.id) === activeCategoryId);
+    const showCategoryFilter = isNavbar && (categories.length > 0 || isLoggedIn);
+    const filterLabel = isMineActive
+        ? "Quiz của tôi"
+        : activeCategory?.name;
+    const hasActiveFilter = Boolean(filterLabel);
+
+    const handleFilterSelect = (filter: "all" | "mine" | { categoryId: number }) => {
+        setIsOpen(false);
+        setIsFilterMenuOpen(false);
+        setIsExpanded(true);
+        onExpandChange?.(true);
+
+        if (filter === "all") {
+            navigate("/results");
+        } else if (filter === "mine") {
+            navigate("/results?mine=1");
+        } else {
+            navigate(`/results?categoryId=${filter.categoryId}`);
+        }
+    };
+
+    // Keep search expanded while a category/mine filter is active
+    useEffect(() => {
+        if (isNavbar && hasActiveFilter) {
+            setIsExpanded(true);
+            onExpandChange?.(true);
+        }
+    }, [isNavbar, hasActiveFilter, activeCategoryId, isMineActive, onExpandChange]);
 
     useDebounce(
         () => {
@@ -54,8 +98,9 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
     }, [debouncedQuery, fuse]);
 
     useClickAway(containerRef, () => {
+        if (isFilterMenuOpen) return;
         setIsOpen(false);
-        if (isNavbar && !query) {
+        if (isNavbar && !query && !hasActiveFilter) {
             setIsExpanded(false);
             onExpandChange?.(false);
         }
@@ -66,7 +111,7 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
         setQuery("");
         setResults([]);
         setIsOpen(false);
-        if (isNavbar) {
+        if (isNavbar && !hasActiveFilter) {
             setIsExpanded(false);
             onExpandChange?.(false);
         }
@@ -80,25 +125,36 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
         }
     };
 
+    const isSearchCollapsed = isNavbar && !isExpanded && !hasActiveFilter;
+
     return (
         <div ref={containerRef} className={`relative flex items-center transition-all duration-300 ease-in-out ${isNavbar
-                ? isExpanded ? "w-full md:w-[400px]" : "w-10"
+                ? isExpanded || hasActiveFilter ? "w-full md:w-[400px]" : "w-10"
                 : "w-full max-w-2xl"
             } group`}>
             {/* Search Input Container */}
             <div
                 className={`relative w-full flex items-center overflow-hidden transition-all duration-300 ${isNavbar ? "rounded-full" : "rounded-2xl"
-                    } ${isNavbar && !isExpanded ? "cursor-pointer" : ""}`}
+                    } ${isNavbar && !isExpanded && !hasActiveFilter ? "cursor-pointer" : ""}`}
                 onClick={handleToggleExpand}
             >
-                <div className={`absolute left-0 w-10 h-10 flex items-center justify-center text-muted-foreground group-focus-within:text-primary transition-colors ${isNavbar && !isExpanded ? "hover:bg-white/10 rounded-full" : "pl-1"
-                    }`}>
-                    <img 
-                        src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png" 
-                        alt="Search" 
-                        className="w-5 h-5 object-contain" 
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleExpand();
+                    }}
+                    className={`absolute left-0 z-10 w-10 h-10 flex items-center justify-center text-muted-foreground transition-colors ${isSearchCollapsed ? "hover:bg-white/10 rounded-full cursor-pointer" : "pl-1 pointer-events-none"
+                    }`}
+                    aria-label="Mở tìm kiếm"
+                    tabIndex={isSearchCollapsed ? 0 : -1}
+                >
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/11552/11552108.png"
+                        alt=""
+                        className="w-5 h-5 object-contain"
                     />
-                </div>
+                </button>
                 <Input
                     ref={inputRef}
                     type="text"
@@ -114,24 +170,114 @@ const QuizSearch = ({ quizzes, onPlay, onEdit, variant = "default", onExpandChan
                             navigate(`/results?q=${encodeURIComponent(query.trim())}`);
                         }
                     }}
-                    placeholder={isNavbar ? "Tìm kiếm..." : "Tìm kiếm Quiz (Ví dụ: Toán học, Lịch sử...)"}
-                    className={`transition-all duration-300 bg-card border-2 border-white/10 shadow-xl focus-visible:ring-0 focus:border-primary font-bold placeholder:text-muted-foreground placeholder:font-normal ${isNavbar
-                            ? `h-10 pl-10 rounded-full ${isExpanded ? "w-full opacity-100 pr-10" : "w-0 opacity-0 border-transparent shadow-none"}`
-                            : "w-full pl-12 pr-12 h-14 text-lg rounded-2xl"
+                    placeholder={
+                        isNavbar
+                            ? filterLabel && !query
+                                ? `Đang lọc: ${filterLabel}`
+                                : "Tìm kiếm..."
+                            : "Tìm kiếm Quiz (Ví dụ: Toán học, Lịch sử...)"
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                    tabIndex={isSearchCollapsed ? -1 : 0}
+                    className={`transition-all duration-300 bg-card border-2 shadow-xl focus-visible:ring-0 focus:border-primary font-bold placeholder:text-muted-foreground placeholder:font-normal ${isNavbar
+                            ? `h-10 pl-10 rounded-full border-white/10 ${(isExpanded || hasActiveFilter) ? `w-full opacity-100 pointer-events-auto ${showCategoryFilter ? (query ? "pr-20" : "pr-[4.5rem]") : "pr-10"} ${hasActiveFilter && !query ? "border-primary/40 bg-primary/5" : ""}` : "w-0 opacity-0 border-transparent shadow-none pointer-events-none"}`
+                            : "w-full pl-12 pr-12 h-14 text-lg rounded-2xl border-white/10"
                         }`}
                 />
-                {query && isExpanded && (
+                {isNavbar && (isExpanded || hasActiveFilter) && showCategoryFilter && (
+                    <DropdownMenu onOpenChange={setIsFilterMenuOpen}>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className={`absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-0.5 p-1.5 rounded-full transition-colors max-w-[5.5rem] ${
+                                    filterLabel
+                                        ? "bg-primary/15 text-primary hover:bg-primary/25"
+                                        : "hover:bg-muted text-muted-foreground"
+                                }`}
+                                aria-label="Lọc theo danh mục"
+                            >
+                                <ListFilter className="w-3.5 h-3.5 shrink-0" />
+                                {filterLabel ? (
+                                    <span className="text-[10px] font-bold truncate hidden sm:inline">
+                                        {filterLabel}
+                                    </span>
+                                ) : null}
+                                <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-56 max-h-72 overflow-y-auto rounded-xl border-white/20 bg-background/95 backdrop-blur-xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <DropdownMenuLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                Danh mục
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => handleFilterSelect("all")}
+                                className={`cursor-pointer font-semibold ${!activeCategoryId && !isMineActive ? "bg-primary/10 text-primary" : ""}`}
+                            >
+                                Tất cả danh mục
+                            </DropdownMenuItem>
+                            {isLoggedIn && (
+                                <DropdownMenuItem
+                                    onClick={() => handleFilterSelect("mine")}
+                                    className={`cursor-pointer font-semibold gap-2 ${isMineActive ? "bg-primary/10 text-primary" : ""}`}
+                                >
+                                    <span className="shrink-0 text-muted-foreground">
+                                        {defaultIcons["My Quizzes"]}
+                                    </span>
+                                    <span className="truncate">Quiz của tôi</span>
+                                </DropdownMenuItem>
+                            )}
+                            {categories.length > 0 && <DropdownMenuSeparator />}
+                            {categories.map((cat) => (
+                                <DropdownMenuItem
+                                    key={cat.id}
+                                    onClick={() => handleFilterSelect({ categoryId: cat.id })}
+                                    className={`cursor-pointer font-semibold gap-2 ${
+                                        String(cat.id) === activeCategoryId ? "bg-primary/10 text-primary" : ""
+                                    }`}
+                                >
+                                    <span className="shrink-0 text-muted-foreground">
+                                        {getIconForCategory(cat.name)}
+                                    </span>
+                                    <span className="truncate">{cat.name}</span>
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+                {query && (isExpanded || hasActiveFilter) && (
                     <button
+                        type="button"
                         onClick={handleClear}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
+                        aria-label="Xóa từ khóa tìm kiếm"
                     >
                         <X className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                )}
+                {isNavbar && hasActiveFilter && !query && (
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleFilterSelect("all");
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
+                        aria-label="Xóa bộ lọc danh mục"
+                        title="Xóa bộ lọc"
+                    >
+                        <X className="w-4 h-4 text-primary" />
                     </button>
                 )}
             </div>
 
             {/* Results Dropdown */}
-            {isOpen && isExpanded && (query.trim() || results.length > 0) && (
+            {isOpen && (isExpanded || hasActiveFilter) && (query.trim() || results.length > 0) && (
                 <div className={`
                     ${isNavbar 
                         ? "fixed top-20 left-2 right-2 md:absolute md:top-full md:left-0 md:right-auto md:mt-3 md:w-[400px]" 

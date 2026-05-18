@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useModal } from "@/context/ModalContext";
@@ -206,10 +206,19 @@ const MatchPlay = () => {
     const [musicUrl, setMusicUrl] = useState<string>("/audio/background.mp3");
     const [correctAnswerInfo, setCorrectAnswerInfo] = useState<any>(null);
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
-    const [potentialPoints, setPotentialPoints] = useState(1000);
+    // HOMEWORK: smooth local points/timer ticks (see intervals below).
+    // REALTIME: `timer` is driven between sparse server `timeUpdate`s using an
+    // anchored wall-clock model + requestAnimationFrame (see effect below).
+    const [homeworkPoints, setHomeworkPoints] = useState(1000);
     const [isUserAnswered, setIsUserAnswered] = useState(false);
     const [frozenPoints, setFrozenPoints] = useState<number | null>(null);
     const [isQuestionEnded, setIsQuestionEnded] = useState(false);
+
+    const computeRealtimePoints = useCallback(
+        (t: number, max: number) =>
+            max > 0 ? Math.max(0, Math.min(1000, Math.floor((t / max) * 1000))) : 0,
+        []
+    );
 
     // Local Volume Settings
     const [volume, setVolume] = useState(() => {
@@ -231,8 +240,42 @@ const MatchPlay = () => {
     const [homeworkQuestions, setHomeworkQuestions] = useState<Question[]>([]);
     const [homeworkScore, setHomeworkScore] = useState(0);
 
+    // Single source of truth for the score number on the time bar.
+    // REALTIME: `timer` interpolates from server anchors; resyncs on each
+    //           `timeUpdate`. When the reveal phase starts, snap to frozen points.
+    // HOMEWORK: uses the local smooth-decreasing `homeworkPoints` counter.
+    const potentialPoints =
+        matchMode === "REALTIME"
+            ? (isQuestionEnded && isUserAnswered && frozenPoints !== null
+                ? frozenPoints
+                : computeRealtimePoints(timer, maxTimer))
+            : homeworkPoints;
+
+    // Always keep the latest value reachable from event-handler closures.
+    const potentialPointsRef = useRef(potentialPoints);
+    useEffect(() => {
+        potentialPointsRef.current = potentialPoints;
+    }, [potentialPoints]);
+
     const questionRef = useRef<Question | null>(null);
     const scoresRef = useRef<PlayerScore[]>([]);
+
+    /** REALTIME: authoritative remaining seconds + wall-clock sample when it was valid. */
+    const realtimeAnchorRef = useRef<{ remainingSec: number; wallMs: number } | null>(null);
+    /** REALTIME: frozen remaining while host has paused (matches server freeze). */
+    const realtimePausedRemainRef = useRef<number | null>(null);
+    const realtimeLastEmittedRef = useRef<number | null>(null);
+    const isPausedRef = useRef(false);
+    isPausedRef.current = isPaused;
+
+    const pushRealtimeTimerRef = useRef<(value: number, force?: boolean) => void>(() => {});
+    pushRealtimeTimerRef.current = (value: number, force = false) => {
+        const rounded = Math.max(0, Number(value.toFixed(1)));
+        if (force || realtimeLastEmittedRef.current !== rounded) {
+            realtimeLastEmittedRef.current = rounded;
+            setTimer(rounded);
+        }
+    };
     
     // Keep scoresRef in sync with scores state
     useEffect(() => {
@@ -318,7 +361,7 @@ const MatchPlay = () => {
                 setIsUserAnswered(false);
                 setIsQuestionEnded(false);
                 setFrozenPoints(null);
-                setPotentialPoints(1000);
+                setHomeworkPoints(1000);
                 setFeedback(null);
                 setQuestion(nextQ);
                 setQuestionNumber((prev) => prev + 1);
@@ -355,11 +398,22 @@ const MatchPlay = () => {
     useEffect(() => {
         if (matchMode !== "REALTIME" || !user || !matchId) return;
 
-        const handleNextQuestion = ({ question, timer, isPaused: initialPaused }: { question: Question, timer: number, isPaused?: boolean }) => {
-            setQuestion(question);
-            setTimer(timer);
-            setMaxTimer(timer);
-            setIsPaused(initialPaused || false);
+        const handleNextQuestion = ({
+            question: q,
+            timer: qTimer,
+            isPaused: initialPaused,
+        }: {
+            question: Question;
+            timer: number;
+            isPaused?: boolean;
+        }) => {
+            const pausedNow = initialPaused || false;
+            setQuestion(q);
+            setMaxTimer(qTimer);
+            realtimeAnchorRef.current = { remainingSec: qTimer, wallMs: performance.now() };
+            realtimePausedRemainRef.current = pausedNow ? qTimer : null;
+            pushRealtimeTimerRef.current(qTimer, true);
+            setIsPaused(pausedNow);
             setExplode(false);
             setError(null);
             setFeedback(null); // Clear previous feedback
@@ -367,14 +421,17 @@ const MatchPlay = () => {
             setShowCorrectAnswer(false);
             setIsUserAnswered(false);
             setFrozenPoints(null);
-            setPotentialPoints(1000);
+            setHomeworkPoints(1000);
             setIsQuestionEnded(false);
             setQuestionNumber((prev) => prev + 1);
-            questionRef.current = question;
+            questionRef.current = q;
         };
 
         const handleTimeUpdate = (remainingTime: number) => {
-            setTimer(remainingTime);
+            if (isPausedRef.current) return;
+            realtimePausedRemainRef.current = null;
+            realtimeAnchorRef.current = { remainingSec: remainingTime, wallMs: performance.now() };
+            pushRealtimeTimerRef.current(remainingTime, true);
         };
 
         const handleAnswerResult = ({ userId, isCorrect, questionId, correctAnswer, phase }: { userId: number, isCorrect: boolean, questionId: number, correctAnswer?: any, phase?: "attempt" | "reveal" }) => {
@@ -420,8 +477,24 @@ const MatchPlay = () => {
             setTimeout(() => setNotification(null), 4000);
         };
 
-        const handlePauseStatusUpdated = ({ isPaused }: { isPaused: boolean }) => {
-            setIsPaused(isPaused);
+        const handlePauseStatusUpdated = ({ isPaused: paused }: { isPaused: boolean }) => {
+            if (paused) {
+                const a = realtimeAnchorRef.current;
+                if (a) {
+                    const elapsed = (performance.now() - a.wallMs) / 1000;
+                    const frozen = Math.max(0, Number((a.remainingSec - elapsed).toFixed(1)));
+                    realtimePausedRemainRef.current = frozen;
+                    pushRealtimeTimerRef.current(frozen, true);
+                }
+            } else {
+                const snap = realtimePausedRemainRef.current;
+                if (snap !== null) {
+                    realtimeAnchorRef.current = { remainingSec: snap, wallMs: performance.now() };
+                    realtimePausedRemainRef.current = null;
+                    pushRealtimeTimerRef.current(snap, true);
+                }
+            }
+            setIsPaused(paused);
         };
 
         const handleSettingsUpdated = (settings: { musicUrl?: string }) => {
@@ -431,9 +504,25 @@ const MatchPlay = () => {
         };
 
         const handleGameStarted = (data?: { isPaused?: boolean }) => {
-            if (data?.isPaused !== undefined) {
-                setIsPaused(data.isPaused);
+            if (data?.isPaused === undefined) return;
+            const paused = data.isPaused;
+            if (paused) {
+                const a = realtimeAnchorRef.current;
+                if (a) {
+                    const elapsed = (performance.now() - a.wallMs) / 1000;
+                    const frozen = Math.max(0, Number((a.remainingSec - elapsed).toFixed(1)));
+                    realtimePausedRemainRef.current = frozen;
+                    pushRealtimeTimerRef.current(frozen, true);
+                }
+            } else {
+                const snap = realtimePausedRemainRef.current;
+                if (snap !== null) {
+                    realtimeAnchorRef.current = { remainingSec: snap, wallMs: performance.now() };
+                    realtimePausedRemainRef.current = null;
+                    pushRealtimeTimerRef.current(snap, true);
+                }
             }
+            setIsPaused(paused);
         };
 
         socket.on("nextQuestion", handleNextQuestion);
@@ -465,53 +554,58 @@ const MatchPlay = () => {
         };
     }, [matchId, user?.id, matchMode, navigate]);
 
-    // Smooth potential points countdown logic
+    // REALTIME: smooth countdown between throttled server `timeUpdate`s without a
+    // competing setInterval (anchor + rAF resyncs on each socket sample).
     useEffect(() => {
-        if (gameOver || !question) return;
-        if (isQuestionEnded) return;
-        // In HOMEWORK mode, stop draining points once the user has answered
-        if (matchMode === "HOMEWORK" && isUserAnswered) return;
-        if (matchMode === "REALTIME" && isPaused) return;
+        if (matchMode !== "REALTIME" || gameOver || !question || isQuestionEnded) return;
 
-        // Sync local points with timer logic - snap if drift is significant
-        // HOMEWORK timer decrements by 1 each second (not server-synced), so the snap
-        // would cause a visible jump every second. Skip snap for HOMEWORK mode.
-        if (matchMode === "REALTIME") {
-            const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
-            if (Math.abs(potentialPoints - targetPoints) > 5) {
-                setPotentialPoints(targetPoints);
-            }
-        }
-
-        // Smooth decrement by 1:
-        // total points = 1000. Total time = maxTimer s. 
-        // We want to lose 1 point every (maxTimer * 1000 / 1000) ms = maxTimer ms.
-        const intervalMs = Math.max(10, maxTimer); // Floor at 10ms for safety
-        const interval = setInterval(() => {
-            setPotentialPoints(prev => {
-                if (prev <= 0) {
-                    clearInterval(interval);
-                    return 0;
+        let id = 0;
+        const tick = () => {
+            const push = pushRealtimeTimerRef.current;
+            if (isPausedRef.current) {
+                const snap = realtimePausedRemainRef.current;
+                if (snap !== null) push(snap, false);
+            } else {
+                const a = realtimeAnchorRef.current;
+                if (a) {
+                    const elapsed = (performance.now() - a.wallMs) / 1000;
+                    push(a.remainingSec - elapsed, false);
                 }
-                return prev - 1;
-            });
+            }
+            id = requestAnimationFrame(tick);
+        };
+        id = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(id);
+    }, [matchMode, gameOver, question?.id, isQuestionEnded]);
+
+    // HOMEWORK-only: smooth local points countdown. We can't derive from
+    // `timer` here because the homework timer ticks once per second, which
+    // would look choppy. REALTIME uses the rAF-driven `timer` above.
+    useEffect(() => {
+        if (matchMode !== "HOMEWORK") return;
+        if (gameOver || !question) return;
+        if (isQuestionEnded || isUserAnswered) return;
+
+        const intervalMs = Math.max(10, maxTimer); // ms per 1-point decrement
+        const interval = setInterval(() => {
+            setHomeworkPoints((prev) => (prev <= 0 ? 0 : prev - 1));
         }, intervalMs);
 
         return () => clearInterval(interval);
-    }, [timer, maxTimer, isPaused, gameOver, !!question, matchMode, potentialPoints, isQuestionEnded]);
+    }, [matchMode, maxTimer, gameOver, !!question, isQuestionEnded, isUserAnswered]);
 
-    // When the question is ended/revealed, freeze the number in place
+    // When the question ends in HOMEWORK mode, freeze the local counter at
+    // whatever value should be displayed (user's frozen value if they answered,
+    // else the value derived from the remaining timer).
     useEffect(() => {
+        if (matchMode !== "HOMEWORK") return;
         if (!isQuestionEnded) return;
-        // Prefer freezing to the user's locked-in points if they have answered.
         if (isUserAnswered && frozenPoints !== null) {
-            setPotentialPoints(frozenPoints);
+            setHomeworkPoints(frozenPoints);
             return;
         }
-        // Otherwise freeze to whatever timer-derived points would be at this moment.
-        const targetPoints = maxTimer > 0 ? Math.floor((timer / maxTimer) * 1000) : 0;
-        setPotentialPoints(targetPoints);
-    }, [isQuestionEnded, isUserAnswered, frozenPoints, matchMode, maxTimer, timer]);
+        setHomeworkPoints(computeRealtimePoints(timer, maxTimer));
+    }, [matchMode, isQuestionEnded, isUserAnswered, frozenPoints, maxTimer, timer, computeRealtimePoints]);
 
     // TTS
     useEffect(() => {
@@ -622,8 +716,13 @@ const MatchPlay = () => {
             onResult: triggerFeedback,
             onAnswered: () => {
                 setIsUserAnswered(true);
-                setFrozenPoints((prev) => (prev === null ? potentialPoints : prev));
-                // In HOMEWORK mode, mark the question as ended so the score bar freezes
+                // Capture *exactly* what is on the time bar right now. This is
+                // the same value the server uses to award points (REALTIME) or
+                // the value the API will return (HOMEWORK). Using a ref avoids
+                // stale-closure issues where the rendered `potentialPoints`
+                // could be one render behind.
+                const snapshot = potentialPointsRef.current;
+                setFrozenPoints((prev) => (prev === null ? snapshot : prev));
                 if (matchMode === "HOMEWORK") {
                     setIsQuestionEnded(true);
                 }

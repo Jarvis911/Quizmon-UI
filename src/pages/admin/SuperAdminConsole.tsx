@@ -34,18 +34,46 @@ import ReportIcon from "@mui/icons-material/Report";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import PaymentIcon from "@mui/icons-material/Payment";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
+import TuneIcon from "@mui/icons-material/Tune";
 import { superAdminDataProvider } from "@/admin/superAdminDataProvider";
 import { superAdminAuthProvider } from "@/admin/superAdminAuthProvider";
+import { SuperAdminLayout } from "@/admin/SuperAdminLayout";
+import { SuperAdminPlanEdit } from "@/admin/SuperAdminPlanEdit";
+import { AiFeatureSelect, AiModelSelect } from "@/admin/superAdminAiConfigInputs";
+import { featureLabel } from "@/admin/superAdminAiOptions";
+import { OrganizationToolbarFilter } from "@/admin/superAdminOrgToolbar";
+import {
+  ClassroomList,
+  ClassroomShow,
+  HomeworkList,
+  HomeworkShow,
+  MatchList,
+  MatchShow,
+  OrganizationList,
+  OrganizationShow,
+  PaymentList,
+  PaymentShow,
+  SubscriptionList,
+  SubscriptionShow,
+  UsageMetricList,
+  classroomIcon,
+  homeworkIcon,
+  matchIcon,
+  organizationIcon,
+  paymentIcon,
+  subscriptionIcon,
+  usageMetricIcon,
+} from "@/admin/SuperAdminDataResources";
 
 const requiredMissing = (value: unknown) => (value == null || value === "" ? "Required" : undefined);
 
 const quizFilters = [
-  <SearchInput source="search" alwaysOn placeholder="Title or creator..." />,
-  <TextInput source="categoryId" label="Category ID" />,
+  <SearchInput key="search" source="search" alwaysOn placeholder="Title or creator..." />,
+  <TextInput key="cat" source="categoryId" label="Category ID" />,
 ];
 
 const userFilters = [
-  <SearchInput source="search" alwaysOn placeholder="Username or email..." />,
+  <SearchInput key="search" source="search" alwaysOn placeholder="Username or email..." />,
   <SelectInput
     source="isAdmin"
     label="Staff admin"
@@ -82,7 +110,7 @@ const reportFilters = [
 ];
 
 const aiJobFilters = [
-  <TextInput source="userId" label="User ID" />,
+  <TextInput key="userId" source="userId" label="User ID" />,
   <SelectInput
     source="status"
     choices={[
@@ -98,6 +126,7 @@ const aiJobFilters = [
 
 const QuizListActions = () => (
   <TopToolbar>
+    <OrganizationToolbarFilter />
     <FilterButton />
     <ExportButton />
   </TopToolbar>
@@ -105,6 +134,7 @@ const QuizListActions = () => (
 
 const UserListToolbar = () => (
   <TopToolbar>
+    <OrganizationToolbarFilter />
     <FilterButton />
     <ExportButton />
   </TopToolbar>
@@ -136,6 +166,10 @@ const QuizList = () => (
       <TextField source="id" />
       <TextField source="title" />
       <FunctionField label="Creator" render={(r: { creator?: { username?: string } }) => r.creator?.username ?? "—"} />
+      <FunctionField
+        label="Organization"
+        render={(r: { organization?: { name?: string } }) => r.organization?.name ?? "—"}
+      />
       <BooleanField source="isPublic" />
       <DateField source="createdAt" showTime />
       <ShowButton />
@@ -153,6 +187,12 @@ const QuizShow = () => (
       <FunctionField label="Creator" render={(r: { creator?: { username?: string; email?: string } }) => r.creator?.username ?? "—"} />
       <FunctionField label="Creator email" render={(r: { creator?: { email?: string } }) => r.creator?.email ?? "—"} />
       <TextField source="category.name" label="Category" />
+      <FunctionField
+        label="Organization"
+        render={(r: { organization?: { name?: string; slug?: string } }) =>
+          r.organization ? `${r.organization.name} (${r.organization.slug})` : "—"
+        }
+      />
       <BooleanField source="isPublic" />
       <DateField source="createdAt" showTime />
     </SimpleShowLayout>
@@ -167,9 +207,21 @@ const UserList = () => (
       <TextField source="email" />
       <BooleanField source="isAdmin" label="Staff" />
       <DateField source="createdAt" showTime />
+      <EditButton />
       <ShowButton />
     </Datagrid>
   </List>
+);
+
+const UserEdit = () => (
+  <Edit mutationMode="pessimistic">
+    <SimpleForm>
+      <TextInput source="id" disabled />
+      <TextInput source="username" disabled fullWidth />
+      <TextInput source="email" disabled fullWidth />
+      <BooleanInput source="isAdmin" label="Platform admin" helperText="Grants access to the admin panel and React Admin console" />
+    </SimpleForm>
+  </Edit>
 );
 
 const UserShow = () => (
@@ -319,14 +371,42 @@ const PlanShow = () => (
   </Show>
 );
 
-const PlanEdit = () => (
+const AiConfigListActions = () => (
+  <TopToolbar>
+    <CreateButton />
+    <ExportButton />
+  </TopToolbar>
+);
+
+const AiConfigList = () => (
+  <List actions={<AiConfigListActions />} perPage={25} pagination={<Pagination rowsPerPageOptions={[10, 25, 50]} />}>
+    <Datagrid bulkActionButtons={false}>
+      <TextField source="id" />
+      <FunctionField label="Feature" render={(r: { featureName?: string }) => featureLabel(r.featureName ?? "")} />
+      <TextField source="modelName" label="Model" />
+      <BooleanField source="isActive" label="Active" />
+      <DateField source="updatedAt" showTime label="Updated" />
+      <EditButton />
+    </Datagrid>
+  </List>
+);
+
+const AiConfigCreate = () => (
+  <Create redirect="list">
+    <SimpleForm defaultValues={{ isActive: true, modelName: "gemini-2.5-flash" }}>
+      <AiFeatureSelect />
+      <AiModelSelect />
+      <BooleanInput source="isActive" />
+    </SimpleForm>
+  </Create>
+);
+
+const AiConfigEdit = () => (
   <Edit mutationMode="pessimistic">
     <SimpleForm>
-      <TextInput source="type" disabled fullWidth helperText="Plan type cannot be changed here; feature matrix unchanged from this screen" />
-      <TextInput source="name" validate={[requiredMissing]} fullWidth />
-      <TextInput source="description" fullWidth multiline minRows={2} />
-      <NumberInput source="priceMonthly" />
-      <NumberInput source="priceYearly" />
+      <TextInput source="id" disabled />
+      <AiFeatureSelect disabled helperText="Feature key is fixed after creation" />
+      <AiModelSelect />
       <BooleanInput source="isActive" />
     </SimpleForm>
   </Edit>
@@ -365,16 +445,47 @@ const AiJobShow = () => (
 
 export default function SuperAdminConsole() {
   return (
-    <div className="fixed inset-0 z-30 lg:left-0">
+    <div className="super-admin-console fixed inset-0 z-30 flex flex-col overflow-hidden bg-background">
       <Admin
-        basename="/admin/super"
+        basename="/admin"
         dataProvider={superAdminDataProvider}
         authProvider={superAdminAuthProvider}
+        layout={SuperAdminLayout}
         loginPage={false}
-        title="Quizmon Super Admin"
+        title="Quizmon Admin"
         requireAuth
       >
-        <Resource name="users" icon={PersonIcon} list={UserList} show={UserShow} recordRepresentation="username" />
+        <Resource
+          name="organizations"
+          options={{ label: "Organizations" }}
+          icon={organizationIcon}
+          list={OrganizationList}
+          show={OrganizationShow}
+          recordRepresentation="name"
+        />
+        <Resource
+          name="classrooms"
+          icon={classroomIcon}
+          list={ClassroomList}
+          show={ClassroomShow}
+          recordRepresentation="name"
+        />
+        <Resource name="matches" options={{ label: "Live matches" }} icon={matchIcon} list={MatchList} show={MatchShow} />
+        <Resource name="homework" icon={homeworkIcon} list={HomeworkList} show={HomeworkShow} />
+        <Resource
+          name="subscriptions"
+          icon={subscriptionIcon}
+          list={SubscriptionList}
+          show={SubscriptionShow}
+        />
+        <Resource name="payments" icon={paymentIcon} list={PaymentList} show={PaymentShow} />
+        <Resource
+          name="usage-metrics"
+          options={{ label: "Usage metrics" }}
+          icon={usageMetricIcon}
+          list={UsageMetricList}
+        />
+        <Resource name="users" icon={PersonIcon} list={UserList} edit={UserEdit} show={UserShow} recordRepresentation="username" />
         <Resource name="quizzes" icon={QuizIcon} list={QuizList} show={QuizShow} />
         <Resource name="reports" icon={ReportIcon} list={ReportList} edit={ReportEdit} />
         <Resource
@@ -385,7 +496,16 @@ export default function SuperAdminConsole() {
           create={PromotionCreate}
           edit={PromotionEdit}
         />
-        <Resource name="plans" icon={PaymentIcon} list={PlanList} show={PlanShow} edit={PlanEdit} />
+        <Resource name="plans" icon={PaymentIcon} list={PlanList} show={PlanShow} edit={SuperAdminPlanEdit} />
+        <Resource
+          name="ai-config"
+          options={{ label: "AI models" }}
+          icon={TuneIcon}
+          list={AiConfigList}
+          create={AiConfigCreate}
+          edit={AiConfigEdit}
+          recordRepresentation={(r) => featureLabel(String(r.featureName ?? ""))}
+        />
         <Resource name="ai-jobs" options={{ label: "AI jobs" }} icon={SmartToyIcon} list={AiJobList} show={AiJobShow} />
       </Admin>
     </div>

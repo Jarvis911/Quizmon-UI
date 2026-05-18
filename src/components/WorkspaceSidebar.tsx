@@ -1,4 +1,4 @@
-import { X, Building2, Check, Plus, Settings, Info, Shuffle, ShieldCheck, Users2 } from "lucide-react";
+import { X, Check, Plus, Info, Shuffle, ShieldCheck } from "lucide-react";
 import { useOrganization } from "@/context/OrganizationContext";
 import { Button } from "./ui/button";
 import { CreateOrgModal } from "./modals/CreateOrgModal";
@@ -11,9 +11,20 @@ interface WorkspaceSidebarProps {
 }
 
 export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarProps) {
-  const { organizations, currentOrg, switchOrganization, isLoading } = useOrganization();
+  const {
+    organizations,
+    currentOrg,
+    switchOrganization,
+    isLoading,
+    currentOrgHasTeamCollaboration,
+    userHasAnyTeamOrg,
+  } = useOrganization();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const navigate = useNavigate();
+
+  /** Team UI: multi-workspace or School/Enterprise — otherwise show only mobile nav, no org chrome. */
+  const showTeamWorkspaceChrome =
+    currentOrgHasTeamCollaboration || organizations.length > 1;
 
   return (
     <>
@@ -32,10 +43,16 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
       >
         <div className="p-6 flex items-center justify-between border-b border-white/10 bg-white/5">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/20 rounded-xl">
-              <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-6 h-6 object-contain" />
-            </div>
-            <h2 className="text-xl font-black tracking-tight text-foreground">Không gian</h2>
+            {showTeamWorkspaceChrome ? (
+              <>
+                <div className="p-2 bg-primary/20 rounded-xl">
+                  <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="" className="w-6 h-6 object-contain" />
+                </div>
+                <h2 className="text-xl font-black tracking-tight text-foreground">Không gian</h2>
+              </>
+            ) : (
+              <h2 className="text-xl font-black tracking-tight text-foreground">Menu</h2>
+            )}
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-white/10">
             <X className="w-5 h-5" />
@@ -59,19 +76,21 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
             </Button>
           </div>
 
-          <div className="px-2 mb-4">
-            <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Danh sách tổ chức</p>
-          </div>
+          {showTeamWorkspaceChrome && (
+            <>
+              <div className="px-2 mb-4">
+                <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Danh sách tổ chức</p>
+              </div>
 
-          {isLoading && !currentOrg && (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-14 w-full bg-white/5 animate-pulse rounded-2xl" />
-              ))}
-            </div>
-          )}
+              {isLoading && !currentOrg && (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-14 w-full bg-white/5 animate-pulse rounded-2xl" />
+                  ))}
+                </div>
+              )}
 
-          {organizations.map((org) => {
+              {organizations.map((org) => {
             const isActive = currentOrg?.id === org.id;
             return (
               <button
@@ -95,8 +114,11 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
                 {isActive && <Check className="w-4 h-4 shrink-0" />}
               </button>
             );
-          })}
+              })}
+            </>
+          )}
 
+          {showTeamWorkspaceChrome && (
           <div className="mt-8 px-2 space-y-4">
             <div className="bg-primary/5 border border-primary/10 rounded-4xl p-5 relative overflow-hidden group">
               <h3 className="text-sm font-black text-primary mb-4 flex items-center gap-2">
@@ -127,30 +149,35 @@ export default function WorkspaceSidebar({ isOpen, onClose }: WorkspaceSidebarPr
               </ul>
             </div>
           </div>
+          )}
         </div>
 
-        <div className="p-4 border-t border-white/10 bg-white/5 space-y-2">
-          <Button 
-            className="w-full justify-start h-12 rounded-2xl font-bold bg-primary/10 text-primary hover:bg-primary/20 border-none shadow-none"
-            variant="outline"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="w-5 h-5 mr-3" />
-            Tạo tổ chức mới
-          </Button>
-          
-          <Button 
-            className="w-full justify-start h-12 rounded-2xl font-bold hover:bg-white/10 border-none"
-            variant="ghost"
-            onClick={() => {
-              navigate('/settings/organization');
-              onClose();
-            }}
-          >
-            <img src="https://cdn-icons-png.flaticon.com/512/738/738853.png" alt="Settings" className="w-5 h-5 mr-3 object-contain" />
-            Cài đặt tổ chức
-          </Button>
-        </div>
+        {showTeamWorkspaceChrome && (
+          <div className="p-4 border-t border-white/10 bg-white/5 space-y-2">
+            {userHasAnyTeamOrg && (
+              <Button 
+                className="w-full justify-start h-12 rounded-2xl font-bold bg-primary/10 text-primary hover:bg-primary/20 border-none shadow-none"
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                <Plus className="w-5 h-5 mr-3" />
+                Tạo tổ chức mới
+              </Button>
+            )}
+            
+            <Button 
+              className="w-full justify-start h-12 rounded-2xl font-bold hover:bg-white/10 border-none"
+              variant="ghost"
+              onClick={() => {
+                navigate('/settings/organization');
+                onClose();
+              }}
+            >
+              <img src="https://cdn-icons-png.flaticon.com/512/738/738853.png" alt="Settings" className="w-5 h-5 mr-3 object-contain" />
+              Cài đặt tổ chức
+            </Button>
+          </div>
+        )}
 
         <CreateOrgModal 
           isOpen={isCreateModalOpen} 

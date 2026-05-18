@@ -32,7 +32,7 @@ type LibraryTab = "my" | "org";
 
 const Library = () => {
     const { token, user } = useAuth();
-    const { currentOrg } = useOrganization();
+    const { currentOrg, currentOrgHasTeamCollaboration } = useOrganization();
     const { showAlert } = useModal();
     const [myQuizzes, setMyQuizzes] = useState<Quiz[]>([]);
     const [orgQuizzes, setOrgQuizzes] = useState<Quiz[]>([]);
@@ -58,6 +58,12 @@ const Library = () => {
         fetchClassrooms();
     }, [token, user]);
 
+    useEffect(() => {
+        if (!currentOrgHasTeamCollaboration && activeTab === "org") {
+            setActiveTab("my");
+        }
+    }, [currentOrgHasTeamCollaboration, activeTab]);
+
     const fetchMyQuizzes = useCallback(async () => {
         if (!token) return;
         try {
@@ -69,14 +75,18 @@ const Library = () => {
     }, [token]);
 
     const fetchOrgQuizzes = useCallback(async () => {
-        if (!token) return;
+        if (!token || !currentOrgHasTeamCollaboration) {
+            setOrgQuizzes([]);
+            return;
+        }
         try {
             const res = await apiClient.get(endpoints.quiz_org_library);
             setOrgQuizzes(res.data);
         } catch (err) {
             console.error(err);
+            setOrgQuizzes([]);
         }
-    }, [token]);
+    }, [token, currentOrgHasTeamCollaboration]);
 
     useEffect(() => {
         const load = async () => {
@@ -221,7 +231,9 @@ const Library = () => {
                         Thư viện Quiz
                     </h1>
                     <p className="text-muted-foreground font-medium text-xs md:text-base mt-1 md:mt-2">
-                        Quản lý quiz cá nhân và thư viện của tổ chức <span className="text-primary font-bold">{currentOrg?.name}</span>
+                        {currentOrgHasTeamCollaboration
+                            ? <>Quản lý quiz cá nhân và thư viện của tổ chức <span className="text-primary font-bold">{currentOrg?.name}</span></>
+                            : <>Quiz trong không gian <span className="text-primary font-bold">{currentOrg?.name}</span>. Nâng cấp School hoặc Enterprise để dùng thư viện tổ chức và mời thành viên.</>}
                     </p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
@@ -251,6 +263,7 @@ const Library = () => {
                         {myQuizzes.length}
                     </span>
                 </button>
+                {currentOrgHasTeamCollaboration && (
                 <button
                     onClick={() => setActiveTab("org")}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm transition-all ${
@@ -265,6 +278,7 @@ const Library = () => {
                         {orgQuizzes.length}
                     </span>
                 </button>
+                )}
             </div>
 
             {/* Description for current tab */}
@@ -276,7 +290,13 @@ const Library = () => {
                 {activeTab === "my" ? (
                     <>
                         <Copy className="w-4 h-4 shrink-0" />
-                        Quiz cá nhân của bạn. Bạn có thể <strong>đưa vào tổ chức</strong> để giáo viên khác dùng hoặc dùng làm bài tập lớp.
+                        {currentOrgHasTeamCollaboration ? (
+                            <>
+                                Quiz cá nhân của bạn. Bạn có thể <strong>đưa vào tổ chức</strong> để giáo viên khác dùng hoặc dùng làm bài tập lớp.
+                            </>
+                        ) : (
+                            <>Quiz trong thư viện cá nhân của bạn.</>
+                        )}
                     </>
                 ) : (
                     <>
@@ -320,7 +340,9 @@ const Library = () => {
                             {/* Org management overlay */}
                             {(quiz as any).creatorId === currentUserId && (
                                 <div className="absolute bottom-3 right-3 opacity-0 group-hover/card:opacity-100 transition-opacity z-10">
-                                    {activeTab === "my" && !(quiz as any).organizationId ? (
+                                    {activeTab === "my" &&
+                                        !(quiz as any).organizationId &&
+                                        currentOrgHasTeamCollaboration ? (
                                         <button
                                             onClick={() => handleAssignToOrg(quiz.id)}
                                             className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-indigo-500/90 text-white px-3 py-1.5 rounded-lg shadow-lg hover:bg-indigo-600 transition-colors"
@@ -328,6 +350,17 @@ const Library = () => {
                                         >
                                             <ArrowUpRight className="w-3.5 h-3.5" />
                                             Vào tổ chức
+                                        </button>
+                                    ) : activeTab === "my" &&
+                                      (quiz as any).organizationId &&
+                                      (quiz as any).creatorId === currentUserId ? (
+                                        <button
+                                            onClick={() => handleRemoveFromOrg(quiz.id)}
+                                            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-orange-500/90 text-white px-3 py-1.5 rounded-lg shadow-lg hover:bg-orange-600 transition-colors"
+                                            title="Rút quiz khỏi thư viện tổ chức"
+                                        >
+                                            <ArrowDownLeft className="w-3.5 h-3.5" />
+                                            Rút về
                                         </button>
                                     ) : activeTab === "org" && (quiz as any).creatorId === currentUserId ? (
                                         <button

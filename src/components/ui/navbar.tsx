@@ -11,7 +11,7 @@ import apiClient from "../../api/client";
 import endpoints, { getAvatarUrl } from "../../api/api";
 import { SiGoogleclassroom } from "react-icons/si";
 import QuizSearch from "../quiz/QuizSearch";
-import { Quiz } from "../../types";
+import { Quiz, Category } from "../../types";
 import { sanitizeError } from "../../lib/utils";
 import {
   DropdownMenu,
@@ -33,12 +33,13 @@ import { useOrganization } from "../../context/OrganizationContext";
 export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const { token, user, logout } = useAuth();
-  const { currentOrg } = useOrganization();
+  const { currentOrg, currentOrgHasTeamCollaboration } = useOrganization();
   const { showAlert } = useModal();
   const { selectedTheme, themeId, handleThemeChange } = useTheme();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [showMobileNotifs, setShowMobileNotifs] = useState(false);
   const [showMobileThemes, setShowMobileThemes] = useState(false);
@@ -69,7 +70,8 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
     const fetchAllQuizzes = async () => {
       try {
         const categoriesRes = await apiClient.get(endpoints.category);
-        const categories = categoriesRes.data;
+        const categoriesData = categoriesRes.data;
+        setCategories(categoriesData);
 
         let allQuizzes: Quiz[] = [];
 
@@ -80,7 +82,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
         }
 
         // Fetch category quizzes
-        const categoryPromises = categories.map((cat: any) =>
+        const categoryPromises = categoriesData.map((cat: any) =>
           apiClient.get(endpoints.getQuizByCategory(cat.id))
         );
         const categoryResponses = await Promise.all(categoryPromises);
@@ -276,6 +278,8 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           <div className={`flex items-center transition-all duration-300 ${isSearchExpanded ? 'flex-1 justify-center' : 'w-auto'}`}>
             <QuizSearch
               quizzes={quizzes}
+              categories={categories}
+              isLoggedIn={!!token}
               variant="navbar"
               onExpandChange={setIsSearchExpanded}
               onPlay={handlePlayNow}
@@ -383,10 +387,12 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
                   </DropdownMenuItem>
                 )}
 
+                {currentOrgHasTeamCollaboration && (
                 <DropdownMenuItem onClick={() => navigate('/settings/organization')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
                   <img src="https://cdn-icons-png.flaticon.com/512/7713/7713569.png" alt="Organization" className="w-5 h-5 mr-2 object-contain" />
                   Quản lý tổ chức
                 </DropdownMenuItem>
+                )}
 
                 <DropdownMenuItem onClick={() => navigate('/billing')} className="cursor-pointer font-bold text-foreground hover:bg-primary/10">
                   <img 
